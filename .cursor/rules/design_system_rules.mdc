@@ -1,0 +1,119 @@
+---
+description: Design system and Figma-to-code integration rules for this Vue/Vuetify client
+alwaysApply: true
+---
+
+# Asanify Client Design System Rules
+
+Use this rule when implementing UI from Figma via MCP tools.
+
+## Tech Stack and Runtime Baseline
+
+- Framework: Vue 3 SFCs, Vue Router 4, Vuex 4.
+- UI library: Vuetify 3 (primary), with Bootstrap CSS loaded globally.
+- Build: Vue CLI 5 + webpack (`vue-cli-service`, `vue.config.js`).
+- Styling: global CSS, global SASS, component `<style scoped>`, Vuetify utility classes.
+- Icons: Material Design Icons (`mdi-*`) via `v-icon`; some SVG image icons.
+
+## Token System (Use Existing Sources First)
+
+Primary token sources:
+
+1. Vuetify theme colors in `src/plugins/vuetify.js` (`theme.themes.light.colors`).
+2. Global properties in `src/plugins/helpers.js` (`$asanifyBlue`, `$asanifyRed`, etc.).
+3. CSS variables in `src/main.css` (`--asanify-blue`, `--asanify-red`).
+4. Typography in `src/base.sass` (`$body-font-family: "Quicksand"`).
+
+Rules:
+
+- Reuse existing color tokens before introducing new hex values.
+- Prefer Vuetify theme color names (`primary`, `asanifyBlue`, etc.) where possible.
+- If a new cross-app token is needed, add it to `src/plugins/vuetify.js` and mirror it in `src/plugins/helpers.js` only when templates rely on `$...` globals.
+- There is no token build pipeline (no style-dictionary/theming transform). Keep token changes explicit and local to these files.
+
+## Component Architecture Conventions
+
+- App shell pattern: `src/App.vue` composes `core-system-bar`, `core-app-bar`, `core-drawer`, `core-view`, `core-footer`.
+- Shared building blocks live in `src/components/core/` and `src/components/base/`.
+- Global shared components are registered in `src/components.js`.
+- Feature views live in feature folders under `src/components/` (for example `People`, `RunPayroll`, `Expenses`, `Leave`).
+- Many pages use `BasicPageLayout` (`src/components/core/BasicPageLayout.vue`) for breadcrumbs/title/tabs.
+
+Rules:
+
+- For shared/reusable UI, implement in `src/components/core/` (or `base/` if foundational) and register globally only if needed across many features.
+- For feature-specific UI, keep code inside that feature folder.
+- Keep naming aligned with current conventions: `Core*`, `V*` wrappers, `*Page`, `*Selector`.
+
+## Routing and Code-Splitting Rules
+
+- Route definitions are centralized in `src/router/routes.js`.
+- Lazy loading with webpack chunk names is standard (`import(/* webpackChunkName: "..." */ ...)`).
+
+Rules:
+
+- Add new screens as lazy routes with meaningful chunk names.
+- Preserve existing route meta usage (`requiresAuth`, `requiresAdmin`, `requiresNotHr`, `requiresWeb`).
+
+## Styling and Responsive Rules
+
+- Global styles: `src/main.css` and `src/App.vue` style block.
+- RTL support: `src/assets/styles/rtl.css` (loaded in `src/main.js`).
+- Responsive behavior commonly uses `$vuetify.display.*` and utility classes (`d-md-flex`, `d-sm-none`, etc.).
+
+Rules:
+
+- Prefer Vuetify props/utilities and existing utility classes over custom CSS for layout/spacing.
+- Use scoped styles for feature-local tweaks; use global CSS only for app-wide behavior or Vuetify overrides.
+- Preserve RTL behavior for any directional UI; validate icon mirroring behavior where relevant.
+- Reuse `main.css` CSS variables and typography settings before introducing one-off style values.
+
+## Asset and Media Rules
+
+- Primary app assets live in `src/assets/`; PWA icons in `public/manifest.json` and root `icons/`.
+- Asset usage style is mixed: static `@/assets/...` and dynamic `require(...)`.
+- Web compression is enabled in `vue.config.js` via `CompressionPlugin` when `VUE_APP_PLATFORM === 'web'`.
+- Static downloadable templates are configured through env vars (many S3 URLs).
+
+Rules:
+
+- Prefer colocated static imports from `@/assets` for predictable bundling.
+- Use dynamic `require` only for truly data-driven asset paths.
+- Do not hardcode external asset URLs in components when an env-driven value already exists.
+
+## Icon System Rules
+
+- Default icon system is MDI via `v-icon` and `mdi-*` names.
+- Navigation icon definitions are centralized in `src/navigationData.js`.
+- `src/components/core/Drawer.vue` supports either `link.icon` (MDI) or `link.image` (custom SVG).
+
+Rules:
+
+- Default to MDI for new UI icons.
+- Use kebab-case `mdi-*` names and keep icon metadata in navigation config for nav items.
+- Use image icons only when required by branding or unsupported glyphs.
+
+## Project Organization Expectations
+
+- `src/components/` is feature-oriented; avoid creating parallel architecture patterns.
+- Keep business logic in existing feature modules and shared helpers/plugins.
+- No Storybook/component catalog is present; use in-repo Vue examples and existing pages as reference.
+
+## Figma MCP Implementation Workflow
+
+When converting Figma designs:
+
+1. Map colors to Vuetify theme or existing global color tokens.
+2. Map typography to Quicksand-based system from `src/base.sass`.
+3. Build layouts with Vuetify grid/components first; add minimal custom CSS.
+4. Prefer existing shared components (`core`, `base`, globally registered components) before creating new ones.
+5. Check responsive states using `$vuetify.display.*`.
+6. Check RTL impacts for alignment and directional icons.
+7. Use MDI icons unless a specific asset icon already exists in `src/assets`.
+
+## Guardrails
+
+- Do not introduce a second styling paradigm (for example CSS-in-JS) in this repo.
+- Do not bypass token sources with widespread hardcoded colors unless intentionally one-off.
+- Do not add Storybook-first patterns; this codebase is route/page-driven.
+- Keep changes consistent with Vue SFC + Vuetify conventions already in use.

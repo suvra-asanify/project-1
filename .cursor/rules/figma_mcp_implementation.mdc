@@ -1,0 +1,12 @@
+---
+description: Figma MCP implementation and translation rules
+alwaysApply: true
+---
+
+# Figma MCP Implementation Rules
+
+- Treat Figma MCP code output (often React + Tailwind) as design and behavior reference, not final project code style.
+- Translate Figma output into this repo's stack and conventions (Vue 3 + Vuetify + existing project patterns).
+- Reuse existing project tokens, components, and typography before creating new styling or duplicated UI primitives.
+- Prefer existing routing, state, and data-fetch patterns when wiring behavior from Figma designs.
+- Target 1:1 visual and interaction parity with Figma, while prioritizing project design-system tokens when conflicts occur.

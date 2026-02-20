@@ -1,0 +1,11 @@
+---
+description: Figma MCP asset handling rules
+alwaysApply: true
+---
+
+# Figma MCP Server Rules
+
+- The Figma MCP server provides an assets endpoint that serves image and SVG assets.
+- If the Figma MCP server returns a `localhost` source for an image or SVG, use that source directly.
+- Do not import or add new icon packages; use only assets provided in the Figma payload.
+- Do not use or create placeholders when a `localhost` source is provided.

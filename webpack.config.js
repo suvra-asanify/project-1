@@ -19,14 +19,6 @@ module.exports = {
         test: /\.css$/,
         use: ['style-loader', 'css-loader'],
       },
-      {
-        test: /\.(woff|woff2|eot|ttf|otf)$/i,
-        type: 'asset/resource',
-      },
-      {
-        test: /\.(png|svg|jpg|jpeg|gif)$/i,
-        type: 'asset/resource',
-      },
     ],
   },
   plugins: [
@@ -36,9 +28,6 @@ module.exports = {
     }),
   ],
   resolve: {
-    alias: {
-      vue: 'vue/dist/vue.esm-bundler.js',
-    },
     extensions: ['.js', '.vue', '.json'],
   },
   devServer: {

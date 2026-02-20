@@ -1,0 +1,242 @@
+---
+description: Additional Figma MCP workflow rules and prompts for Cursor
+alwaysApply: true
+---
+
+# Figma MCP Workflow Add-on (Vue + Vuetify)
+
+This add-on extends the existing Figma MCP rules with **practical workflows, tool usage patterns, and prompt templates** for Cursor. It assumes the base rules in:
+
+- `.cursor/commands/figma-implement.md`
+- `.cursor/rules/figma_mcp_assets.mdc`
+- `.cursor/rules/figma_mcp_implementation.mdc`
+- `.cursor/rules/design_system_rules.mdc`
+
+Use this file as an **operational playbook** when working with Figma MCP inside Cursor.
+
+---
+
+## 1. Core MCP Tool Belt (Developer-Facing)
+
+When implementing UI from Figma, these are the primary tools you should use from Cursor:
+
+- **`get_design_context`**: Returns a structured representation of the selected Figma node(s). Often looks React/Tailwind-like; treat it as **design reference** and translate to **Vue 3 + Vuetify**.
+- **`get_screenshot`**: Produces a screenshot of the selected node/variant. Use this for 1:1 visual comparison while implementing and reviewing.
+- **`get_variable_defs`**: Extracts **variables and styles** (color, spacing, typography, radius, etc.) applied in the selection. Use this to map Figma tokens to the app’s Vuetify/design-system tokens.
+- **`get_metadata`**: Returns a lightweight, XML-ish outline of the node tree. Use when:
+  - `get_design_context` is too large or truncated.
+  - You need to identify child nodes to target individually (e.g., specific cards/sections inside a complex frame).
+- **`whoami`** (remote server only): Verifies which Figma account is authenticated (useful when you suspect permission or access issues).
+
+**Rule:** For any non-trivial implementation, expect to call at least `get_design_context` + `get_screenshot`, and often `get_variable_defs` as well.
+
+---
+
+## 2. Token-First Workflow with `get_variable_defs`
+
+To keep Figma-aligned designs consistent with the project’s design system:
+
+1. **Run `get_variable_defs`** on the selected node(s).
+2. **List variables**:
+   - Color variables (names + values).
+   - Spacing and radius variables (names + values).
+   - Typography variables (font families, sizes, weights, line heights).
+3. **Map to project tokens**:
+   - Prefer mapping to existing tokens in:
+     - `src/plugins/vuetify.js` (Vuetify theme colors).
+     - `src/plugins/helpers.js` (global `$asanify*` helpers).
+     - `src/main.css` (CSS vars).
+     - `src/base.sass` (typography).
+   - Only introduce new tokens when there is a **clear cross-app need**.
+4. **Only then implement components**, wiring styles via the mapped tokens instead of hardcoded values.
+
+Example intent for the agent:
+
+> Using the selected Figma node(s), run `get_variable_defs` and produce:
+> 1) a list of color/spacing/typography variables used (names + values), and  
+> 2) a suggested mapping to our Vuetify theme tokens in `src/plugins/vuetify.js`.  
+> Do not implement components yet.
+
+---
+
+## 3. Page-Level Implementation: Chunking a Full Screen
+
+For page-sized frames, avoid implementing everything in one shot. Use this pattern:
+
+1. **Select the screen frame** in Figma.
+2. Optionally run **`get_metadata`** to understand the structure (header, content, sidebar, cards, tables, etc.).
+3. **Identify logical chunks**:
+   - Page header (title, breadcrumbs, actions).
+   - Major body sections.
+   - Repeated elements (cards, list items, table rows).
+4. For each chunk:
+   - Run `get_design_context` for the chunk’s node.
+   - Run `get_screenshot` for that chunk.
+   - Run `get_variable_defs` if token usage differs from other chunks.
+   - Implement a Vue 3 SFC using Vuetify, reusing shared components and tokens.
+5. **Compose the page**:
+   - Build a page-level view that arranges these chunk components together, following existing layout patterns and routing rules.
+
+**Rule:** Use **component-level chunking** to avoid large, brittle, or truncated responses and to maximize reuse.
+
+---
+
+## 4. Multi-Frame Flows (e.g., Onboarding Across Several Screens)
+
+For flows that span multiple Figma frames (e.g., multi-step onboarding):
+
+1. **Planning first (no UI yet)**:
+   - From the frame links and product notes, design:
+     - Component/view boundaries (one view per step, shared layout shell, etc.).
+     - Routing or stepper-based state management.
+     - Shared components (e.g., progress header, buttons, input patterns).
+     - File locations (feature folders, core/base components).
+2. **Per-frame implementation**:
+   - For each frame:
+     - Run `get_design_context` and `get_screenshot`.
+     - Run `get_variable_defs` if tokens differ from other frames.
+     - Implement one primary view component plus subcomponents as needed.
+3. **Orchestrator**:
+   - Implement a parent controller (router-based or internal stepper/state machine) that:
+     - Handles navigation (next/back/skip).
+     - Coordinates validation and transitions.
+     - Shares layout and header/footer patterns across steps.
+4. **Validation**:
+   - Ensure each step matches its screenshot visually.
+   - Confirm navigation, validation, and edge-case behavior matches the flow definition.
+
+**Rule:** Treat multi-frame flows as a set of coordinated view components plus an orchestrator, not as a single giant screen.
+
+---
+
+## 5. Surgical Updates for Design Changes
+
+When Figma updates an existing design and you need to adjust existing code instead of regenerating:
+
+1. **Identify the existing component(s)** and file paths to be changed.
+2. **Refresh Figma context** for the updated node(s):
+   - Run `get_design_context` for the updated selection.
+   - Run `get_screenshot` for side-by-side comparison.
+   - Run `get_variable_defs` to capture any token changes.
+3. **Edit-in-place behavior**:
+   - Instruct the agent to:
+     - Update **only** the specific Vue component(s) and file(s).
+     - Keep the public component API stable (props, events, slots).
+     - Make **minimal diffs** that achieve visual and behavioral parity.
+4. **If results drift**:
+   - Narrow the Figma selection (target only the changed node/section).
+   - Be explicit about which file and component should be edited.
+   - Re-run `get_design_context`/`get_screenshot` for that narrowed scope.
+
+**Rule:** Prefer **small, targeted edits** to existing components over wholesale rewrites when designs change.
+
+---
+
+## 6. Prompt Templates (Vue + Vuetify + Minimal Churn)
+
+These prompts are written for Cursor and assume MCP tools are available.
+
+### 6.1 Component from a Figma Link (Remote Server)
+
+Use when implementing a single component from a shared Figma node link:
+
+> Implement the UI from this Figma link using **Vue 3 SFC + Vuetify** (no Tailwind).
+> Follow our repo conventions and reuse existing components from `src/components/core` and `src/components/base` when possible.  
+>  
+> Before coding:  
+> 1) run `get_design_context` on the exact node,  
+> 2) run `get_screenshot` for that node,  
+> 3) run `get_variable_defs` and list the variables (names + values) used in this node.  
+>  
+> Then implement the component in: `src/components/core/<ComponentName>.vue`.  
+> Keep changes minimal and align tokens with `src/plugins/vuetify.js` and our existing token helpers.
+
+### 6.2 Multi-Step Flow Planning (No UI Yet)
+
+Use when you have several Figma frames for a single flow and want a plan first:
+
+> We have a multi-step flow across several Figma frames (links provided separately).  
+> **Do NOT implement UI yet.**  
+>  
+> First, propose:  
+> - component/view boundaries (one view per step vs shared layout),  
+> - routing or stepper state approach,  
+> - how tokens and shared components will be reused,  
+> - where files will live in the repo (feature folders, core/base components).  
+>  
+> After we agree on the plan, we will implement step-by-step using `get_design_context` + `get_screenshot` + `get_variable_defs` per frame.
+
+### 6.3 Token-First Analysis (No Components Yet)
+
+Use when you want to align tokens before coding:
+
+> Using the selected Figma node(s), run `get_variable_defs` and produce:  
+> 1) a list of color/spacing/typography variables used (names + values); and  
+> 2) a suggested mapping to our Vuetify theme tokens in `src/plugins/vuetify.js` and other token sources.  
+> Do **not** implement any Vue components yet.
+
+---
+
+## 7. Selection Strategy and Chunking Guidelines
+
+To reduce errors, truncation, and token waste:
+
+- **Prefer smaller, focused selections**:
+  - Individual components (cards, headers, sidebars, dialogs).
+  - Small groups of related elements that logically form a unit.
+- **Avoid giant, deeply nested frames**:
+  - Large selections are more likely to cause timeouts, truncated `get_design_context` responses, and incomplete code.
+- **Reuse component selections**:
+  - If the same UI pattern appears in multiple places, extract it as a component once, then reuse it in code.
+
+**Rule:** When in doubt, reduce the Figma selection to a single logical component and implement that, then compose.
+
+---
+
+## 8. Troubleshooting Playbook (Cursor + Figma MCP)
+
+Common issues and recommended responses:
+
+- **HTTP 500 or similar errors from tool calls**:
+  - Often on the assistant/IDE side rather than the MCP server itself.
+  - Try:
+    - Reducing the selection size.
+    - Retrying after a short delay.
+    - Restarting the IDE if the issue persists across different selections.
+
+- **Desktop MCP tools not loading or connection lost**:
+  - Ensure:
+    - Figma Dev Mode is enabled and the file is open.
+    - The MCP desktop server is running and reachable.
+  - Restart Figma and Cursor/IDE if the connection seems stale.
+
+- **Cursor MCP tool calls failing unexpectedly**:
+  - In Cursor:
+    - Use the command palette action to **clear MCP tokens** (e.g., “Clear All MCP Tokens”).
+    - Re-authenticate with Figma, then retry the tool calls.
+
+- **Images/assets stopped loading or appear broken**:
+  - MCP-provided image URLs can expire.
+  - Mitigation:
+    - Re-run `get_design_context` or the relevant tool to obtain fresh URLs.
+    - For highly stable assets, consider downloading/committing to `src/assets` (while still following existing asset rules).
+
+---
+
+## 9. Definition of Done for Figma-Driven Work (Developer Checklist)
+
+Before considering Figma-driven UI implementation “done”:
+
+- **Context usage**:
+  - `get_design_context` and `get_screenshot` have been used for the implemented node(s).
+- **Token alignment**:
+  - Styling is driven by variables/tokens mapped from Figma via `get_variable_defs` where applicable.
+  - Colors, spacing, and typography primarily come from existing token sources, with new tokens added only when necessary.
+- **Asset rules respected**:
+  - Assets follow the Figma MCP asset rules (e.g., use `localhost` sources directly, no new icon packages, no placeholders when an asset is provided).
+- **Visual and behavioral parity**:
+  - Implemented UI matches the Figma screenshot for layout, typography, colors, and major interaction states.
+  - Behavior (navigation, validation, hover/focus where specified) matches the intended design.
+
+Use this checklist in code reviews for any Figma-driven change.
+

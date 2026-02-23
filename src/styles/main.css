@@ -1,8 +1,114 @@
+:root {
+  /* Typography */
+  --font-family-base: 'Quicksand', sans-serif;
+  --font-size-xs: 12px;
+  --line-height-xs: 16px;
+  --font-size-sm: 14px;
+  --line-height-sm: 20px;
+  --font-size-base: 16px;
+  --line-height-base: 24px;
+  --font-size-xl: 20px;
+  --line-height-xl: 28px;
+  --font-size-2xl: 34px;
+  --line-height-2xl: 40px;
+  --font-size-3xl: 48px;
+  --line-height-3xl: 52px;
+
+  /* Spacing scale (px) */
+  --space-0: 0px;
+  --space-0_5: 2px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 28px;
+  --space-8: 32px;
+  --space-9: 36px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-n0_5: -2px;
+  --space-n1: -4px;
+
+  /* Radius */
+  --radius-none: 0px;
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 8px;
+  --radius-xl: 24px;
+  --radius-pill: 9999px;
+  --radius-circle: 200px;
+
+  /* Borders */
+  --border-width-sm: 1px;
+
+  /* Color – text */
+  --color-text-primary: #000000de;
+  --color-text-secondary: #00000099;
+  --color-text-inverse-primary: #ffffff;
+  --color-text-interactive: #005a9c;
+  --color-text-error: #d50000;
+
+  /* Color – icon */
+  --color-icon-primary: #000000de;
+  --color-icon-secondary: #00000099;
+  --color-icon-inverse-primary: #ffffff;
+  --color-icon-interactive: #005a9c;
+  --color-icon-info: #03a9f4;
+  --color-icon-success: #4caf50;
+  --color-icon-warning: #fb8c00;
+  --color-icon-error: #d50000;
+  --color-icon-progress: #388e3c;
+
+  /* Color – surface */
+  --color-surface-primary: #ffffff;
+  --color-surface-background: #f2f3f8;
+  --color-surface-left-nav: #242939;
+  --color-surface-interactive: #005a9c;
+  --color-surface-interactive-subtle: #e6eff6;
+  --color-surface-info-light: #e0f4fd;
+  --color-surface-success-light: #e9f5ea;
+  --color-surface-warning-light: #fef1e0;
+  --color-surface-error-light: #fae0e0;
+  --color-surface-progress: #43a047;
+  --color-surface-scroll-track: #ffe0b2;
+  --color-surface-scroll-thumb: #ffc977;
+  --color-surface-active: #0000001f;
+  --color-surface-darken: #000000de;
+  --color-surface-light: #e0f4fd;
+  --color-surface-dark: #005a9c;
+
+  /* Color – border */
+  --color-border-primary: #0000001f;
+  --color-border-interactive: #005a9cde;
+  --color-border-info: #03a9f4;
+  --color-border-success: #4caf50;
+  --color-border-warning: #fb8c00;
+  --color-border-error: #d50000;
+
+  /* Brand */
+  --color-brand-primary: #005a9c;
+
+  /* Elevation */
+  --shadow-default: 0px 1px 5px 0px #0000001f, 0px 2px 2px 0px #00000024,
+    0px 1px 1px 0px #00000033;
+  --shadow-level-2: 0px 1px 5px 0px #0000001f, 0px 2px 2px 0px #00000024,
+    0px 3px 1px -2px #00000033;
+
+  /* Density */
+  --density-list-compact: 40px;
+  --density-list-comfortable: 48px;
+}
+
 * {
-  font-family: 'Quicksand', sans-serif;
+  font-family: var(--font-family-base);
 }
 
 body {
   margin: 0;
   padding: 0;
+  color: var(--color-text-primary);
+  background-color: var(--color-surface-background);
 }

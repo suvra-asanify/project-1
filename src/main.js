@@ -1,4 +1,4 @@
-import { createApp } from 'vue';
+﻿import { createApp } from 'vue';
 import App from './App.vue';
 import { createVuetify } from 'vuetify';
 import * as components from 'vuetify/components';
@@ -7,6 +7,7 @@ import '@mdi/font/css/materialdesignicons.css';
 import 'vuetify/styles';
 import './styles/main.css';
 import { colors } from './design-tokens';
+import router from './router';
 
 const theme = {
   defaultTheme: 'light',
@@ -36,4 +37,5 @@ createApp(App)
       theme,
     }),
   )
+  .use(router)
   .mount('#app');

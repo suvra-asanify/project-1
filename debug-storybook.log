@@ -1,0 +1,17 @@
+[16:48:11.749] [INFO] [36mInitializing Storybook[39m
+[16:48:12.164] [DEBUG] Getting package.json info for C:/Users/Suvra Shaw/Documents/project-1/package.json...
+[16:48:12.165] [DEBUG] Getting CLI versions from NPM for storybook...
+[16:48:12.165] [DEBUG] Executing command: npm info storybook version
+[16:48:13.581] [INFO] Adding Storybook version 10.2.11 to your project
+[16:48:13.583] [DEBUG] Project type detected: vue3
+[16:48:13.584] [DEBUG] Using cached package.json for C:\Users\Suvra Shaw\Documents\project-1\package.json...
+[16:48:13.586] [DEBUG] Using cached package.json for C:\Users\Suvra Shaw\Documents\project-1\package.json...
+[16:48:13.587] [ERROR] [38;2;241;97;97mError: Could not find framework for renderer: vue3 and builder: webpack5[39m
+    at FrameworkDetectionService.detectFramework (file:///C:/Users/Suvra%20Shaw/AppData/Local/npm-cache/_npx/05823ecb1a3a987d/node_modules/create-storybook/dist/_node-chunks/chunk-XF7L7BDD.js:907:11)
+    at FrameworkDetectionCommand.execute (file:///C:/Users/Suvra%20Shaw/AppData/Local/npm-cache/_npx/05823ecb1a3a987d/node_modules/create-storybook/dist/_node-chunks/chunk-XF7L7BDD.js:939:204)
+    at async doInitiate (file:///C:/Users/Suvra%20Shaw/AppData/Local/npm-cache/_npx/05823ecb1a3a987d/node_modules/create-storybook/dist/_node-chunks/chunk-XF7L7BDD.js:2830:234)
+    at async file:///C:/Users/Suvra%20Shaw/AppData/Local/npm-cache/_npx/05823ecb1a3a987d/node_modules/create-storybook/dist/_node-chunks/chunk-XF7L7BDD.js:2882:20
+    at async withTelemetry (file:///C:/Users/Suvra%20Shaw/AppData/Local/npm-cache/_npx/05823ecb1a3a987d/node_modules/storybook/dist/_node-chunks/chunk-GEQXL5UM.js:218:12)
+    at async initiate (file:///C:/Users/Suvra%20Shaw/AppData/Local/npm-cache/_npx/05823ecb1a3a987d/node_modules/create-storybook/dist/_node-chunks/chunk-XF7L7BDD.js:2875:24)
+    at async _Command.<anonymous> (file:///C:/Users/Suvra%20Shaw/AppData/Local/npm-cache/_npx/05823ecb1a3a987d/node_modules/create-storybook/dist/_node-chunks/run-Y7LR7RCS.js:2684:144)
+[16:48:13.593] [INFO] Storybook collects completely anonymous usage telemetry. We use it to shape Storybook's roadmap and prioritize features. You can learn more, including how to opt out, at https://storybook.js.org/telemetry

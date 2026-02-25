@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "Vue project with Vuetify, Webpack, and MDI icons",
   "scripts": {
-    "dev": "webpack serve --mode development"
+    "dev": "webpack serve --mode development",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
   },
   "dependencies": {
     "@mdi/font": "^7.4.0",
@@ -12,9 +14,19 @@
     "vuetify": "^3.5.0"
   },
   "devDependencies": {
+    "@storybook/addon-essentials": "^7.6.23",
+    "@storybook/addon-interactions": "^7.6.23",
+    "@storybook/addon-links": "^7.6.23",
+    "@storybook/blocks": "^7.6.23",
+    "@storybook/test": "^7.6.23",
+    "@storybook/vue3": "^7.6.23",
+    "@storybook/vue3-webpack5": "^7.6.23",
     "@vue/compiler-sfc": "^3.4.0",
     "css-loader": "^6.8.1",
     "html-webpack-plugin": "^5.5.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "storybook": "^7.6.23",
     "style-loader": "^3.3.3",
     "vue-loader": "^17.3.1",
     "webpack": "^5.89.0",

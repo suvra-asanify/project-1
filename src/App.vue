@@ -1,15 +1,14 @@
 <template>
-  <div id="app-root">
-    <main>
-      <div class="container">
-        <h1>Test App</h1>
-      </div>
-    </main>
-  </div>
+  <ComponentTester />
 </template>
 
 <script>
+import ComponentTester from './components/ComponentTester.vue';
+
 export default {
   name: 'App',
+  components: {
+    ComponentTester,
+  },
 };
 </script>

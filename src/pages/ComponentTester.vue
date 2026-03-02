@@ -7,8 +7,19 @@
       </p>
     </header>
 
+    <section class="tester-card tester-filter pa-4 rounded-lg border-sm mb-6">
+      <label class="text-label-sm tester-field">
+        <span class="tester-field-label">component</span>
+        <select v-model="selectedComponent" class="tester-input">
+          <option v-for="entry in componentEntries" :key="entry.name" :value="entry.name">
+            {{ entry.name }}
+          </option>
+        </select>
+      </label>
+    </section>
+
     <section
-      v-for="entry in componentEntries"
+      v-for="entry in visibleComponentEntries"
       :key="entry.name"
       class="tester-card pa-6 rounded-lg border-sm mb-6"
     >
@@ -36,12 +47,33 @@
             </select>
           </label>
 
-          <label class="text-label-sm tester-field">
-            <span class="tester-field-label">label</span>
+          <label v-if="avatar.variant !== 'img'" class="text-label-sm tester-field">
+            <span class="tester-field-label">backend label</span>
             <input v-model="avatar.label" class="tester-input" type="text" />
           </label>
 
-          <label class="text-label-sm tester-field">
+          <label v-if="avatar.variant === 'img'" class="text-label-sm tester-field">
+            <span class="tester-field-label">backend image url</span>
+            <input
+              v-model="avatar.imageSrc"
+              class="tester-input"
+              type="text"
+              placeholder="https://..."
+              @input="onAvatarImageUrlInput"
+            />
+          </label>
+
+          <label v-if="avatar.variant === 'img'" class="text-label-sm tester-field">
+            <span class="tester-field-label">backend image file</span>
+            <input
+              class="tester-input-file"
+              type="file"
+              accept="image/*"
+              @change="onAvatarImageFileChange"
+            />
+          </label>
+
+          <label v-if="avatar.variant === 'multiple'" class="text-label-sm tester-field">
             <span class="tester-field-label">count</span>
             <input v-model.number="avatar.count" class="tester-input" type="number" min="0" />
           </label>
@@ -50,34 +82,117 @@
             <input v-model="avatar.rounded" type="checkbox" />
             <span>rounded</span>
           </label>
-
-          <label class="text-label-sm tester-field">
-            <span class="tester-field-label">playground code</span>
-            <textarea
-              v-model="avatarPlaygroundCode"
-              class="tester-input tester-code"
-              placeholder='<Avatar variant="img" :size="36" label="AB" :count="3" :rounded="true" class="ma-auto" />'
-              spellcheck="false"
-            />
-          </label>
-
-          <div class="tester-actions">
-            <button class="tester-button" type="button" @click="applyAvatarPlayground">
-              Apply snippet
-            </button>
-          </div>
-
-          <p v-if="avatarPlaygroundError" class="text-body-xs tester-error">
-            {{ avatarPlaygroundError }}
-          </p>
         </div>
 
         <div class="tester-preview rounded-md pa-6">
-          <component
-            :is="entry.name"
-            v-bind="propsFor(entry.name)"
-            :class="avatarPlaygroundClass"
-          />
+          <component :is="entry.name" v-bind="propsFor(entry.name)" />
+        </div>
+      </div>
+
+      <div v-else-if="entry.name === 'progress-linear' && progressLinear" class="tester-layout">
+        <div class="tester-controls">
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">size</span>
+            <select v-model="progressLinear.size" class="tester-input">
+              <option value="default">default</option>
+              <option value="large">large</option>
+            </select>
+          </label>
+
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">backend value</span>
+            <input
+              v-model="progressLinear.value"
+              class="tester-input"
+              type="text"
+              placeholder="e.g. 25, 80%, 1/5"
+            />
+          </label>
+
+          <template v-if="progressLinear.size === 'large'">
+            <label class="text-label-sm tester-toggle">
+              <input v-model="progressLinear.rounded" type="checkbox" />
+              <span>rounded</span>
+            </label>
+
+            <label class="text-label-sm tester-field">
+              <span class="tester-field-label">current</span>
+              <input v-model="progressLinear.current" class="tester-input" type="text" />
+            </label>
+
+            <label class="text-label-sm tester-field">
+              <span class="tester-field-label">limit</span>
+              <input v-model="progressLinear.limit" class="tester-input" type="text" />
+            </label>
+          </template>
+        </div>
+
+        <div class="tester-preview rounded-md pa-6">
+          <component :is="entry.name" v-bind="propsFor(entry.name)" />
+        </div>
+      </div>
+
+      <div v-else-if="entry.name === 'progress-circular' && progressCircular" class="tester-layout">
+        <div class="tester-controls">
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">size</span>
+            <select v-model="progressCircular.size" class="tester-input">
+              <option value="default">default</option>
+              <option value="small">small</option>
+              <option value="large">large</option>
+            </select>
+          </label>
+
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">backend value</span>
+            <input
+              v-model="progressCircular.value"
+              class="tester-input"
+              type="text"
+              placeholder="e.g. 25, 80%, 1/4"
+            />
+          </label>
+        </div>
+
+        <div class="tester-preview rounded-md pa-6">
+          <component :is="entry.name" v-bind="propsFor(entry.name)" />
+        </div>
+      </div>
+
+      <div v-else-if="entry.name === 'radio-button' && radioButton" class="tester-layout">
+        <div class="tester-controls">
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">state</span>
+            <select v-model="radioButton.state" class="tester-input">
+              <option value="default">default</option>
+              <option value="hover">hover</option>
+              <option value="pressed">pressed</option>
+            </select>
+          </label>
+
+          <label class="text-label-sm tester-toggle">
+            <input v-model="radioButton.value" type="checkbox" />
+            <span>backend value (selected)</span>
+          </label>
+
+          <label class="text-label-sm tester-toggle">
+            <input v-model="radioButton.hasLabel" type="checkbox" />
+            <span>has label</span>
+          </label>
+
+          <label v-if="radioButton.hasLabel" class="text-label-sm tester-field">
+            <span class="tester-field-label">backend label</span>
+            <input v-model="radioButton.label" class="tester-input" type="text" />
+          </label>
+
+          <label class="text-label-sm tester-toggle">
+            <input v-model="radioButton.disabled" type="checkbox" />
+            <span>disabled</span>
+          </label>
+        </div>
+
+        <div class="tester-preview rounded-md pa-6">
+          <component :is="entry.name" v-bind="propsFor(entry.name)" />
         </div>
       </div>
 
@@ -131,75 +246,29 @@ const defaultPropsByComponent = {
     variant: 'default',
     size: 'default',
     label: 'AA',
+    imageSrc: '',
     count: 1,
     rounded: true,
   },
+  'progress-linear': {
+    size: 'default',
+    rounded: true,
+    value: '1/5',
+    current: '',
+    limit: '',
+  },
+  'progress-circular': {
+    size: 'default',
+    value: '1/4',
+  },
+  'radio-button': {
+    state: 'default',
+    value: false,
+    hasLabel: false,
+    label: 'label',
+    disabled: false,
+  },
 };
-
-const AVATAR_VARIANTS = Object.freeze(['default', 'img', 'multiple']);
-
-function parseLiteral(rawValue) {
-  const value = String(rawValue).trim();
-
-  if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
-    return value.slice(1, -1);
-  }
-
-  if (value === 'true') {
-    return true;
-  }
-
-  if (value === 'false') {
-    return false;
-  }
-
-  if (value === 'null') {
-    return null;
-  }
-
-  if (value === 'undefined') {
-    return undefined;
-  }
-
-  if (/^-?\d+(\.\d+)?$/.test(value)) {
-    return Number(value);
-  }
-
-  return value;
-}
-
-function parseAttributes(input) {
-  const attributes = [];
-  const pattern = /([:@]?[\w-]+)(?:\s*=\s*(".*?"|'.*?'|[^\s/>]+))?/g;
-  let match = pattern.exec(input);
-
-  while (match) {
-    const name = match[1];
-    if (name && name !== '/') {
-      attributes.push({
-        name,
-        value: match[2],
-        hasValue: typeof match[2] !== 'undefined',
-      });
-    }
-    match = pattern.exec(input);
-  }
-
-  return attributes;
-}
-
-function parseAvatarSnippet(code) {
-  const tagMatch = String(code).match(/<Avatar\b([\s\S]*?)\/?>/i);
-  if (!tagMatch) {
-    throw new Error('Snippet must contain an opening <Avatar ...> tag.');
-  }
-
-  return parseAttributes(tagMatch[1]);
-}
-
-function sanitizeForDoubleQuotes(value) {
-  return String(value).replace(/"/g, "'");
-}
 
 export default {
   name: 'ComponentTester',
@@ -209,140 +278,62 @@ export default {
   data() {
     return {
       componentProps: JSON.parse(JSON.stringify(defaultPropsByComponent)),
-      avatarPlaygroundCode: '',
-      avatarPlaygroundClass: '',
-      avatarPlaygroundError: '',
+      selectedComponent: autoNames[0] || '',
     };
-  },
-  created() {
-    this.avatarPlaygroundCode = this.buildAvatarSnippet(this.avatar, this.avatarPlaygroundClass);
   },
   computed: {
     componentEntries() {
       return autoNames.map((name) => ({ name }));
     },
+    visibleComponentEntries() {
+      return this.componentEntries.filter((entry) => entry.name === this.selectedComponent);
+    },
     avatar() {
       return this.componentProps.Avatar || null;
+    },
+    progressLinear() {
+      return this.componentProps['progress-linear'] || null;
+    },
+    progressCircular() {
+      return this.componentProps['progress-circular'] || null;
+    },
+    radioButton() {
+      return this.componentProps['radio-button'] || null;
     },
   },
   methods: {
     propsFor(name) {
       return this.componentProps[name] || {};
     },
-    buildAvatarSnippet(avatar, className) {
-      if (!avatar) {
-        return '<Avatar />';
-      }
-
-      const sizeAttr = typeof avatar.size === 'number' ? `:size="${avatar.size}"` : `size="${sanitizeForDoubleQuotes(avatar.size)}"`;
-      const label = avatar.label === null || avatar.label === undefined
-        ? ':label="null"'
-        : typeof avatar.label === 'number'
-          ? `:label="${avatar.label}"`
-          : `label="${sanitizeForDoubleQuotes(avatar.label)}"`;
-
-      const classAttr = className ? ` class="${sanitizeForDoubleQuotes(className)}"` : '';
-
-      return `<Avatar variant="${avatar.variant}" ${sizeAttr} ${label} :count="${avatar.count}" :rounded="${avatar.rounded}"${classAttr} />`;
-    },
-    applyAvatarPlayground() {
+    onAvatarImageFileChange(event) {
       if (!this.avatar) {
         return;
       }
 
-      const nextAvatar = { ...this.avatar };
-      let nextClass = this.avatarPlaygroundClass;
+      const files = event.target && event.target.files ? event.target.files : [];
+      const file = files[0];
+      if (!file || !file.type.startsWith('image/')) {
+        return;
+      }
 
-      try {
-        const attributes = parseAvatarSnippet(this.avatarPlaygroundCode);
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (!this.avatar) {
+          return;
+        }
 
-        attributes.forEach(({ name, value, hasValue }) => {
-          const parsedValue = hasValue ? parseLiteral(value) : true;
+        this.avatar.imageSrc = typeof reader.result === 'string' ? reader.result : '';
+        this.avatar.variant = 'img';
+      };
+      reader.readAsDataURL(file);
+    },
+    onAvatarImageUrlInput() {
+      if (!this.avatar) {
+        return;
+      }
 
-          if (name === 'class') {
-            if (typeof parsedValue !== 'string') {
-              throw new Error('`class` must be a plain string.');
-            }
-            nextClass = parsedValue.trim();
-            return;
-          }
-
-          if (name === 'variant' || name === ':variant') {
-            if (typeof parsedValue !== 'string' || !AVATAR_VARIANTS.includes(parsedValue)) {
-              throw new Error('`variant` must be one of: default, img, multiple.');
-            }
-            nextAvatar.variant = parsedValue;
-            return;
-          }
-
-          if (name === 'size' || name === ':size') {
-            const validSize = (
-              (typeof parsedValue === 'number' && Number.isFinite(parsedValue) && parsedValue > 0) ||
-              (typeof parsedValue === 'string' && parsedValue.trim().length > 0)
-            );
-            if (!validSize) {
-              throw new Error('`size` must be a positive number or non-empty string.');
-            }
-            nextAvatar.size = parsedValue;
-            return;
-          }
-
-          if (name === 'label' || name === ':label') {
-            const validLabel = (
-              parsedValue === null ||
-              parsedValue === undefined ||
-              typeof parsedValue === 'string' ||
-              typeof parsedValue === 'number'
-            );
-            if (!validLabel) {
-              throw new Error('`label` must be string, number, null, or undefined.');
-            }
-            nextAvatar.label = parsedValue;
-            return;
-          }
-
-          if (name === 'count' || name === ':count') {
-            const numericCount = Number(parsedValue);
-            if (!Number.isFinite(numericCount) || numericCount < 0) {
-              throw new Error('`count` must be a number greater than or equal to 0.');
-            }
-            nextAvatar.count = Math.floor(numericCount);
-            return;
-          }
-
-          if (name === 'rounded') {
-            if (!hasValue) {
-              nextAvatar.rounded = true;
-              return;
-            }
-            if (typeof parsedValue !== 'boolean') {
-              throw new Error('`rounded` must be boolean when provided.');
-            }
-            nextAvatar.rounded = parsedValue;
-            return;
-          }
-
-          if (name === ':rounded') {
-            if (typeof parsedValue !== 'boolean') {
-              throw new Error('`:rounded` must be boolean.');
-            }
-            nextAvatar.rounded = parsedValue;
-            return;
-          }
-
-          if (name === 'image-src' || name === ':image-src' || name === 'imageSrc' || name === ':imageSrc') {
-            if (typeof parsedValue !== 'string') {
-              throw new Error('`image-src` must be a string URL/path.');
-            }
-            nextAvatar.imageSrc = parsedValue;
-          }
-        });
-
-        this.componentProps.Avatar = nextAvatar;
-        this.avatarPlaygroundClass = nextClass;
-        this.avatarPlaygroundError = '';
-      } catch (error) {
-        this.avatarPlaygroundError = error instanceof Error ? error.message : 'Unable to parse snippet.';
+      if (String(this.avatar.imageSrc || '').trim().length > 0) {
+        this.avatar.variant = 'img';
       }
     },
   },
@@ -357,6 +348,10 @@ export default {
 
 .tester-header {
   max-width: 960px;
+}
+
+.tester-filter {
+  max-width: 320px;
 }
 
 .tester-title {
@@ -417,41 +412,13 @@ export default {
   gap: var(--spacing-2);
 }
 
-.tester-code {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  min-height: 112px;
-  padding: var(--spacing-2) var(--spacing-3);
-  resize: vertical;
-}
-
-.tester-actions {
-  display: flex;
-  justify-content: flex-start;
-}
-
-.tester-button {
-  background: var(--primary, #0055d4);
-  border: 0;
+.tester-input-file {
+  border: var(--border-sm) dashed var(--color-border-primary, rgba(0, 0, 0, 0.12));
   border-radius: var(--rounded-md);
-  color: var(--white, #fff);
-  cursor: pointer;
+  color: var(--color-text-primary, rgba(0, 0, 0, 0.87));
   font: inherit;
   min-height: var(--base-40);
-  padding: 0 var(--spacing-4);
-}
-
-.tester-button:hover {
-  opacity: 0.92;
-}
-
-.tester-button:focus-visible {
-  outline: 2px solid var(--primary, #0055d4);
-  outline-offset: 2px;
-}
-
-.tester-error {
-  color: var(--error, #b3261e);
-  margin: 0;
+  padding: var(--spacing-2) var(--spacing-3);
 }
 
 .tester-preview {

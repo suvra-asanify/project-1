@@ -36,7 +36,7 @@
     <div
       v-if="showCount"
       class="avatar-stacked"
-      :class="stackedClasses"
+      :class="{ 'avatar-stacked-square': !rounded }"
     />
   </div>
 </template>

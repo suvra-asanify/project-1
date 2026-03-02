@@ -106,7 +106,7 @@
 </template>
 
 <script>
-const componentFiles = require.context('./', false, /\.vue$/);
+const componentFiles = require.context('../components', false, /\.vue$/);
 const autoComponents = {};
 const autoNames = [];
 

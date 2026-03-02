@@ -27,11 +27,12 @@ export function useAvatar(props) {
   const isImg = computed(() => props.variant === 'img');
   const isMultiple = computed(() => props.variant === 'multiple');
 
-  // Backend-safe label normalization — always uppercase.
+  // Backend-safe label normalization - always uppercase.
   const displayLabel = computed(() => (props.label == null ? '' : String(props.label).trim().toUpperCase()));
 
   // Preset sizes use CSS classes; explicit integer sizes inject inline CSS vars.
-  const explicitSize = computed(() => (isPresetSize(props.size) ? null : `${props.size}px`));
+  const isPreset = computed(() => isPresetSize(props.size));
+  const explicitSize = computed(() => (isPreset.value || !Number.isFinite(props.size) ? null : `${props.size}px`));
 
   // count is always a positive integer; clamp to 0 if invalid.
   const normalizedCount = computed(() => (props.count > 0 ? props.count : 0));
@@ -52,7 +53,7 @@ export function useAvatar(props) {
 
   // Inline CSS variables injected only for explicit (non-preset) size values.
   // Ratios derived from the default preset: base-60 container, base-22 label
-  // (22/60 ≈ 0.3667), base-18 count (18/60 = 0.3), base-48 overlap (48/60 = 0.8).
+  // (22/60 ~= 0.3667), base-18 count (18/60 = 0.3), base-48 overlap (48/60 = 0.8).
   const stackStyles = computed(() => {
     if (!explicitSize.value) return null;
 
@@ -65,7 +66,7 @@ export function useAvatar(props) {
   });
 
   const sizeToken = computed(() =>
-    isPresetSize(props.size) ? SIZE_TOKEN_BY_PRESET[props.size] : String(props.size)
+    isPreset.value ? SIZE_TOKEN_BY_PRESET[props.size] : String(props.size)
   );
 
   // Public classes: default state is implicit (no variant-default / size-default).
@@ -79,11 +80,6 @@ export function useAvatar(props) {
     props.rounded ? 'avatar--rounded' : 'avatar--square',
   ]);
 
-  // Overrides pill radius on the stacked element when rounded=false.
-  const stackedClasses = computed(() => ({
-    'avatar-stacked-square': !props.rounded,
-  }));
-
   return {
     isImg,
     isMultiple,
@@ -96,6 +92,5 @@ export function useAvatar(props) {
     rootClasses,
     stackStyles,
     avatarClasses,
-    stackedClasses,
   };
 }

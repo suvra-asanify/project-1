@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import ComponentTester from './components/ComponentTester.vue';
+import ComponentTester from './pages/ComponentTester.vue';
 
 export default {
   name: 'App',

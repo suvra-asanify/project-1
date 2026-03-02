@@ -21,10 +21,15 @@ export default {
         return PROGRESS_CIRCULAR_SIZES.includes(value);
       },
     },
-    // Single backend value (e.g. "50%", "2/4", "Full"): drives label + fill.
-    value: {
+    // Backend determinate value (0-100).
+    progress: {
       type: [Number, String],
-      default: '1/4',
+      default: 25,
+    },
+    // Backend label for values like "1/4", "80%", etc.
+    label: {
+      type: String,
+      default: 'label',
     },
   },
 

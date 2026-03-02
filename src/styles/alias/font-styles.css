@@ -1,0 +1,77 @@
+/* ── Display (semibold) ────────────────────────────────────────── */
+
+.text-display-hero {
+  font-weight: var(--font-weight-semibold);
+  font-size:   var(--display-hero-size);
+  line-height: var(--display-hero-lh);
+}
+
+.text-display-title {
+  font-weight: var(--font-weight-semibold);
+  font-size:   var(--display-title-size);
+  line-height: var(--display-title-lh);
+}
+
+.text-display-section {
+  font-weight: var(--font-weight-semibold);
+  font-size:   var(--display-section-size);
+  line-height: var(--display-section-lh);
+}
+
+.text-display-emphasis {
+  font-weight: var(--font-weight-semibold);
+  font-size:   var(--display-emphasis-size);
+  line-height: var(--display-emphasis-lh);
+}
+
+/* ── Body (medium) ─────────────────────────────────────────────── */
+
+.text-body-lg {
+  font-weight: var(--font-weight-medium);
+  font-size:   var(--body-lg-size);
+  line-height: var(--body-lg-lh);
+}
+
+.text-body-base {
+  font-weight: var(--font-weight-medium);
+  font-size:   var(--body-base-size);
+  line-height: var(--body-base-lh);
+}
+
+.text-body-sm {
+  font-weight: var(--font-weight-medium);
+  font-size:   var(--body-sm-size);
+  line-height: var(--body-sm-lh);
+}
+
+.text-body-xs {
+  font-weight: var(--font-weight-medium);
+  font-size:   var(--body-xs-size);
+  line-height: var(--body-xs-lh);
+}
+
+/* ── Label (semibold) ──────────────────────────────────────────── */
+
+.text-label-lg {
+  font-weight: var(--font-weight-semibold);
+  font-size:   var(--label-lg-size);
+  line-height: var(--label-lg-lh);
+}
+
+.text-label-base {
+  font-weight: var(--font-weight-semibold);
+  font-size:   var(--label-base-size);
+  line-height: var(--label-base-lh);
+}
+
+.text-label-sm {
+  font-weight: var(--font-weight-semibold);
+  font-size:   var(--label-sm-size);
+  line-height: var(--label-sm-lh);
+}
+
+.text-label-xs {
+  font-weight: var(--font-weight-semibold);
+  font-size:   var(--label-xs-size);
+  line-height: var(--label-xs-lh);
+}

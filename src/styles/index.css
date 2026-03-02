@@ -1,0 +1,8 @@
+/* ── Design system entry point ─────────────────────────────────── */
+/* Import this single file to get all tokens and utility classes.  */
+/* Usage: import 'your-package-name/styles'                        */
+
+@import './base/num-base.css';
+@import './base/color-base.css';
+@import './base/typo-base.css';
+@import './alias/font-styles.css';

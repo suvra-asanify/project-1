@@ -1,0 +1,48 @@
+/* ── Font family ───────────────────────────────────────────────── */
+
+* {
+  font-family: 'Quicksand', sans-serif;
+}
+
+/* ── Font weight tokens ────────────────────────────────────────── */
+
+:root {
+  --font-weight-regular:   400;
+  --font-weight-medium:    500;
+  --font-weight-semibold:  600;
+  --font-weight-bold:      700;
+}
+
+/* ── Size / line-height tokens ─────────────────────────────────── */
+
+:root {
+  /* display */
+  --display-hero-size:      var(--base-48);
+  --display-hero-lh:        108.33%;
+  --display-title-size:     var(--base-34);
+  --display-title-lh:       117.65%;
+  --display-section-size:   var(--base-20);
+  --display-section-lh:     140%;
+  --display-emphasis-size:  var(--base-18);
+  --display-emphasis-lh:    155.56%;
+
+  /* body */
+  --body-lg-size:    var(--base-18);
+  --body-lg-lh:      155.56%;
+  --body-base-size:  var(--base-16);
+  --body-base-lh:    150%;
+  --body-sm-size:    var(--base-14);
+  --body-sm-lh:      142.86%;
+  --body-xs-size:    var(--base-12);
+  --body-xs-lh:      133.33%;
+
+  /* label */
+  --label-lg-size:    var(--base-18);
+  --label-lg-lh:      155.56%;
+  --label-base-size:  var(--base-16);
+  --label-base-lh:    150%;
+  --label-sm-size:    var(--base-14);
+  --label-sm-lh:      142.86%;
+  --label-xs-size:    var(--base-12);
+  --label-xs-lh:      133.33%;
+}

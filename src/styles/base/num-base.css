@@ -1,0 +1,82 @@
+/* ── Base scale tokens ─────────────────────────────────────────── */
+/* Single source of truth for all numeric values (px).            */
+/* Font sizes, line heights, radii, spacing, etc. reference here. */
+
+:root {
+  /* negative */
+  --base-n68:   -68px;
+  --base-n50:   -50px;
+  --base-n32:   -32px;
+  --base-n28:   -28px;
+  --base-n24:   -24px;
+  --base-n20:   -20px;
+  --base-n16:   -16px;
+  --base-n12:   -12px;
+  --base-n8:    -8px;
+  --base-n4:    -4px;
+  --base-n2:    -2px;
+
+  /* zero & sub-pixel */
+  --base-0:     0px;
+  --base-0-8:   0.8px;
+
+  /* 1 – 15 */
+  --base-1:     1px;
+  --base-2:     2px;
+  --base-3:     3px;
+  --base-4:     4px;
+  --base-5:     5px;
+  --base-6:     6px;
+  --base-7:     7px;
+  --base-8:     8px;
+  --base-9:     9px;
+  --base-10:    10px;
+  --base-11:    11px;
+  --base-12:    12px;
+  --base-13:    13px;
+  --base-14:    14px;
+  --base-15:    15px;
+
+  /* 16 – 25 */
+  --base-16:    16px;
+  --base-17:    17px;
+  --base-18:    18px;
+  --base-19:    19px;
+  --base-20:    20px;
+  --base-21:    21px;
+  --base-22:    22px;
+  --base-23:    23px;
+  --base-24:    24px;
+  --base-25:    25px;
+
+  /* 28 – 52 */
+  --base-28:    28px;
+  --base-30:    30px;
+  --base-32:    32px;
+  --base-34:    34px;
+  --base-36:    36px;
+  --base-40:    40px;
+  --base-44:    44px;
+  --base-48:    48px;
+  --base-50:    50px;
+  --base-52:    52px;
+
+  /* 56 – 96 */
+  --base-56:    56px;
+  --base-60:    60px;
+  --base-64:    64px;
+  --base-70:    70px;
+  --base-75:    75px;
+  --base-80:    80px;
+  --base-90:    90px;
+  --base-96:    96px;
+
+  /* 100+ */
+  --base-100:   100px;
+  --base-120:   120px;
+  --base-160:   160px;
+  --base-200:   200px;
+
+  /* special */
+  --base-9999:  9999px;
+}

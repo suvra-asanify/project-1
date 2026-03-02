@@ -1,11 +1,11 @@
 <template>
-  <v-app>
-    <v-main>
-      <v-container>
+  <div id="app-root">
+    <main>
+      <div class="container">
         <h1>Test App</h1>
-      </v-container>
-    </v-main>
-  </v-app>
+      </div>
+    </main>
+  </div>
 </template>
 
 <script>

@@ -1,4 +1,10 @@
-import { computed } from 'vue';
+import { computed, ref, watch } from 'vue';
+
+// Neutral person-silhouette placeholder shown when imageSrc is empty or fails to load.
+export const AVATAR_FALLBACK_IMAGE =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%23e0e0e0'/%3E%3Ccircle cx='20' cy='15' r='7' fill='%23bdbdbd'/%3E%3Cpath d='M5 35c0-8.3 6.7-15 15-15s15 6.7 15 15' fill='%23bdbdbd'/%3E%3C/svg%3E";
+
+export const AVATAR_DEFAULT_LABEL = 'AA';
 
 // Public enums shared with Avatar prop validators.
 export const AVATAR_VARIANTS = Object.freeze(['default', 'img', 'multiple']);
@@ -7,40 +13,13 @@ export const AVATAR_SIZE_KEYS = Object.freeze(['default', 'small', 'large']);
 // Preset prop value -> public class token.
 const SIZE_TOKEN_BY_PRESET = Object.freeze({ default: 'default', small: 'sm', large: 'lg' });
 
-export const AVATAR_FALLBACK_IMAGE =
-  'https://www.figma.com/api/mcp/asset/0ad7dc93-7eda-4247-b729-7786b3e7cbb9';
+// Explicit size must be an integer between 20 and 100 (inclusive).
+export function isValidExplicitSize(value) {
+  return typeof value === 'number' && Number.isInteger(value) && value >= 20 && value <= 100;
+}
 
 function isPresetSize(value) {
   return typeof value === 'string' && AVATAR_SIZE_KEYS.includes(value);
-}
-
-// Converts size input to CSS length:
-// - 36 -> 36px
-// - "36" -> 36px
-// - "4rem" / "clamp(...)" -> unchanged
-function toCssSize(value) {
-  if (typeof value === 'number') {
-    return Number.isFinite(value) && value > 0 ? `${value}px` : null;
-  }
-
-  if (typeof value !== 'string') return null;
-
-  const trimmed = value.trim();
-  if (!trimmed) return null;
-  return /^\d+(\.\d+)?$/.test(trimmed) ? `${trimmed}px` : trimmed;
-}
-
-// For explicit numeric sizes, emit predictable class hooks:
-// 36 or "36px" -> size-36, 36.5 -> size-36-5.
-function toSizeClassToken(value) {
-  const raw = typeof value === 'number'
-    ? String(value)
-    : typeof value === 'string'
-      ? value.trim()
-      : '';
-
-  const numericLike = /^(\d+(?:\.\d+)?)(?:px)?$/i.exec(raw);
-  return numericLike ? numericLike[1].replace(/\./g, '-') : 'custom';
 }
 
 export function useAvatar(props) {
@@ -48,24 +27,32 @@ export function useAvatar(props) {
   const isImg = computed(() => props.variant === 'img');
   const isMultiple = computed(() => props.variant === 'multiple');
 
-  // Backend-safe label normalization.
-  const displayLabel = computed(() => (props.label == null ? '' : String(props.label).trim()));
+  // Backend-safe label normalization — always uppercase.
+  const displayLabel = computed(() => (props.label == null ? '' : String(props.label).trim().toUpperCase()));
 
-  // Preset sizes use CSS classes. Any non-preset value is treated as explicit size.
-  const presetSizeKey = computed(() => (isPresetSize(props.size) ? props.size : 'default'));
-  const explicitSize = computed(() => (isPresetSize(props.size) ? null : toCssSize(props.size)));
+  // Preset sizes use CSS classes; explicit integer sizes inject inline CSS vars.
+  const explicitSize = computed(() => (isPresetSize(props.size) ? null : `${props.size}px`));
 
-  const normalizedCount = computed(() => {
-    const parsed = Number(props.count);
-    return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : 0;
-  });
+  // count is always a positive integer; clamp to 0 if invalid.
+  const normalizedCount = computed(() => (props.count > 0 ? props.count : 0));
 
   const showCount = computed(() => isMultiple.value && normalizedCount.value > 0);
-  const showGhost = showCount;
   const showLabel = computed(() => !isImg.value && displayLabel.value.length > 0);
-  const resolvedImageSrc = computed(() => props.imageSrc || AVATAR_FALLBACK_IMAGE);
 
-  // Inline CSS variables are required only for explicit size values.
+  // Image src: falls back to placeholder when imageSrc is empty.
+  // Resets to the real src whenever the prop changes (e.g. new backend value).
+  const currentImageSrc = ref(props.imageSrc || AVATAR_FALLBACK_IMAGE);
+  watch(() => props.imageSrc, (val) => {
+    currentImageSrc.value = val || AVATAR_FALLBACK_IMAGE;
+  });
+  // Called by @error on the <img> when the backend URL fails to load.
+  function onImageError() {
+    currentImageSrc.value = AVATAR_FALLBACK_IMAGE;
+  }
+
+  // Inline CSS variables injected only for explicit (non-preset) size values.
+  // Ratios derived from the default preset: base-60 container, base-22 label
+  // (22/60 ≈ 0.3667), base-18 count (18/60 = 0.3), base-48 overlap (48/60 = 0.8).
   const stackStyles = computed(() => {
     if (!explicitSize.value) return null;
 
@@ -77,11 +64,9 @@ export function useAvatar(props) {
     };
   });
 
-  const sizeToken = computed(() => (
-    explicitSize.value
-      ? toSizeClassToken(props.size)
-      : SIZE_TOKEN_BY_PRESET[presetSizeKey.value]
-  ));
+  const sizeToken = computed(() =>
+    isPresetSize(props.size) ? SIZE_TOKEN_BY_PRESET[props.size] : String(props.size)
+  );
 
   // Public classes: default state is implicit (no variant-default / size-default).
   const rootClasses = computed(() => [
@@ -94,17 +79,23 @@ export function useAvatar(props) {
     props.rounded ? 'avatar--rounded' : 'avatar--square',
   ]);
 
+  // Overrides pill radius on the stacked element when rounded=false.
+  const stackedClasses = computed(() => ({
+    'avatar-stacked-square': !props.rounded,
+  }));
+
   return {
     isImg,
     isMultiple,
     displayLabel,
     showLabel,
     showCount,
-    showGhost,
     normalizedCount,
-    resolvedImageSrc,
+    currentImageSrc,
+    onImageError,
     rootClasses,
     stackStyles,
     avatarClasses,
+    stackedClasses,
   };
 }

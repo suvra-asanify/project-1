@@ -29,11 +29,24 @@
 
           <label class="text-label-sm tester-field">
             <span class="tester-field-label">size</span>
-            <select v-model="avatar.size" class="tester-input">
+            <select v-model="avatarSizeMode" class="tester-input">
               <option value="default">default</option>
               <option value="small">small</option>
               <option value="large">large</option>
+              <option value="custom">custom</option>
             </select>
+          </label>
+
+          <label v-if="avatarSizeMode === 'custom'" class="text-label-sm tester-field">
+            <span class="tester-field-label">custom size (20-100)</span>
+            <input
+              v-model.number="avatarCustomSizeValue"
+              class="tester-input"
+              type="number"
+              min="20"
+              max="100"
+              step="1"
+            />
           </label>
 
           <label class="text-label-sm tester-field">
@@ -81,6 +94,78 @@
         </div>
       </div>
 
+      <div v-else-if="entry.name === 'TextField' && textField" class="tester-layout">
+        <div class="tester-controls">
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">variant</span>
+            <select v-model="textField.variant" class="tester-input">
+              <option value="default">default</option>
+              <option value="underlined">underlined</option>
+            </select>
+          </label>
+
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">size</span>
+            <select v-model="textField.size" class="tester-input">
+              <option value="default">default</option>
+              <option value="small">small</option>
+              <option value="large">large</option>
+            </select>
+          </label>
+
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">placeholder (backend)</span>
+            <input v-model="textField.placeholder" class="tester-input" type="text" />
+          </label>
+
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">input / modelValue (backend)</span>
+            <input v-model="textField.modelValue" class="tester-input" type="text" />
+          </label>
+
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">prepend icon (mdi-* | in | flag:in | flagcdn.com/in.svg | custom image url)</span>
+            <input v-model="textField.prependInnerIcon" class="tester-input" type="text" placeholder="flagcdn.com/in.svg" />
+          </label>
+
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">append icon (mdi-* | us | flag:us | https://flagcdn.com/us.svg | custom image url)</span>
+            <input v-model="textField.appendInnerIcon" class="tester-input" type="text" placeholder="mdi-plus" />
+          </label>
+
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">hint (backend)</span>
+            <input v-model="textField.hint" class="tester-input" type="text" />
+          </label>
+
+          <label class="text-label-sm tester-toggle">
+            <input v-model="textField.seeCharCount" type="checkbox" />
+            <span>see char count</span>
+          </label>
+
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">total char (backend)</span>
+            <input
+              v-model.number="textField.totalChar"
+              class="tester-input"
+              type="number"
+              min="1"
+              step="1"
+              :disabled="!textField.seeCharCount"
+            />
+          </label>
+
+          <label class="text-label-sm tester-toggle">
+            <input v-model="textField.disabled" type="checkbox" />
+            <span>disabled</span>
+          </label>
+        </div>
+
+        <div class="tester-preview rounded-md pa-6">
+          <component :is="entry.name" v-bind="propsFor(entry.name)" />
+        </div>
+      </div>
+
       <div v-else class="tester-preview rounded-md pa-6">
         <component :is="entry.name" v-bind="propsFor(entry.name)" />
       </div>
@@ -106,6 +191,12 @@
 </template>
 
 <script>
+import {
+  AVATAR_SIZE_KEYS,
+  AVATAR_VARIANTS,
+  isValidExplicitSize,
+} from '../composables/useAvatar';
+
 const componentFiles = require.context('../components', false, /\.vue$/);
 const autoComponents = {};
 const autoNames = [];
@@ -134,9 +225,21 @@ const defaultPropsByComponent = {
     count: 1,
     rounded: true,
   },
+  TextField: {
+    variant: 'default',
+    size: 'default',
+    placeholder: 'Placeholder Enter Smthng',
+    modelValue: 'Input Text',
+    prependInnerIcon: '',
+    appendInnerIcon: '',
+    prefix: '',
+    suffix: '',
+    hint: '',
+    seeCharCount: false,
+    totalChar: null,
+    disabled: false,
+  },
 };
-
-const AVATAR_VARIANTS = Object.freeze(['default', 'img', 'multiple']);
 
 function parseLiteral(rawValue) {
   const value = String(rawValue).trim();
@@ -224,6 +327,48 @@ export default {
     avatar() {
       return this.componentProps.Avatar || null;
     },
+    textField() {
+      return this.componentProps.TextField || null;
+    },
+    avatarSizeMode: {
+      get() {
+        if (!this.avatar) {
+          return 'default';
+        }
+        return (typeof this.avatar.size === 'string' && AVATAR_SIZE_KEYS.includes(this.avatar.size))
+          ? this.avatar.size
+          : 'custom';
+      },
+      set(value) {
+        if (!this.avatar) {
+          return;
+        }
+        if (value === 'custom') {
+          if (!isValidExplicitSize(this.avatar.size)) {
+            this.avatar.size = 36;
+          }
+          return;
+        }
+        this.avatar.size = value;
+      },
+    },
+    avatarCustomSizeValue: {
+      get() {
+        if (!this.avatar || !isValidExplicitSize(this.avatar.size)) {
+          return '';
+        }
+        return this.avatar.size;
+      },
+      set(value) {
+        if (!this.avatar) {
+          return;
+        }
+        const numericValue = Number(value);
+        if (isValidExplicitSize(numericValue)) {
+          this.avatar.size = numericValue;
+        }
+      },
+    },
   },
   methods: {
     propsFor(name) {
@@ -277,11 +422,11 @@ export default {
 
           if (name === 'size' || name === ':size') {
             const validSize = (
-              (typeof parsedValue === 'number' && Number.isFinite(parsedValue) && parsedValue > 0) ||
-              (typeof parsedValue === 'string' && parsedValue.trim().length > 0)
+              isValidExplicitSize(parsedValue) ||
+              (typeof parsedValue === 'string' && AVATAR_SIZE_KEYS.includes(parsedValue))
             );
             if (!validSize) {
-              throw new Error('`size` must be a positive number or non-empty string.');
+              throw new Error('`size` must be one of default/small/large or an integer between 20 and 100.');
             }
             nextAvatar.size = parsedValue;
             return;
@@ -468,4 +613,3 @@ export default {
   }
 }
 </style>
-

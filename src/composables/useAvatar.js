@@ -32,23 +32,35 @@ export function useAvatar(props) {
 
   // Preset sizes use CSS classes; explicit integer sizes inject inline CSS vars.
   const isPreset = computed(() => isPresetSize(props.size));
-  const explicitSize = computed(() => (isPreset.value || !Number.isFinite(props.size) ? null : `${props.size}px`));
+  const explicitSize = computed(() => (isValidExplicitSize(props.size) ? `${props.size}px` : null));
 
   // count is always a positive integer; clamp to 0 if invalid.
-  const normalizedCount = computed(() => (props.count > 0 ? props.count : 0));
+  const normalizedCount = computed(() => {
+    if (!Number.isFinite(props.count) || props.count <= 0) {
+      return 0;
+    }
+    return Math.floor(props.count);
+  });
 
   const showCount = computed(() => isMultiple.value && normalizedCount.value > 0);
   const showLabel = computed(() => !isImg.value && displayLabel.value.length > 0);
 
-  // Image src: falls back to placeholder when imageSrc is empty.
-  // Resets to the real src whenever the prop changes (e.g. new backend value).
-  const currentImageSrc = ref(props.imageSrc || AVATAR_FALLBACK_IMAGE);
-  watch(() => props.imageSrc, (val) => {
-    currentImageSrc.value = val || AVATAR_FALLBACK_IMAGE;
+  // Tracks if current prop URL has failed loading. Reset on src changes.
+  const hasImageError = ref(false);
+  watch(() => props.imageSrc, () => {
+    hasImageError.value = false;
   });
+
+  const currentImageSrc = computed(() => {
+    if (hasImageError.value || !props.imageSrc) {
+      return AVATAR_FALLBACK_IMAGE;
+    }
+    return props.imageSrc;
+  });
+
   // Called by @error on the <img> when the backend URL fails to load.
   function onImageError() {
-    currentImageSrc.value = AVATAR_FALLBACK_IMAGE;
+    hasImageError.value = true;
   }
 
   // Inline CSS variables injected only for explicit (non-preset) size values.
@@ -72,7 +84,7 @@ export function useAvatar(props) {
   // Public classes: default state is implicit (no variant-default / size-default).
   const rootClasses = computed(() => [
     props.variant !== 'default' && `variant-${props.variant}`,
-    sizeToken.value !== 'default' && `size-${sizeToken.value}`,
+    isPreset.value && sizeToken.value !== 'default' && `size-${sizeToken.value}`,
   ].filter(Boolean));
 
   const avatarClasses = computed(() => [

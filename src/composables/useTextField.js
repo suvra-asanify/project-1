@@ -3,8 +3,8 @@ import { computed, ref, watch } from 'vue';
 export const TEXT_FIELD_VARIANTS = Object.freeze(['default', 'underlined']);
 export const TEXT_FIELD_SIZE_KEYS = Object.freeze(['default', 'small', 'large']);
 
-export const TEXT_FIELD_DEFAULT_PLACEHOLDER = 'Placeholder Enter Smthng';
-export const TEXT_FIELD_DEFAULT_INPUT = 'Input Text';
+export const TEXT_FIELD_DEFAULT_PLACEHOLDER = '';
+export const TEXT_FIELD_DEFAULT_INPUT = '';
 
 function normalizeText(value, fallback = '') {
   if (typeof value === 'string') {
@@ -38,10 +38,6 @@ function isFlagCdnUrl(icon) {
   return /^(?:https?:\/\/|\/\/)?(?:www\.)?flagcdn\.com\/.+/i.test(icon);
 }
 
-function isCountryCode(icon) {
-  return /^[a-z]{2}$/i.test(icon);
-}
-
 function isUrlLike(icon) {
   return /^(?:https?:\/\/|\/\/|\/|\.\/|\.\.\/|data:image\/|blob:)/i.test(icon);
 }
@@ -71,16 +67,16 @@ function toIconConfig(rawIcon) {
 
   // Accept direct FlagCDN URLs.
   if (isFlagCdnUrl(icon)) {
-    return { type: 'flag', className: '', src: ensureHttpsUrl(icon), alt: 'flag icon' };
+    return { type: 'asset', className: '', src: ensureHttpsUrl(icon), alt: 'flag icon' };
   }
 
-  // Accept shorthand formats for flags:
-  // - "in" -> https://flagcdn.com/in.svg
-  // - "flag:in" -> https://flagcdn.com/in.svg
-  const shorthand = icon.toLowerCase().replace(/^flag:/, '');
-  if (isCountryCode(shorthand)) {
+  // Accept shorthand format for flags:
+  // - "flag:in" -> https://flagcdn.com/w20/in.png
+  const flagMatch = icon.match(/^flag:([a-z]{2})$/i);
+  if (flagMatch) {
+    const shorthand = flagMatch[1].toLowerCase();
     return {
-      type: 'flag',
+      type: 'asset',
       className: '',
       src: `https://flagcdn.com/w20/${shorthand}.png`,
       alt: `${shorthand.toUpperCase()} flag`,
@@ -89,7 +85,7 @@ function toIconConfig(rawIcon) {
 
   // Accept generic custom image URLs from backend.
   if (isUrlLike(icon)) {
-    return { type: 'image', className: '', src: ensureHttpsUrl(icon), alt: 'icon' };
+    return { type: 'asset', className: '', src: ensureHttpsUrl(icon), alt: 'icon' };
   }
 
   // Fallback to MDI syntax.
@@ -97,13 +93,11 @@ function toIconConfig(rawIcon) {
 }
 
 export function useTextField(props, emit) {
-  const internalValue = ref(normalizeText(props.modelValue, TEXT_FIELD_DEFAULT_INPUT));
-  const isHovered = ref(false);
-  const isFocused = ref(false);
+  const internalValue = ref('');
 
   watch(() => props.modelValue, (value) => {
     internalValue.value = normalizeText(value, TEXT_FIELD_DEFAULT_INPUT);
-  });
+  }, { immediate: true });
 
   const normalizedPlaceholder = computed(() =>
     normalizeText(props.placeholder, TEXT_FIELD_DEFAULT_PLACEHOLDER)
@@ -111,23 +105,15 @@ export function useTextField(props, emit) {
   const normalizedPrefix = computed(() => normalizeText(props.prefix));
   const normalizedSuffix = computed(() => normalizeText(props.suffix));
   const normalizedHint = computed(() => normalizeText(props.hint));
-  const resolvedPrependIcon = computed(() =>
-    normalizeText(props.prependInnerIcon).trim() || normalizeText(props.prependIcon).trim()
-  );
-  const resolvedAppendIcon = computed(() =>
-    normalizeText(props.appendInnerIcon).trim() || normalizeText(props.appendIcon).trim()
-  );
+  const resolvedPrependIcon = computed(() => props.prependInnerIcon || props.prependIcon);
+  const resolvedAppendIcon = computed(() => props.appendInnerIcon || props.appendIcon);
 
   const prependIconConfig = computed(() => toIconConfig(resolvedPrependIcon.value));
   const appendIconConfig = computed(() => toIconConfig(resolvedAppendIcon.value));
 
-  const normalizedTotalChar = computed(() => (
-    props.seeCharCount
-      ? normalizePositiveInteger(props.totalChar, null)
-      : null
+  const resolvedTotalChar = computed(() => (
+    props.seeCharCount ? normalizePositiveInteger(props.totalChar, null) : null
   ));
-
-  const effectiveCharCount = computed(() => internalValue.value.length);
 
   const showPrependInnerIcon = computed(() => prependIconConfig.value.type !== 'none');
   const showAppendInnerIcon = computed(() => appendIconConfig.value.type !== 'none');
@@ -137,55 +123,24 @@ export function useTextField(props, emit) {
   const showCounter = computed(() => props.seeCharCount);
 
   const counterText = computed(() => {
-    if (normalizedTotalChar.value) {
-      return `${effectiveCharCount.value}/${normalizedTotalChar.value}`;
+    if (resolvedTotalChar.value) {
+      return `${internalValue.value.length}/${resolvedTotalChar.value}`;
     }
-    return `${effectiveCharCount.value}`;
+    return `${internalValue.value.length}`;
   });
 
-  function onInput(event) {
-    const nextValue = String(event?.target?.value ?? '');
-    const clamped = normalizedTotalChar.value
-      ? nextValue.slice(0, normalizedTotalChar.value)
-      : nextValue;
-    internalValue.value = clamped;
-    emit('update:modelValue', clamped);
-    emit('input', clamped);
-  }
-
-  function onMouseEnter() {
-    if (props.disabled) {
-      return;
-    }
-    isHovered.value = true;
-  }
-
-  function onMouseLeave() {
-    isHovered.value = false;
-  }
-
-  function onFocusIn() {
-    if (props.disabled) {
-      return;
-    }
-    isFocused.value = true;
-  }
-
-  function onFocusOut() {
-    isFocused.value = false;
-  }
-
-  const effectiveState = computed(() => {
-    if (props.disabled) {
-      return 'default';
-    }
-    if (isFocused.value) {
-      return 'active';
-    }
-    if (isHovered.value) {
-      return 'hover';
-    }
-    return 'default';
+  const inputValue = computed({
+    get() {
+      return internalValue.value;
+    },
+    set(nextValue) {
+      const nextText = String(nextValue ?? '');
+      const clamped = resolvedTotalChar.value
+        ? nextText.slice(0, resolvedTotalChar.value)
+        : nextText;
+      internalValue.value = clamped;
+      emit('update:modelValue', clamped);
+    },
   });
 
   const rootClasses = computed(() => [
@@ -194,33 +149,18 @@ export function useTextField(props, emit) {
     props.disabled && 'disabled',
   ].filter(Boolean));
 
-  const controlStyles = computed(() => {
-    if (props.disabled) {
-      return null;
-    }
-    if (effectiveState.value === 'active') {
-      if (props.variant === 'underlined') {
-        return {
-          borderBottomColor: 'var(--primary, #005a9c)',
-          borderBottomWidth: 'var(--border-md)',
-          boxShadow: 'none',
-        };
-      }
-      return {
-        borderColor: 'var(--primary, #005a9c)',
-        boxShadow: '0 0 0 var(--base-1) rgba(0, 90, 156, 0.24)',
-      };
-    }
-    if (effectiveState.value === 'hover') {
-      return {
-        borderColor: 'rgba(0, 0, 0, 0.5)',
-      };
-    }
-    return null;
-  });
+  const hintId = computed(() => (
+    props.id && showHint.value ? `${props.id}-hint` : null
+  ));
+  const counterId = computed(() => (
+    props.id && showCounter.value ? `${props.id}-counter` : null
+  ));
+  const describedBy = computed(() => (
+    [hintId.value, counterId.value].filter(Boolean).join(' ') || null
+  ));
 
   return {
-    internalValue,
+    inputValue,
     normalizedPlaceholder,
     normalizedPrefix,
     normalizedSuffix,
@@ -235,11 +175,9 @@ export function useTextField(props, emit) {
     showCounter,
     counterText,
     rootClasses,
-    controlStyles,
-    onInput,
-    onMouseEnter,
-    onMouseLeave,
-    onFocusIn,
-    onFocusOut,
+    resolvedTotalChar,
+    hintId,
+    counterId,
+    describedBy,
   };
 }

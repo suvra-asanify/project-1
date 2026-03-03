@@ -1,23 +1,16 @@
 <template>
   <div class="text-field" :class="rootClasses">
-    <div
-      class="text-field-control"
-      :style="controlStyles"
-      @mouseenter="onMouseEnter"
-      @mouseleave="onMouseLeave"
-      @focusin="onFocusIn"
-      @focusout="onFocusOut"
-    >
+    <div class="text-field-control">
       <template v-if="showPrependInnerIcon">
         <i
           v-if="prependIconConfig.type === 'mdi'"
-          class="text-field-icon text-field-icon-prepend"
+          class="text-field-icon"
           :class="prependIconConfig.className"
           aria-hidden="true"
         />
         <img
           v-else
-          class="flagcdn-icon text-field-flag-icon text-field-icon-prepend"
+          class="flagcdn-icon text-field-flag-icon"
           :src="prependIconConfig.src"
           :alt="prependIconConfig.alt"
           crossorigin="anonymous"
@@ -32,10 +25,15 @@
 
       <input
         class="text-field-input"
-        :value="internalValue"
+        v-model="inputValue"
+        :id="id"
+        :name="name"
+        :autocomplete="autocomplete"
         :placeholder="normalizedPlaceholder"
+        :aria-invalid="ariaInvalid ? 'true' : null"
+        :aria-describedby="describedBy"
+        :maxlength="resolvedTotalChar || null"
         :disabled="disabled"
-        @input="onInput"
       />
 
       <span v-if="showSuffix" class="text-field-affix text-field-suffix">
@@ -45,13 +43,13 @@
       <template v-if="showAppendInnerIcon">
         <i
           v-if="appendIconConfig.type === 'mdi'"
-          class="text-field-icon text-field-icon-append"
+          class="text-field-icon"
           :class="appendIconConfig.className"
           aria-hidden="true"
         />
         <img
           v-else
-          class="flagcdn-icon text-field-flag-icon text-field-icon-append"
+          class="flagcdn-icon text-field-flag-icon"
           :src="appendIconConfig.src"
           :alt="appendIconConfig.alt"
           crossorigin="anonymous"
@@ -62,8 +60,8 @@
     </div>
 
     <div v-if="showHint || showCounter" class="text-field-meta">
-      <span v-if="showHint" class="text-field-hint">{{ normalizedHint }}</span>
-      <span v-if="showCounter" class="text-field-counter">{{ counterText }}</span>
+      <span v-if="showHint" :id="hintId" class="text-field-hint">{{ normalizedHint }}</span>
+      <span v-if="showCounter" :id="counterId" class="text-field-counter">{{ counterText }}</span>
     </div>
   </div>
 </template>
@@ -79,7 +77,7 @@ import {
 
 export default {
   name: 'TextField',
-  emits: ['update:modelValue', 'input'],
+  emits: ['update:modelValue'],
   props: {
     variant: {
       type: String,
@@ -107,6 +105,7 @@ export default {
       type: String,
       default: '',
     },
+    // Backward-compatible alias for prependInnerIcon.
     prependIcon: {
       type: String,
       default: '',
@@ -115,6 +114,7 @@ export default {
       type: String,
       default: '',
     },
+    // Backward-compatible alias for appendInnerIcon.
     appendIcon: {
       type: String,
       default: '',
@@ -140,6 +140,22 @@ export default {
       default: null,
     },
     disabled: {
+      type: Boolean,
+      default: false,
+    },
+    id: {
+      type: String,
+      default: null,
+    },
+    name: {
+      type: String,
+      default: null,
+    },
+    autocomplete: {
+      type: String,
+      default: 'off',
+    },
+    ariaInvalid: {
       type: Boolean,
       default: false,
     },
@@ -182,6 +198,15 @@ export default {
   width: 100%;
 }
 
+.text-field:not(.disabled) .text-field-control:hover {
+  border-color: rgba(0, 0, 0, 0.5);
+}
+
+.text-field:not(.disabled):not(.underlined) .text-field-control:focus-within {
+  border-color: var(--primary, #005a9c);
+  box-shadow: 0 0 0 var(--base-1) rgba(0, 90, 156, 0.24);
+}
+
 .text-field.underlined .text-field-control {
   background: transparent;
   border-left: 0;
@@ -190,6 +215,12 @@ export default {
   border-top: 0;
   padding-left: 0;
   padding-right: 0;
+}
+
+.text-field:not(.disabled).underlined .text-field-control:focus-within {
+  border-bottom-color: var(--primary, #005a9c);
+  border-bottom-width: var(--border-md);
+  box-shadow: none;
 }
 
 .text-field.underlined.disabled .text-field-control {

@@ -124,12 +124,12 @@
           </label>
 
           <label class="text-label-sm tester-field">
-            <span class="tester-field-label">prepend icon (mdi-* | in | flag:in | flagcdn.com/in.svg | custom image url)</span>
-            <input v-model="textField.prependInnerIcon" class="tester-input" type="text" placeholder="flagcdn.com/in.svg" />
+            <span class="tester-field-label">prepend icon (mdi-* | flag:in | flagcdn.com/in.svg | custom image url)</span>
+            <input v-model="textField.prependInnerIcon" class="tester-input" type="text" placeholder="flag:in" />
           </label>
 
           <label class="text-label-sm tester-field">
-            <span class="tester-field-label">append icon (mdi-* | us | flag:us | https://flagcdn.com/us.svg | custom image url)</span>
+            <span class="tester-field-label">append icon (mdi-* | flag:us | https://flagcdn.com/us.svg | custom image url)</span>
             <input v-model="textField.appendInnerIcon" class="tester-input" type="text" placeholder="mdi-plus" />
           </label>
 

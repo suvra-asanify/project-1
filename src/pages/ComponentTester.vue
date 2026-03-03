@@ -166,6 +166,82 @@
         </div>
       </div>
 
+      <div v-else-if="entry.name === 'TextArea' && textArea" class="tester-layout">
+        <div class="tester-controls">
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">state</span>
+            <select v-model="textArea.state" class="tester-input">
+              <option value="default">default</option>
+              <option value="hover">hover</option>
+              <option value="active">active</option>
+            </select>
+          </label>
+
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">placeholder</span>
+            <input v-model="textArea.placeholder" class="tester-input" type="text" />
+          </label>
+
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">input</span>
+            <textarea v-model="textArea.input" class="tester-input tester-code" />
+          </label>
+
+          <label class="text-label-sm tester-toggle">
+            <input v-model="textArea.hasHint" type="checkbox" />
+            <span>has hint</span>
+          </label>
+
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">hint</span>
+            <input
+              v-model="textArea.hint"
+              class="tester-input"
+              type="text"
+              :disabled="!textArea.hasHint"
+            />
+          </label>
+
+          <label class="text-label-sm tester-toggle">
+            <input v-model="textArea.seeCharCount" type="checkbox" />
+            <span>see char count</span>
+          </label>
+
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">char count</span>
+            <input
+              v-model.number="textArea.charCount"
+              class="tester-input"
+              type="number"
+              min="0"
+              step="1"
+              :disabled="!textArea.seeCharCount"
+            />
+          </label>
+
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">total char</span>
+            <input
+              v-model.number="textArea.totalChar"
+              class="tester-input"
+              type="number"
+              min="1"
+              step="1"
+              :disabled="!textArea.seeCharCount"
+            />
+          </label>
+
+          <label class="text-label-sm tester-toggle">
+            <input v-model="textArea.disabled" type="checkbox" />
+            <span>disabled</span>
+          </label>
+        </div>
+
+        <div class="tester-preview rounded-md pa-6">
+          <component :is="entry.name" v-bind="propsFor(entry.name)" />
+        </div>
+      </div>
+
       <div v-else class="tester-preview rounded-md pa-6">
         <component :is="entry.name" v-bind="propsFor(entry.name)" />
       </div>
@@ -237,6 +313,17 @@ const defaultPropsByComponent = {
     hint: '',
     seeCharCount: false,
     totalChar: null,
+    disabled: false,
+  },
+  TextArea: {
+    state: 'default',
+    placeholder: 'Placeholder Enter Smthng',
+    input: 'Lorem ipsum dolor sit amet consectetur.',
+    hasHint: false,
+    hint: 'suffix',
+    seeCharCount: false,
+    charCount: 0,
+    totalChar: 600,
     disabled: false,
   },
 };
@@ -329,6 +416,9 @@ export default {
     },
     textField() {
       return this.componentProps.TextField || null;
+    },
+    textArea() {
+      return this.componentProps.TextArea || null;
     },
     avatarSizeMode: {
       get() {

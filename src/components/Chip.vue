@@ -159,6 +159,7 @@ export default {
   --chip-icon-size: var(--base-16);
   --chip-padding-inline: 6px;
   --chip-close-size: var(--base-28);
+  --chip-close-gap: var(--spacing-1);
   --chip-font-size: var(--label-sm-size);
   --chip-font-lh: var(--label-sm-lh);
   --chip-bg-flat: #e3e3e3;
@@ -382,7 +383,7 @@ export default {
   flex: 0 0 var(--chip-close-size);
   height: var(--chip-close-size);
   justify-content: center;
-  margin-inline-start: 0 !important;
+  margin-inline-start: var(--chip-close-gap) !important;
   margin-inline-end: 0 !important;
   opacity: 1;
   overflow: visible;

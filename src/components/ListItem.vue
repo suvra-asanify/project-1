@@ -20,8 +20,8 @@
         name="prepend"
         :selected="selected"
         :disabled="disabled"
-        :show-checkbox="showCheckbox"
-        :show-avatar="showAvatar"
+        :checkbox="showCheckbox"
+        :avatar="showAvatar"
         :show-prepend-icon="showPrependIcon"
         :prepend-icon="prependIconConfig"
         :avatar-label="avatarLabel"
@@ -170,11 +170,11 @@ export default {
       type: String,
       default: LIST_ITEM_DEFAULT_LABEL,
     },
-    showCheckbox: {
+    checkbox: {
       type: Boolean,
       default: false,
     },
-    prependAvatar: {
+    avatar: {
       type: Boolean,
       default: false,
     },

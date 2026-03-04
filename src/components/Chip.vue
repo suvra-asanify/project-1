@@ -18,18 +18,10 @@
         :color="normalizedColor"
         :size="size"
       >
-        <v-icon v-if="prependIconConfig.type === 'mdi'" class="chip-icon">
-          {{ prependIconConfig.icon }}
-        </v-icon>
-        <img
-          v-else
-          class="chip-image-icon"
-          :class="prependIconConfig.assetType === 'flag' ? 'chip-flag-icon flagcdn-icon' : null"
-          :src="prependIconConfig.src"
-          :alt="prependIconConfig.alt"
-          crossorigin="anonymous"
-          referrerpolicy="no-referrer"
-          loading="lazy"
+        <ds-icon
+          :config="prependIconConfig"
+          icon-class="chip-icon"
+          :image-class="['chip-image-icon', prependIconConfig.assetType === 'flag' && 'chip-flag-icon flagcdn-icon']"
         />
       </slot>
     </template>
@@ -54,18 +46,10 @@
         :color="normalizedColor"
         :size="size"
       >
-        <v-icon v-if="appendIconConfig.type === 'mdi'" class="chip-icon">
-          {{ appendIconConfig.icon }}
-        </v-icon>
-        <img
-          v-else
-          class="chip-image-icon"
-          :class="appendIconConfig.assetType === 'flag' ? 'chip-flag-icon flagcdn-icon' : null"
-          :src="appendIconConfig.src"
-          :alt="appendIconConfig.alt"
-          crossorigin="anonymous"
-          referrerpolicy="no-referrer"
-          loading="lazy"
+        <ds-icon
+          :config="appendIconConfig"
+          icon-class="chip-icon"
+          :image-class="['chip-image-icon', appendIconConfig.assetType === 'flag' && 'chip-flag-icon flagcdn-icon']"
         />
       </slot>
     </template>
@@ -81,7 +65,6 @@
 </template>
 
 <script>
-import { computed } from 'vue';
 import {
   CHIP_COLORS,
   CHIP_DEFAULT_ICON,
@@ -90,9 +73,12 @@ import {
   CHIP_VARIANTS,
   useChip,
 } from '../composables/useChip';
+import DsIcon from '../shared/DsIcon.vue';
+import { useForwardSlots } from '../shared/useForwardSlots';
 
 export default {
   name: 'chip',
+  components: { DsIcon },
   inheritAttrs: false,
   props: {
     variant: {
@@ -143,9 +129,7 @@ export default {
   },
   setup(props, { slots }) {
     const chipState = useChip(props);
-    const forwardedSlotNames = computed(() => (
-      Object.keys(slots).filter((name) => !['default', 'prepend', 'append', 'close'].includes(name))
-    ));
+    const forwardedSlotNames = useForwardSlots(slots, ['default', 'prepend', 'append', 'close']);
 
     return {
       ...chipState,

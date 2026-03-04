@@ -2,7 +2,7 @@ import { computed } from 'vue';
 import {
   normalizeText,
   toIconConfig,
-} from './sharedHelpers';
+} from '../shared/sharedHelpers';
 
 export const LIST_ITEM_SIZE_KEYS = Object.freeze(['default', 'small', 'large']);
 
@@ -38,8 +38,8 @@ export function useListItem(props) {
     toIconConfig(normalizeText(props.appendIcon, LIST_ITEM_DEFAULT_ICON).trim())
   );
 
-  const showCheckbox = computed(() => props.showCheckbox === true);
-  const showAvatar = computed(() => props.prependAvatar === true);
+  const showCheckbox = computed(() => props.checkbox === true);
+  const showAvatar = computed(() => props.avatar === true);
   const showPrependIcon = computed(() => prependIconConfig.value.type !== 'none');
   const showAppendIcon = computed(() => appendIconConfig.value.type !== 'none');
   const showSubtext = computed(() => normalizedSubtext.value.length > 0);

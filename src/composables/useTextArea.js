@@ -2,7 +2,7 @@ import { computed, ref, watch } from 'vue';
 import {
   normalizePositiveInteger,
   normalizeText,
-} from './sharedHelpers';
+} from '../shared/sharedHelpers';
 
 export const TEXT_AREA_DEFAULT_PLACEHOLDER = 'Placeholder Enter Smthng';
 export const TEXT_AREA_DEFAULT_INPUT = 'Lorem ipsum dolor sit amet consectetur.';

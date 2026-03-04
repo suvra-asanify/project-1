@@ -52,7 +52,7 @@ import {
 } from '../composables/useAvatar';
 
 export default {
-  name: 'Avatar',
+  name: 'avatar',
   inheritAttrs: false,
   props: {
     variant: {

@@ -27,14 +27,12 @@
         <h2 class="text-label-lg tester-card-title">{{ entry.name }}</h2>
       </div>
 
-      <div v-if="entry.name === 'Avatar' && avatar" class="tester-layout">
+      <div v-if="entry.name === 'avatar' && avatar" class="tester-layout">
         <div class="tester-controls">
           <label class="text-label-sm tester-field">
             <span class="tester-field-label">variant</span>
             <select v-model="avatar.variant" class="tester-input">
-              <option value="default">default</option>
-              <option value="img">img</option>
-              <option value="multiple">multiple</option>
+              <option v-for="v in AVATAR_VARIANTS" :key="v" :value="v">{{ v }}</option>
             </select>
           </label>
 
@@ -107,8 +105,7 @@
           <label class="text-label-sm tester-field">
             <span class="tester-field-label">size</span>
             <select v-model="progressLinear.size" class="tester-input">
-              <option value="default">default</option>
-              <option value="large">large</option>
+              <option v-for="s in PROGRESS_LINEAR_SIZES" :key="s" :value="s">{{ s }}</option>
             </select>
           </label>
 
@@ -150,9 +147,7 @@
           <label class="text-label-sm tester-field">
             <span class="tester-field-label">size</span>
             <select v-model="progressCircular.size" class="tester-input">
-              <option value="default">default</option>
-              <option value="small">small</option>
-              <option value="large">large</option>
+              <option v-for="s in PROGRESS_CIRCULAR_SIZES" :key="s" :value="s">{{ s }}</option>
             </select>
           </label>
 
@@ -177,40 +172,21 @@
           <label class="text-label-sm tester-field">
             <span class="tester-field-label">variant</span>
             <select v-model="chip.variant" class="tester-input">
-              <option value="flat">flat</option>
-              <option value="tonal">tonal</option>
+              <option v-for="v in CHIP_VARIANTS" :key="v" :value="v">{{ v }}</option>
             </select>
           </label>
 
           <label class="text-label-sm tester-field">
             <span class="tester-field-label">color</span>
             <select v-model="chip.color" class="tester-input">
-              <option value="default">default</option>
-              <option value="success">success</option>
-              <option value="warning">warning</option>
-              <option value="error">error</option>
-              <option value="neutral">neutral</option>
-              <option value="pink">pink</option>
-              <option value="purple">purple</option>
-              <option value="deeppurple">deeppurple</option>
-              <option value="indigo">indigo</option>
-              <option value="lightblue">lightblue</option>
-              <option value="cyan">cyan</option>
-              <option value="teal">teal</option>
-              <option value="lightgreen">lightgreen</option>
-              <option value="lime">lime</option>
-              <option value="yellow">yellow</option>
-              <option value="amber">amber</option>
-              <option value="deeporange">deeporange</option>
+              <option v-for="c in CHIP_COLORS" :key="c" :value="c">{{ c }}</option>
             </select>
           </label>
 
           <label class="text-label-sm tester-field">
             <span class="tester-field-label">size</span>
             <select v-model="chip.size" class="tester-input">
-              <option value="default">default</option>
-              <option value="small">small</option>
-              <option value="large">large</option>
+              <option v-for="s in CHIP_SIZE_KEYS" :key="s" :value="s">{{ s }}</option>
             </select>
           </label>
 
@@ -256,6 +232,41 @@
         </div>
       </div>
 
+      <div v-else-if="entry.name === 'list' && list" class="tester-layout">
+        <div class="tester-controls">
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">max-height</span>
+            <input
+              v-model.number="list.maxHeight"
+              class="tester-input"
+              type="number"
+              min="48"
+              step="1"
+            />
+          </label>
+
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">items-count (backend)</span>
+            <input
+              v-model.number="list.itemsCount"
+              class="tester-input"
+              type="number"
+              min="0"
+              step="1"
+              @input="onListItemsCountInput"
+            />
+          </label>
+        </div>
+
+        <div class="tester-preview tester-preview-list rounded-md pa-6">
+          <component
+            :is="entry.name"
+            v-bind="propsFor(entry.name)"
+            @update:modelValue="onListModelValueUpdate"
+          />
+        </div>
+      </div>
+
       <div v-else-if="entry.name === 'list-item' && listItem" class="tester-layout">
         <div class="tester-controls">
           <label class="text-label-sm tester-field">
@@ -298,13 +309,13 @@
           </label>
 
           <label class="text-label-sm tester-toggle">
-            <input v-model="listItem.showCheckbox" type="checkbox" />
-            <span>show-checkbox</span>
+            <input v-model="listItem.checkbox" type="checkbox" />
+            <span>checkbox</span>
           </label>
 
           <label class="text-label-sm tester-toggle">
-            <input v-model="listItem.prependAvatar" type="checkbox" />
-            <span>prepend-avatar</span>
+            <input v-model="listItem.avatar" type="checkbox" />
+            <span>avatar</span>
           </label>
 
           <label class="text-label-sm tester-toggle">
@@ -355,17 +366,14 @@
           <label class="text-label-sm tester-field">
             <span class="tester-field-label">variant</span>
             <select v-model="textField.variant" class="tester-input">
-              <option value="default">default</option>
-              <option value="underlined">underlined</option>
+              <option v-for="v in TEXT_FIELD_VARIANTS" :key="v" :value="v">{{ v }}</option>
             </select>
           </label>
 
           <label class="text-label-sm tester-field">
             <span class="tester-field-label">size</span>
             <select v-model="textField.size" class="tester-input">
-              <option value="default">default</option>
-              <option value="small">small</option>
-              <option value="large">large</option>
+              <option v-for="s in TEXT_FIELD_SIZE_KEYS" :key="s" :value="s">{{ s }}</option>
             </select>
           </label>
 
@@ -487,8 +495,13 @@
 <script>
 import {
   AVATAR_SIZE_KEYS,
+  AVATAR_VARIANTS,
   isValidExplicitSize,
 } from '../composables/useAvatar';
+import { CHIP_COLORS, CHIP_SIZE_KEYS, CHIP_VARIANTS } from '../composables/useChip';
+import { PROGRESS_CIRCULAR_SIZES } from '../composables/useProgressCircular';
+import { PROGRESS_LINEAR_SIZES } from '../composables/useProgressLinear';
+import { TEXT_FIELD_SIZE_KEYS, TEXT_FIELD_VARIANTS } from '../composables/useTextField';
 
 const componentFiles = require.context('../components', false, /\.vue$/);
 const autoComponents = {};
@@ -510,8 +523,15 @@ componentFiles.keys().forEach((filePath) => {
 
 autoNames.sort((a, b) => a.localeCompare(b));
 
+function buildListTesterItems(count = 6) {
+  return Array.from({ length: count }, (_, index) => ({
+    value: index + 1,
+    label: 'Title',
+  }));
+}
+
 const defaultPropsByComponent = {
-  Avatar: {
+  avatar: {
     variant: 'default',
     size: 'default',
     label: 'AA',
@@ -541,12 +561,18 @@ const defaultPropsByComponent = {
     appendIcon: '',
     disabled: false,
   },
+  list: {
+    maxHeight: 304,
+    modelValue: 2,
+    itemsCount: 6,
+    items: buildListTesterItems(6),
+  },
   'list-item': {
     size: 'default',
     selected: false,
     label: 'Title',
-    showCheckbox: false,
-    prependAvatar: false,
+    checkbox: false,
+    avatar: false,
     prependIcon: '',
     appendIcon: '',
     subtext: '',
@@ -586,6 +612,18 @@ export default {
   components: {
     ...autoComponents,
   },
+  setup() {
+    return {
+      AVATAR_VARIANTS,
+      CHIP_COLORS,
+      CHIP_SIZE_KEYS,
+      CHIP_VARIANTS,
+      PROGRESS_CIRCULAR_SIZES,
+      PROGRESS_LINEAR_SIZES,
+      TEXT_FIELD_SIZE_KEYS,
+      TEXT_FIELD_VARIANTS,
+    };
+  },
   data() {
     return {
       componentProps: JSON.parse(JSON.stringify(defaultPropsByComponent)),
@@ -600,7 +638,7 @@ export default {
       return this.componentEntries.filter((entry) => entry.name === this.selectedComponent);
     },
     avatar() {
-      return this.componentProps.Avatar || null;
+      return this.componentProps.avatar || null;
     },
     progressLinear() {
       return this.componentProps['progress-linear'] || null;
@@ -610,6 +648,9 @@ export default {
     },
     chip() {
       return this.componentProps.chip || null;
+    },
+    list() {
+      return this.componentProps.list || null;
     },
     listItem() {
       return this.componentProps['list-item'] || null;
@@ -669,7 +710,15 @@ export default {
   },
   methods: {
     propsFor(name) {
-      return this.componentProps[name] || {};
+      const props = this.componentProps[name] || {};
+      if (name === 'list') {
+        return {
+          maxHeight: props.maxHeight,
+          modelValue: props.modelValue,
+          items: Array.isArray(props.items) ? props.items : [],
+        };
+      }
+      return props;
     },
     onAvatarImageFileChange(event) {
       if (!this.avatar) {
@@ -701,6 +750,36 @@ export default {
       if (String(this.avatar.imageSrc || '').trim().length > 0) {
         this.avatar.variant = 'img';
       }
+    },
+    onListItemsCountInput() {
+      if (!this.list) {
+        return;
+      }
+
+      const parsed = Number(this.list.itemsCount);
+      const normalizedCount = Number.isFinite(parsed)
+        ? Math.max(0, Math.floor(parsed))
+        : 0;
+
+      this.list.itemsCount = normalizedCount;
+      this.list.items = buildListTesterItems(normalizedCount);
+
+      if (normalizedCount === 0) {
+        this.list.modelValue = null;
+        return;
+      }
+
+      const numericModel = Number(this.list.modelValue);
+      if (!Number.isFinite(numericModel) || numericModel < 1 || numericModel > normalizedCount) {
+        this.list.modelValue = Math.min(2, normalizedCount);
+      }
+    },
+    onListModelValueUpdate(nextValue) {
+      if (!this.list) {
+        return;
+      }
+
+      this.list.modelValue = nextValue;
     },
     onListItemSelectedUpdate(nextValue) {
       if (!this.listItem) {
@@ -808,8 +887,13 @@ export default {
   min-height: 200px;
 }
 
+.tester-preview-list,
 .tester-preview-list-item {
   justify-content: flex-start;
+}
+
+.tester-preview-list {
+  align-items: flex-start;
 }
 
 @media (max-width: 900px) {

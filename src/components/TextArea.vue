@@ -33,13 +33,13 @@
 </template>
 
 <script>
-import { computed } from 'vue';
 import {
   TEXT_AREA_DEFAULT_HINT,
   TEXT_AREA_DEFAULT_INPUT,
   TEXT_AREA_DEFAULT_PLACEHOLDER,
   useTextArea,
 } from '../composables/useTextArea';
+import { useForwardSlots } from '../shared/useForwardSlots';
 
 export default {
   name: 'text-area',
@@ -77,9 +77,7 @@ export default {
   },
   setup(props, { emit, slots }) {
     const textAreaState = useTextArea(props, emit);
-    const forwardedSlotNames = computed(() => (
-      Object.keys(slots).filter((name) => name !== 'details')
-    ));
+    const forwardedSlotNames = useForwardSlots(slots, ['details']);
 
     return {
       ...textAreaState,

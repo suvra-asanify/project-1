@@ -3,7 +3,7 @@ import {
   normalizePositiveInteger,
   normalizeText,
   toIconConfig,
-} from './sharedHelpers';
+} from '../shared/sharedHelpers';
 
 export const TEXT_FIELD_VARIANTS = Object.freeze(['default', 'underlined']);
 export const TEXT_FIELD_SIZE_KEYS = Object.freeze(['default', 'small', 'large']);

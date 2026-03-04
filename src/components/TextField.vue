@@ -24,32 +24,20 @@
     >
       <template v-if="$slots['prepend-inner'] || showPrependInnerIcon" #prepend-inner>
         <slot name="prepend-inner">
-          <v-icon v-if="prependIconConfig.type === 'mdi'" class="text-field-icon">{{ prependIconConfig.icon }}</v-icon>
-          <img
-            v-else
-            class="flagcdn-icon text-field-flag-icon"
-            :class="prependIconConfig.assetType === 'image' ? 'text-field-custom-icon' : null"
-            :src="prependIconConfig.src"
-            :alt="prependIconConfig.alt"
-            crossorigin="anonymous"
-            referrerpolicy="no-referrer"
-            loading="lazy"
+          <ds-icon
+            :config="prependIconConfig"
+            icon-class="text-field-icon"
+            :image-class="['flagcdn-icon text-field-flag-icon', prependIconConfig.assetType === 'image' && 'text-field-custom-icon']"
           />
         </slot>
       </template>
 
       <template v-if="$slots['append-inner'] || showAppendInnerIcon" #append-inner>
         <slot name="append-inner">
-          <v-icon v-if="appendIconConfig.type === 'mdi'" class="text-field-icon">{{ appendIconConfig.icon }}</v-icon>
-          <img
-            v-else
-            class="flagcdn-icon text-field-flag-icon"
-            :class="appendIconConfig.assetType === 'image' ? 'text-field-custom-icon' : null"
-            :src="appendIconConfig.src"
-            :alt="appendIconConfig.alt"
-            crossorigin="anonymous"
-            referrerpolicy="no-referrer"
-            loading="lazy"
+          <ds-icon
+            :config="appendIconConfig"
+            icon-class="text-field-icon"
+            :image-class="['flagcdn-icon text-field-flag-icon', appendIconConfig.assetType === 'image' && 'text-field-custom-icon']"
           />
         </slot>
       </template>
@@ -73,7 +61,6 @@
 </template>
 
 <script>
-import { computed } from 'vue';
 import {
   TEXT_FIELD_DEFAULT_INPUT,
   TEXT_FIELD_DEFAULT_PLACEHOLDER,
@@ -81,9 +68,12 @@ import {
   TEXT_FIELD_VARIANTS,
   useTextField,
 } from '../composables/useTextField';
+import DsIcon from '../shared/DsIcon.vue';
+import { useForwardSlots } from '../shared/useForwardSlots';
 
 export default {
   name: 'text-field',
+  components: { DsIcon },
   inheritAttrs: false,
   emits: ['update:modelValue'],
   props: {
@@ -164,9 +154,7 @@ export default {
   },
   setup(props, { emit, slots }) {
     const textFieldState = useTextField(props, emit);
-    const forwardedSlotNames = computed(() => (
-      Object.keys(slots).filter((name) => !['prepend-inner', 'append-inner', 'details'].includes(name))
-    ));
+    const forwardedSlotNames = useForwardSlots(slots, ['prepend-inner', 'append-inner', 'details']);
 
     return {
       ...textFieldState,

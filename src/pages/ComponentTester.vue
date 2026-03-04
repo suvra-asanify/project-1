@@ -113,13 +113,14 @@
           </label>
 
           <label class="text-label-sm tester-field">
-            <span class="tester-field-label">backend value</span>
-            <input
-              v-model="progressLinear.value"
-              class="tester-input"
-              type="text"
-              placeholder="e.g. 25, 80%, 1/5"
-            />
+            <span class="tester-field-label">range</span>
+            <select v-model="progressLinear.range" class="tester-input">
+              <option value="1/5">1/5</option>
+              <option value="2/5">2/5</option>
+              <option value="3/5">3/5</option>
+              <option value="4/5">4/5</option>
+              <option value="5/5">5/5</option>
+            </select>
           </label>
 
           <template v-if="progressLinear.size === 'large'">
@@ -129,11 +130,26 @@
             </label>
 
             <label class="text-label-sm tester-field">
+              <span class="tester-field-label">count</span>
+              <input v-model="progressLinear.count" class="tester-input" type="text" />
+            </label>
+
+            <label class="text-label-sm tester-toggle">
+              <input v-model="progressLinear.percentage" type="checkbox" />
+              <span>percentage</span>
+            </label>
+
+            <label class="text-label-sm tester-toggle">
+              <input v-model="progressLinear.currentLimit" type="checkbox" />
+              <span>current + limit</span>
+            </label>
+
+            <label v-if="progressLinear.currentLimit" class="text-label-sm tester-field">
               <span class="tester-field-label">current</span>
               <input v-model="progressLinear.current" class="tester-input" type="text" />
             </label>
 
-            <label class="text-label-sm tester-field">
+            <label v-if="progressLinear.currentLimit" class="text-label-sm tester-field">
               <span class="tester-field-label">limit</span>
               <input v-model="progressLinear.limit" class="tester-input" type="text" />
             </label>
@@ -368,16 +384,6 @@
         Add a <code>.vue</code> file to <code>src/components</code> and it will appear here.
       </p>
     </section>
-
-    <section class="tester-card pa-6 rounded-lg border-sm">
-      <h2 class="text-label-lg tester-card-title mb-2">How It Works</h2>
-      <p class="text-body-sm tester-subtitle">
-        This page auto-registers components from <code>src/components</code> (except itself).
-      </p>
-      <p class="text-body-sm tester-subtitle">
-        Use default props for new components, or add custom demo props in this file when needed.
-      </p>
-    </section>
   </div>
 </template>
 
@@ -418,10 +424,13 @@ const defaultPropsByComponent = {
   },
   'progress-linear': {
     size: 'default',
-    rounded: true,
-    value: '1/5',
-    current: '',
-    limit: '',
+    range: '1/5',
+    rounded: false,
+    count: 25,
+    percentage: true,
+    currentLimit: true,
+    current: '₹0.00',
+    limit: '₹50,000.00',
   },
   'progress-circular': {
     size: 'default',

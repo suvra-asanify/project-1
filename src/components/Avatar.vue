@@ -1,42 +1,21 @@
-﻿<template>
-  <!--
-    Root wrapper:
-    - Carries public state classes (avatar, size-*, variant-*)
-    - Accepts consumer utility classes
-    - Receives inline CSS vars only when an explicit custom size is provided
-  -->
+<template>
   <div class="avatar" :class="rootClasses" :style="stackStyles">
-    <!-- Inner visual shell keeps rendering classes isolated from root state classes -->
-    <div class="avatar-core" :class="avatarClasses">
-      <!-- Image-only mode (label/count hidden by composable rules) -->
-      <img
-        v-if="isImg"
-        class="avatar-image"
-        :src="currentImageSrc"
-        alt="avatar image"
-        @error="onImageError"
-      />
-
-      <!-- Text modes: default and multiple -->
+    <v-avatar class="avatar-core" :class="avatarClasses" :size="avatarSize" v-bind="$attrs">
+      <v-img v-if="isImg" class="avatar-image" :src="currentImageSrc" cover @error="onImageError" />
       <template v-else-if="showLabel">
-        <!--
-            Slot scope for consumer overrides:
-            - label      → normalised string from the `label` prop
-            - count      → floored positive integer from the `count` prop (0 if invalid)
-            - isMultiple → true when variant="multiple"
-          -->
         <slot :label="displayLabel" :count="normalizedCount" :is-multiple="isMultiple">
           <span class="avatar-label">{{ displayLabel }}</span>
           <span v-if="showCount" class="avatar-count">+{{ normalizedCount }}</span>
         </slot>
       </template>
-    </div>
+    </v-avatar>
 
-    <!-- Secondary overlapped avatar used for the 'multiple' variant -->
-    <div
+    <v-avatar
       v-if="showCount"
       class="avatar-stacked"
       :class="{ 'avatar-stacked-square': !rounded }"
+      :size="avatarSize"
+      color="grey-lighten-1"
     />
   </div>
 </template>
@@ -52,8 +31,8 @@ import {
 
 export default {
   name: 'Avatar',
+  inheritAttrs: false,
   props: {
-    // Visual/content mode.
     variant: {
       type: String,
       default: 'default',
@@ -61,7 +40,6 @@ export default {
         return AVATAR_VARIANTS.includes(value);
       },
     },
-    // Presets: default/small/large. Explicit: integer 20–100.
     size: {
       type: [String, Number],
       default: 'default',
@@ -72,28 +50,23 @@ export default {
         );
       },
     },
-    // Displayed initials or name. String or number accepted; always rendered uppercase.
     label: {
       type: [String, Number],
       default: AVATAR_DEFAULT_LABEL,
     },
-    // Extra avatar count shown as "+N" in the `multiple` variant. Always a positive integer.
     count: {
       type: Number,
       default: 1,
     },
-    // true → pill border-radius; false → small (square) border-radius.
     rounded: {
       type: Boolean,
       default: true,
     },
-    // Image URL for the `img` variant. Provided by the backend.
     imageSrc: {
       type: String,
       default: '',
     },
   },
-  // Keep all conditional rendering/sizing logic centralized in the composable.
   setup(props) {
     return useAvatar(props);
   },
@@ -109,13 +82,10 @@ export default {
 
   align-items: center;
   display: inline-flex;
-  /* Creates a stacking context so core/ghost z-index values don't bleed out. */
   isolation: isolate;
-  /* Aligns the inline-flex avatar with surrounding text. */
   vertical-align: middle;
 }
 
-/* Preset token sizes (used only when explicit custom size is not provided). */
 .avatar.size-sm {
   --avatar-size: var(--base-40);
   --avatar-label-size: var(--base-16);
@@ -130,22 +100,17 @@ export default {
   --avatar-overlap: var(--base-64);
 }
 
-/* Core visual surface for the avatar content. */
 .avatar-core {
   align-items: center;
   background: var(--primary);
   color: var(--white);
   display: inline-flex;
-  height: var(--avatar-size);
   justify-content: center;
   line-height: 1;
   overflow: hidden;
-  width: var(--avatar-size);
-  /* Sits above the ghost layer (z-index: 1). */
   z-index: 2;
 }
 
-/* Variant-specific treatment. */
 .avatar--variant-img {
   background: transparent;
 }
@@ -158,7 +123,6 @@ export default {
   border-radius: var(--rounded-sm);
 }
 
-/* Typography scales from --avatar-* vars (preset or explicit size). */
 .avatar-label {
   font-size: var(--avatar-label-size);
   font-weight: var(--font-weight-semibold);
@@ -173,22 +137,15 @@ export default {
 .avatar-image {
   display: block;
   height: 100%;
-  object-fit: cover;
-  width: 100%;
 }
 
 .avatar-stacked {
   background: var(--grey-lighten-1);
   border-radius: var(--rounded-pill);
-  height: var(--avatar-size);
-  /* Pulls the stacked element leftward so it tucks behind the core by --avatar-overlap. */
   margin-left: calc(-1 * var(--avatar-overlap));
-  width: var(--avatar-size);
-  /* Sits below the core layer (z-index: 2). */
   z-index: 1;
 }
 
-/* Overrides pill radius on the stacked element when rounded=false. */
 .avatar-stacked-square {
   border-radius: var(--rounded-sm);
 }

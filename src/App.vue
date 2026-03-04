@@ -1,5 +1,7 @@
 <template>
-  <ComponentTester />
+  <v-app>
+    <ComponentTester />
+  </v-app>
 </template>
 
 <script>

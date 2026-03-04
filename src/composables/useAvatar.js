@@ -9,6 +9,7 @@ export const AVATAR_DEFAULT_LABEL = 'AA';
 // Public enums shared with Avatar prop validators.
 export const AVATAR_VARIANTS = Object.freeze(['default', 'img', 'multiple']);
 export const AVATAR_SIZE_KEYS = Object.freeze(['default', 'small', 'large']);
+const AVATAR_SIZE_VALUES = Object.freeze({ default: 60, small: 40, large: 80 });
 
 // Preset prop value -> public class token.
 const SIZE_TOKEN_BY_PRESET = Object.freeze({ default: 'default', small: 'sm', large: 'lg' });
@@ -33,6 +34,9 @@ export function useAvatar(props) {
   // Preset sizes use CSS classes; explicit integer sizes inject inline CSS vars.
   const isPreset = computed(() => isPresetSize(props.size));
   const explicitSize = computed(() => (isValidExplicitSize(props.size) ? `${props.size}px` : null));
+  const avatarSize = computed(() => (
+    isPreset.value ? AVATAR_SIZE_VALUES[props.size] : props.size
+  ));
 
   // count is always a positive integer; clamp to 0 if invalid.
   const normalizedCount = computed(() => {
@@ -99,6 +103,7 @@ export function useAvatar(props) {
     showLabel,
     showCount,
     normalizedCount,
+    avatarSize,
     currentImageSrc,
     onImageError,
     rootClasses,

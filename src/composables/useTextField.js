@@ -34,6 +34,20 @@ function toMdiClass(rawIcon) {
   return `mdi mdi-${icon}`;
 }
 
+function toMdiIcon(rawIcon) {
+  const icon = normalizeText(rawIcon).trim();
+  if (!icon) {
+    return '';
+  }
+  if (icon.startsWith('mdi mdi-')) {
+    return icon.split(' ').pop() || '';
+  }
+  if (icon.startsWith('mdi-')) {
+    return icon;
+  }
+  return `mdi-${icon}`;
+}
+
 function isFlagCdnUrl(icon) {
   return /^(?:https?:\/\/|\/\/)?(?:www\.)?flagcdn\.com\/.+/i.test(icon);
 }
@@ -62,12 +76,18 @@ function toIconConfig(rawIcon) {
   const icon = normalizeText(rawIcon).trim();
 
   if (!icon) {
-    return { type: 'none', className: '', src: '', alt: '' };
+    return { type: 'none', className: '', icon: '', src: '', alt: '' };
   }
 
   // Accept direct FlagCDN URLs.
   if (isFlagCdnUrl(icon)) {
-    return { type: 'asset', className: '', src: ensureHttpsUrl(icon), alt: 'flag icon' };
+    return {
+      type: 'asset',
+      className: '',
+      icon: '',
+      src: ensureHttpsUrl(icon),
+      alt: 'flag icon',
+    };
   }
 
   // Accept shorthand format for flags:
@@ -78,6 +98,7 @@ function toIconConfig(rawIcon) {
     return {
       type: 'asset',
       className: '',
+      icon: '',
       src: `https://flagcdn.com/w20/${shorthand}.png`,
       alt: `${shorthand.toUpperCase()} flag`,
     };
@@ -85,11 +106,23 @@ function toIconConfig(rawIcon) {
 
   // Accept generic custom image URLs from backend.
   if (isUrlLike(icon)) {
-    return { type: 'asset', className: '', src: ensureHttpsUrl(icon), alt: 'icon' };
+    return {
+      type: 'asset',
+      className: '',
+      icon: '',
+      src: ensureHttpsUrl(icon),
+      alt: 'icon',
+    };
   }
 
   // Fallback to MDI syntax.
-  return { type: 'mdi', className: toMdiClass(icon), src: '', alt: '' };
+  return {
+    type: 'mdi',
+    className: toMdiClass(icon),
+    icon: toMdiIcon(icon),
+    src: '',
+    alt: '',
+  };
 }
 
 export function useTextField(props, emit) {
@@ -149,6 +182,16 @@ export function useTextField(props, emit) {
     props.disabled && 'disabled',
   ].filter(Boolean));
 
+  const vuetifyVariant = computed(() => (
+    props.variant === 'underlined' ? 'underlined' : 'outlined'
+  ));
+
+  const vuetifyDensity = computed(() => {
+    if (props.size === 'small') return 'compact';
+    if (props.size === 'large') return 'default';
+    return 'comfortable';
+  });
+
   const hintId = computed(() => (
     props.id && showHint.value ? `${props.id}-hint` : null
   ));
@@ -175,6 +218,8 @@ export function useTextField(props, emit) {
     showCounter,
     counterText,
     rootClasses,
+    vuetifyVariant,
+    vuetifyDensity,
     resolvedTotalChar,
     hintId,
     counterId,

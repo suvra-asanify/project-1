@@ -1,7 +1,17 @@
 <template>
-  <div class="progress-circular" :class="rootClasses" :style="rootStyles">
-    <span class="progress-circular__label">{{ displayLabel }}</span>
-  </div>
+  <v-progress-circular
+    class="progress-circular"
+    :class="rootClasses"
+    :size="vuetifySize"
+    :width="4"
+    :model-value="fillPercent"
+    color="green-darken-1"
+    v-bind="$attrs"
+  >
+    <slot :label="displayLabel" :value="fillPercent">
+      <span class="progress-circular__label">{{ displayLabel }}</span>
+    </slot>
+  </v-progress-circular>
 </template>
 
 <script>
@@ -12,7 +22,7 @@ import {
 
 export default {
   name: 'progress-circular',
-
+  inheritAttrs: false,
   props: {
     size: {
       type: String,
@@ -21,18 +31,19 @@ export default {
         return PROGRESS_CIRCULAR_SIZES.includes(value);
       },
     },
-    // Backend determinate value (0-100).
+    value: {
+      type: [Number, String],
+      default: '1/4',
+    },
     progress: {
       type: [Number, String],
-      default: 25,
+      default: null,
     },
-    // Backend label for values like "1/4", "80%", etc.
     label: {
       type: String,
-      default: 'label',
+      default: '',
     },
   },
-
   setup(props) {
     return useProgressCircular(props);
   },
@@ -41,48 +52,26 @@ export default {
 
 <style scoped>
 .progress-circular {
-  --progress-circular-fill: 0;
-  --progress-circular-size: var(--base-54);
-  --progress-circular-stroke: var(--base-4);
-  --progress-circular-label-size: var(--base-22);
-
-  align-items: center;
-  background: conic-gradient(
-    var(--green-darken-1) calc(var(--progress-circular-fill) * 1%),
-    var(--color-border-primary, rgba(0, 0, 0, 0.12)) 0
-  );
-  border-radius: var(--rounded-pill);
-  display: inline-flex;
-  height: var(--progress-circular-size);
-  justify-content: center;
-  position: relative;
-  width: var(--progress-circular-size);
+  color: var(--green-darken-1);
 }
 
-.progress-circular::before {
-  background: var(--color-surface-primary, #fff);
-  border-radius: var(--rounded-pill);
-  content: '';
-  inset: var(--progress-circular-stroke);
-  position: absolute;
-}
-
-.progress-circular.size-small {
-  --progress-circular-size: var(--base-36);
-  --progress-circular-label-size: var(--base-16);
-}
-
-.progress-circular.size-large {
-  --progress-circular-size: var(--base-80);
-  --progress-circular-label-size: var(--base-28);
+.progress-circular :deep(.v-progress-circular__underlay) {
+  color: var(--color-border-primary, rgba(0, 0, 0, 0.12));
+  opacity: 1;
 }
 
 .progress-circular__label {
   color: var(--black-87);
-  font-size: var(--progress-circular-label-size);
+  font-size: var(--base-22);
   font-weight: var(--font-weight-semibold);
   line-height: 1;
-  position: relative;
-  z-index: 1;
+}
+
+.progress-circular.size-small .progress-circular__label {
+  font-size: var(--base-16);
+}
+
+.progress-circular.size-large .progress-circular__label {
+  font-size: var(--base-28);
 }
 </style>

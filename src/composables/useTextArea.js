@@ -93,6 +93,7 @@ export function useTextArea(props, emit) {
     normalizedPlaceholder,
     normalizedHint,
     showHint,
+    resolvedTotalChar,
     counterText,
     rootClasses,
   };

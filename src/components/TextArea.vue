@@ -1,19 +1,26 @@
 <template>
-  <div class="text-area" :class="rootClasses">
-    <div class="text-area-control">
-      <textarea
-        v-model="inputValue"
-        class="text-area-input"
-        :placeholder="normalizedPlaceholder"
-        :disabled="disabled"
-      />
-    </div>
-
-    <div v-if="showHint || seeCharCount" class="text-area-meta">
-      <span v-if="showHint" class="text-area-hint">{{ normalizedHint }}</span>
-      <span v-if="seeCharCount" class="text-area-counter">{{ counterText }}</span>
-    </div>
-  </div>
+  <v-textarea
+    v-model="inputValue"
+    class="text-area"
+    :class="rootClasses"
+    variant="outlined"
+    :placeholder="normalizedPlaceholder"
+    :disabled="disabled"
+    :maxlength="resolvedTotalChar || undefined"
+    :hide-details="$slots.details || showHint || seeCharCount ? false : 'auto'"
+    rows="4"
+    flat
+    v-bind="$attrs"
+  >
+    <template v-if="$slots.details || showHint || seeCharCount" #details>
+      <slot name="details" :hint="normalizedHint" :counter="counterText">
+        <div class="text-area-meta">
+          <span v-if="showHint" class="text-area-hint">{{ normalizedHint }}</span>
+          <span v-if="seeCharCount" class="text-area-counter">{{ counterText }}</span>
+        </div>
+      </slot>
+    </template>
+  </v-textarea>
 </template>
 
 <script>
@@ -27,6 +34,7 @@ import {
 
 export default {
   name: 'TextArea',
+  inheritAttrs: false,
   emits: ['update:input'],
   props: {
     state: {
@@ -79,55 +87,67 @@ export default {
 .text-area {
   display: inline-flex;
   flex-direction: column;
-  gap: var(--spacing-2);
   width: 100%;
 }
 
-.text-area-control {
+.text-area :deep(.v-input__control) {
+  width: 100%;
+}
+
+.text-area :deep(.v-field) {
+  --v-field-border-opacity: 1;
+
   background: var(--white, #ffffff);
-  border: var(--border-sm) solid rgba(0, 0, 0, 0.26);
   border-radius: var(--rounded-md);
-  padding: var(--spacing-2) var(--spacing-3);
+  color: rgba(0, 0, 0, 0.26);
   transition: border-color 120ms ease, box-shadow 120ms ease;
-  width: 100%;
 }
 
-.text-area.state-hover:not(.disabled) .text-area-control {
-  border-color: rgba(0, 0, 0, 0.5);
+.text-area :deep(.v-field__overlay) {
+  display: none;
 }
 
-.text-area.state-active:not(.disabled) .text-area-control {
-  border-color: var(--primary, #005a9c);
-  box-shadow: 0 0 0 var(--base-1) rgba(0, 90, 156, 0.24);
-}
-
-.text-area.disabled .text-area-control {
-  background: rgba(0, 0, 0, 0.05);
-  border-color: rgba(0, 0, 0, 0.18);
-  color: rgba(0, 0, 0, 0.45);
-}
-
-.text-area-input {
-  background: transparent;
-  border: 0;
+.text-area :deep(.v-field__outline) {
   color: inherit;
-  display: block;
+}
+
+.text-area.state-hover:not(.disabled) :deep(.v-field) {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.text-area.state-active:not(.disabled) :deep(.v-field) {
+  box-shadow: 0 0 0 var(--base-1) rgba(0, 90, 156, 0.24);
+  color: var(--primary, #005a9c);
+}
+
+.text-area.disabled :deep(.v-field) {
+  background: rgba(0, 0, 0, 0.05);
+  color: rgba(0, 0, 0, 0.18);
+}
+
+.text-area :deep(textarea) {
+  color: rgba(0, 0, 0, 0.87);
   font-size: var(--body-base-size);
   font-weight: var(--font-weight-medium);
   line-height: var(--body-base-lh);
   min-height: var(--base-120);
-  outline: none;
   resize: vertical;
-  width: 100%;
 }
 
-.text-area-input::placeholder {
+.text-area :deep(textarea::placeholder) {
   color: rgba(0, 0, 0, 0.48);
+  opacity: 1;
 }
 
-.text-area-input:disabled {
+.text-area.disabled :deep(textarea) {
   cursor: not-allowed;
   resize: none;
+}
+
+.text-area :deep(.v-input__details) {
+  align-items: center;
+  min-height: var(--base-16);
+  padding-top: 0;
 }
 
 .text-area-meta {
@@ -135,6 +155,7 @@ export default {
   display: inline-flex;
   gap: var(--spacing-2);
   justify-content: space-between;
+  width: 100%;
 }
 
 .text-area-hint,

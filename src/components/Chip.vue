@@ -24,6 +24,7 @@
         <img
           v-else
           class="chip-image-icon"
+          :class="prependIconConfig.assetType === 'flag' ? 'chip-flag-icon flagcdn-icon' : null"
           :src="prependIconConfig.src"
           :alt="prependIconConfig.alt"
           crossorigin="anonymous"
@@ -59,6 +60,7 @@
         <img
           v-else
           class="chip-image-icon"
+          :class="appendIconConfig.assetType === 'flag' ? 'chip-flag-icon flagcdn-icon' : null"
           :src="appendIconConfig.src"
           :alt="appendIconConfig.alt"
           crossorigin="anonymous"
@@ -157,6 +159,7 @@ export default {
 .chip {
   --chip-height: var(--base-24);
   --chip-icon-size: var(--base-16);
+  --chip-icon-label-gap: var(--spacing-1);
   --chip-padding-inline: 6px;
   --chip-close-size: var(--base-28);
   --chip-close-gap: var(--spacing-1);
@@ -190,17 +193,18 @@ export default {
 .chip :deep(.v-chip__content) {
   align-items: center;
   display: inline-flex;
+  font-size: var(--chip-font-size);
   gap: var(--spacing-1);
-  line-height: inherit;
+  line-height: var(--chip-font-lh);
   padding: 0;
 }
 
 .chip :deep(.v-chip__content > span) {
   color: inherit;
   display: inline-flex;
-  font-size: inherit;
+  font-size: var(--chip-font-size);
   font-weight: inherit;
-  line-height: inherit;
+  line-height: var(--chip-font-lh);
   white-space: nowrap;
 }
 
@@ -209,6 +213,14 @@ export default {
   align-items: center;
   display: inline-flex;
   margin: 0;
+}
+
+.chip:not(.icon-only) :deep(.v-chip__prepend) {
+  margin-inline-end: var(--chip-icon-label-gap);
+}
+
+.chip:not(.icon-only) :deep(.v-chip__append) {
+  margin-inline-start: var(--chip-icon-label-gap);
 }
 
 .chip-icon,
@@ -226,6 +238,18 @@ export default {
   height: var(--chip-icon-size);
   object-fit: cover;
   width: var(--chip-icon-size);
+}
+
+.chip-flag-icon {
+  width: auto;
+}
+
+.chip-flag-icon.flagcdn-icon {
+  display: block;
+  height: var(--chip-icon-size);
+  min-width: calc(var(--chip-icon-size) * 1.3333333);
+  object-fit: contain;
+  width: auto;
 }
 
 .chip.variant-flat {

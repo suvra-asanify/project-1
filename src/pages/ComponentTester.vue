@@ -256,6 +256,72 @@
         </div>
       </div>
 
+      <div v-else-if="entry.name === 'list-item' && listItem" class="tester-layout">
+        <div class="tester-controls">
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">size</span>
+            <select v-model="listItem.size" class="tester-input">
+              <option value="default">default</option>
+              <option value="small">small</option>
+              <option value="large">large</option>
+            </select>
+          </label>
+
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">label</span>
+            <input v-model="listItem.label" class="tester-input" type="text" />
+          </label>
+
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">subtext</span>
+            <input v-model="listItem.subtext" class="tester-input" type="text" />
+          </label>
+
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">append-text</span>
+            <input v-model="listItem.appendText" class="tester-input" type="text" />
+          </label>
+
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">prepend-icon (mdi-* | flag:in | image url)</span>
+            <input v-model="listItem.prependIcon" class="tester-input" type="text" placeholder="leave empty to hide" />
+          </label>
+
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">append-icon (mdi-* | flag:us | image url)</span>
+            <input v-model="listItem.appendIcon" class="tester-input" type="text" placeholder="leave empty to hide" />
+          </label>
+
+          <label class="text-label-sm tester-toggle">
+            <input v-model="listItem.selected" type="checkbox" />
+            <span>selected</span>
+          </label>
+
+          <label class="text-label-sm tester-toggle">
+            <input v-model="listItem.showCheckbox" type="checkbox" />
+            <span>show-checkbox</span>
+          </label>
+
+          <label class="text-label-sm tester-toggle">
+            <input v-model="listItem.prependAvatar" type="checkbox" />
+            <span>prepend-avatar</span>
+          </label>
+
+          <label class="text-label-sm tester-toggle">
+            <input v-model="listItem.disabled" type="checkbox" />
+            <span>disabled</span>
+          </label>
+        </div>
+
+        <div class="tester-preview tester-preview-list-item rounded-md pa-6">
+          <component
+            :is="entry.name"
+            v-bind="propsFor(entry.name)"
+            @update:selected="onListItemSelectedUpdate"
+          />
+        </div>
+      </div>
+
       <div v-else-if="entry.name === 'radio-button' && radioButton" class="tester-layout">
         <div class="tester-controls">
           <label class="text-label-sm tester-toggle">
@@ -470,6 +536,18 @@ const defaultPropsByComponent = {
     appendIcon: '',
     disabled: false,
   },
+  'list-item': {
+    size: 'default',
+    selected: false,
+    label: 'Title',
+    showCheckbox: false,
+    prependAvatar: false,
+    prependIcon: '',
+    appendIcon: '',
+    subtext: '',
+    appendText: '',
+    disabled: false,
+  },
   'radio-button': {
     value: false,
     label: '',
@@ -526,6 +604,9 @@ export default {
     },
     chip() {
       return this.componentProps.chip || null;
+    },
+    listItem() {
+      return this.componentProps['list-item'] || null;
     },
     radioButton() {
       return this.componentProps['radio-button'] || null;
@@ -614,6 +695,13 @@ export default {
       if (String(this.avatar.imageSrc || '').trim().length > 0) {
         this.avatar.variant = 'img';
       }
+    },
+    onListItemSelectedUpdate(nextValue) {
+      if (!this.listItem) {
+        return;
+      }
+
+      this.listItem.selected = nextValue === true;
     },
   },
 };
@@ -712,6 +800,10 @@ export default {
   display: flex;
   justify-content: center;
   min-height: 200px;
+}
+
+.tester-preview-list-item {
+  justify-content: flex-start;
 }
 
 @media (max-width: 900px) {

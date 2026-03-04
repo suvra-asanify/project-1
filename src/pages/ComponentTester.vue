@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="tester-root pa-8">
     <header class="tester-header mb-6">
       <h1 class="text-display-section tester-title">Component Tester</h1>
@@ -40,11 +40,24 @@
 
           <label class="text-label-sm tester-field">
             <span class="tester-field-label">size</span>
-            <select v-model="avatar.size" class="tester-input">
+            <select v-model="avatarSizeMode" class="tester-input">
               <option value="default">default</option>
               <option value="small">small</option>
               <option value="large">large</option>
+              <option value="custom">custom</option>
             </select>
+          </label>
+
+          <label v-if="avatarSizeMode === 'custom'" class="text-label-sm tester-field">
+            <span class="tester-field-label">custom size (20-100)</span>
+            <input
+              v-model.number="avatarCustomSizeValue"
+              class="tester-input"
+              type="number"
+              min="20"
+              max="100"
+              step="1"
+            />
           </label>
 
           <label v-if="avatar.variant !== 'img'" class="text-label-sm tester-field">
@@ -196,6 +209,154 @@
         </div>
       </div>
 
+      <div v-else-if="entry.name === 'TextField' && textField" class="tester-layout">
+        <div class="tester-controls">
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">variant</span>
+            <select v-model="textField.variant" class="tester-input">
+              <option value="default">default</option>
+              <option value="underlined">underlined</option>
+            </select>
+          </label>
+
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">size</span>
+            <select v-model="textField.size" class="tester-input">
+              <option value="default">default</option>
+              <option value="small">small</option>
+              <option value="large">large</option>
+            </select>
+          </label>
+
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">placeholder (backend)</span>
+            <input v-model="textField.placeholder" class="tester-input" type="text" />
+          </label>
+
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">input / modelValue (backend)</span>
+            <input v-model="textField.modelValue" class="tester-input" type="text" />
+          </label>
+
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">prepend icon (mdi-* | flag:in | flagcdn.com/in.svg | custom image url)</span>
+            <input v-model="textField.prependInnerIcon" class="tester-input" type="text" placeholder="flag:in" />
+          </label>
+
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">append icon (mdi-* | flag:us | https://flagcdn.com/us.svg | custom image url)</span>
+            <input v-model="textField.appendInnerIcon" class="tester-input" type="text" placeholder="mdi-plus" />
+          </label>
+
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">hint (backend)</span>
+            <input v-model="textField.hint" class="tester-input" type="text" />
+          </label>
+
+          <label class="text-label-sm tester-toggle">
+            <input v-model="textField.seeCharCount" type="checkbox" />
+            <span>see char count</span>
+          </label>
+
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">total char (backend)</span>
+            <input
+              v-model.number="textField.totalChar"
+              class="tester-input"
+              type="number"
+              min="1"
+              step="1"
+              :disabled="!textField.seeCharCount"
+            />
+          </label>
+
+          <label class="text-label-sm tester-toggle">
+            <input v-model="textField.disabled" type="checkbox" />
+            <span>disabled</span>
+          </label>
+        </div>
+
+        <div class="tester-preview rounded-md pa-6">
+          <component :is="entry.name" v-bind="propsFor(entry.name)" />
+        </div>
+      </div>
+
+      <div v-else-if="entry.name === 'TextArea' && textArea" class="tester-layout">
+        <div class="tester-controls">
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">state</span>
+            <select v-model="textArea.state" class="tester-input">
+              <option value="default">default</option>
+              <option value="hover">hover</option>
+              <option value="active">active</option>
+            </select>
+          </label>
+
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">placeholder</span>
+            <input v-model="textArea.placeholder" class="tester-input" type="text" />
+          </label>
+
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">input</span>
+            <textarea v-model="textArea.input" class="tester-input tester-code" />
+          </label>
+
+          <label class="text-label-sm tester-toggle">
+            <input v-model="textArea.hasHint" type="checkbox" />
+            <span>has hint</span>
+          </label>
+
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">hint</span>
+            <input
+              v-model="textArea.hint"
+              class="tester-input"
+              type="text"
+              :disabled="!textArea.hasHint"
+            />
+          </label>
+
+          <label class="text-label-sm tester-toggle">
+            <input v-model="textArea.seeCharCount" type="checkbox" />
+            <span>see char count</span>
+          </label>
+
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">char count</span>
+            <input
+              v-model.number="textArea.charCount"
+              class="tester-input"
+              type="number"
+              min="0"
+              step="1"
+              :disabled="!textArea.seeCharCount"
+            />
+          </label>
+
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">total char</span>
+            <input
+              v-model.number="textArea.totalChar"
+              class="tester-input"
+              type="number"
+              min="1"
+              step="1"
+              :disabled="!textArea.seeCharCount"
+            />
+          </label>
+
+          <label class="text-label-sm tester-toggle">
+            <input v-model="textArea.disabled" type="checkbox" />
+            <span>disabled</span>
+          </label>
+        </div>
+
+        <div class="tester-preview rounded-md pa-6">
+          <component :is="entry.name" v-bind="propsFor(entry.name)" />
+        </div>
+      </div>
+
       <div v-else class="tester-preview rounded-md pa-6">
         <component :is="entry.name" v-bind="propsFor(entry.name)" />
       </div>
@@ -221,6 +382,11 @@
 </template>
 
 <script>
+import {
+  AVATAR_SIZE_KEYS,
+  isValidExplicitSize,
+} from '../composables/useAvatar';
+
 const componentFiles = require.context('../components', false, /\.vue$/);
 const autoComponents = {};
 const autoNames = [];
@@ -268,6 +434,31 @@ const defaultPropsByComponent = {
     label: 'label',
     disabled: false,
   },
+  TextField: {
+    variant: 'default',
+    size: 'default',
+    placeholder: 'Placeholder Enter Smthng',
+    modelValue: 'Input Text',
+    prependInnerIcon: '',
+    appendInnerIcon: '',
+    prefix: '',
+    suffix: '',
+    hint: '',
+    seeCharCount: false,
+    totalChar: null,
+    disabled: false,
+  },
+  TextArea: {
+    state: 'default',
+    placeholder: 'Placeholder Enter Smthng',
+    input: 'Lorem ipsum dolor sit amet consectetur.',
+    hasHint: false,
+    hint: 'suffix',
+    seeCharCount: false,
+    charCount: 0,
+    totalChar: 600,
+    disabled: false,
+  },
 };
 
 export default {
@@ -299,6 +490,55 @@ export default {
     },
     radioButton() {
       return this.componentProps['radio-button'] || null;
+    },
+    textField() {
+      return this.componentProps.TextField || null;
+    },
+    textArea() {
+      return this.componentProps.TextArea || null;
+    },
+    avatarSizeMode: {
+      get() {
+        if (!this.avatar) {
+          return 'default';
+        }
+
+        return (typeof this.avatar.size === 'string' && AVATAR_SIZE_KEYS.includes(this.avatar.size))
+          ? this.avatar.size
+          : 'custom';
+      },
+      set(value) {
+        if (!this.avatar) {
+          return;
+        }
+
+        if (value === 'custom') {
+          if (!isValidExplicitSize(this.avatar.size)) {
+            this.avatar.size = 36;
+          }
+          return;
+        }
+
+        this.avatar.size = value;
+      },
+    },
+    avatarCustomSizeValue: {
+      get() {
+        if (!this.avatar || !isValidExplicitSize(this.avatar.size)) {
+          return '';
+        }
+        return this.avatar.size;
+      },
+      set(value) {
+        if (!this.avatar) {
+          return;
+        }
+
+        const numericValue = Number(value);
+        if (isValidExplicitSize(numericValue)) {
+          this.avatar.size = numericValue;
+        }
+      },
     },
   },
   methods: {
@@ -421,6 +661,12 @@ export default {
   padding: var(--spacing-2) var(--spacing-3);
 }
 
+.tester-code {
+  min-height: 112px;
+  padding: var(--spacing-2) var(--spacing-3);
+  resize: vertical;
+}
+
 .tester-preview {
   align-items: center;
   background: var(--color-surface-background, #f2f3f8);
@@ -435,4 +681,3 @@ export default {
   }
 }
 </style>
-

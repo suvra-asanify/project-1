@@ -1,0 +1,15 @@
+/*
+  FlagCDN support styles.
+  Usage with text field icon props:
+  - "in"
+  - "flag:us"
+  - "https://flagcdn.com/us.svg"
+*/
+
+.flagcdn-icon {
+  border-radius: var(--rounded-sm);
+  display: inline-block;
+  height: var(--base-16);
+  object-fit: cover;
+  width: var(--base-24);
+}

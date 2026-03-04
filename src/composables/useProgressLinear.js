@@ -26,6 +26,8 @@ function parseProgressValue(rawValue) {
         fillPercent: clamp((numerator / denominator) * 100, 0, 100),
         labelText: `${formatNumber(numerator)}/${formatNumber(denominator)}`,
         rangeText: `${formatNumber(numerator)}/${formatNumber(denominator)}`,
+        currentText: formatNumber(numerator),
+        limitText: formatNumber(denominator),
       };
     }
     return null;
@@ -42,6 +44,8 @@ function parseProgressValue(rawValue) {
       fillPercent: clampedPercent,
       labelText: `${formatNumber(clampedPercent)}%`,
       rangeText: `${formatNumber(clampedPercent)}/100`,
+      currentText: formatNumber(clampedPercent),
+      limitText: '100',
     };
   }
 
@@ -54,13 +58,26 @@ function parseProgressValue(rawValue) {
     fillPercent: clampedPercent,
     labelText: `${formatNumber(clampedPercent)}%`,
     rangeText: `${formatNumber(clampedPercent)}/100`,
+    currentText: formatNumber(clampedPercent),
+    limitText: '100',
   };
+}
+
+function normalizeOptionalText(value) {
+  if (value == null) {
+    return null;
+  }
+  return String(value).trim();
 }
 
 export function useProgressLinear(props) {
   const isLarge = computed(() => props.size === 'large');
 
-  const parsedValue = computed(() => parseProgressValue(props.value));
+  const normalizedCount = computed(() => {
+    const source = props.count ?? props.value;
+    return String(source == null ? '' : source).trim();
+  });
+  const parsedValue = computed(() => parseProgressValue(normalizedCount.value));
 
   const fillPercent = computed(() => {
     if (!parsedValue.value) {
@@ -78,10 +95,20 @@ export function useProgressLinear(props) {
   ));
 
   const trackHeight = computed(() => (isLarge.value ? 20 : 10));
-  const applyRounded = computed(() => props.rounded === true);
+  const applyRounded = computed(() => isLarge.value && props.rounded === true);
 
-  const currentValue = computed(() => String(props.current == null ? '' : props.current).trim());
-  const limitValue = computed(() => String(props.limit == null ? '' : props.limit).trim());
+  const explicitCurrent = computed(() => normalizeOptionalText(props.current));
+  const explicitLimit = computed(() => normalizeOptionalText(props.limit));
+  const currentValue = computed(() => (
+    explicitCurrent.value != null
+      ? explicitCurrent.value
+      : (parsedValue.value ? parsedValue.value.currentText : '')
+  ));
+  const limitValue = computed(() => (
+    explicitLimit.value != null
+      ? explicitLimit.value
+      : (parsedValue.value ? parsedValue.value.limitText : '')
+  ));
 
   const showLabel = computed(() => isLarge.value && labelText.value.length > 0);
   const showLimit = computed(() => (
@@ -95,6 +122,7 @@ export function useProgressLinear(props) {
   ].filter(Boolean));
 
   return {
+    normalizedCount,
     normalizedRange,
     fillPercent,
     trackHeight,

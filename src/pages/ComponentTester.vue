@@ -113,14 +113,13 @@
           </label>
 
           <label class="text-label-sm tester-field">
-            <span class="tester-field-label">range</span>
-            <select v-model="progressLinear.range" class="tester-input">
-              <option value="1/5">1/5</option>
-              <option value="2/5">2/5</option>
-              <option value="3/5">3/5</option>
-              <option value="4/5">4/5</option>
-              <option value="5/5">5/5</option>
-            </select>
+            <span class="tester-field-label">backend count (% | 1/5)</span>
+            <input
+              v-model="progressLinear.count"
+              class="tester-input"
+              type="text"
+              placeholder="e.g. 75% or 1/5"
+            />
           </label>
 
           <template v-if="progressLinear.size === 'large'">
@@ -130,27 +129,12 @@
             </label>
 
             <label class="text-label-sm tester-field">
-              <span class="tester-field-label">count</span>
-              <input v-model="progressLinear.count" class="tester-input" type="text" />
-            </label>
-
-            <label class="text-label-sm tester-toggle">
-              <input v-model="progressLinear.percentage" type="checkbox" />
-              <span>percentage</span>
-            </label>
-
-            <label class="text-label-sm tester-toggle">
-              <input v-model="progressLinear.currentLimit" type="checkbox" />
-              <span>current + limit</span>
-            </label>
-
-            <label v-if="progressLinear.currentLimit" class="text-label-sm tester-field">
-              <span class="tester-field-label">current</span>
+              <span class="tester-field-label">current (backend)</span>
               <input v-model="progressLinear.current" class="tester-input" type="text" />
             </label>
 
-            <label v-if="progressLinear.currentLimit" class="text-label-sm tester-field">
-              <span class="tester-field-label">limit</span>
+            <label class="text-label-sm tester-field">
+              <span class="tester-field-label">limit (backend)</span>
               <input v-model="progressLinear.limit" class="tester-input" type="text" />
             </label>
           </template>
@@ -181,6 +165,90 @@
               placeholder="e.g. 25, 80%, 1/4"
             />
           </label>
+        </div>
+
+        <div class="tester-preview rounded-md pa-6">
+          <component :is="entry.name" v-bind="propsFor(entry.name)" />
+        </div>
+      </div>
+
+      <div v-else-if="entry.name === 'chip' && chip" class="tester-layout">
+        <div class="tester-controls">
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">variant</span>
+            <select v-model="chip.variant" class="tester-input">
+              <option value="flat">flat</option>
+              <option value="tonal">tonal</option>
+            </select>
+          </label>
+
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">color</span>
+            <select v-model="chip.color" class="tester-input">
+              <option value="default">default</option>
+              <option value="success">success</option>
+              <option value="warning">warning</option>
+              <option value="error">error</option>
+              <option value="neutral">neutral</option>
+              <option value="pink">pink</option>
+              <option value="purple">purple</option>
+              <option value="deeppurple">deeppurple</option>
+              <option value="indigo">indigo</option>
+              <option value="lightblue">lightblue</option>
+              <option value="cyan">cyan</option>
+              <option value="teal">teal</option>
+              <option value="lightgreen">lightgreen</option>
+              <option value="lime">lime</option>
+              <option value="yellow">yellow</option>
+              <option value="amber">amber</option>
+              <option value="deeporange">deeporange</option>
+            </select>
+          </label>
+
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">size</span>
+            <select v-model="chip.size" class="tester-input">
+              <option value="default">default</option>
+              <option value="small">small</option>
+              <option value="large">large</option>
+            </select>
+          </label>
+
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">label (backend)</span>
+            <input
+              v-model="chip.label"
+              class="tester-input"
+              type="text"
+              placeholder="leave empty for icon-only"
+            />
+          </label>
+
+          <label class="text-label-sm tester-toggle">
+            <input v-model="chip.closable" type="checkbox" />
+            <span>closable</span>
+          </label>
+
+          <label class="text-label-sm tester-toggle">
+            <input v-model="chip.rounded" type="checkbox" />
+            <span>rounded</span>
+          </label>
+
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">prepend-icon (mdi-* | flag:in | image url)</span>
+            <input v-model="chip.prependIcon" class="tester-input" type="text" placeholder="leave empty to hide" />
+          </label>
+
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">append-icon (mdi-* | flag:us | image url)</span>
+            <input v-model="chip.appendIcon" class="tester-input" type="text" placeholder="ignored when closable" />
+          </label>
+
+          <label class="text-label-sm tester-toggle">
+            <input v-model="chip.disabled" type="checkbox" />
+            <span>disabled</span>
+          </label>
+
         </div>
 
         <div class="tester-preview rounded-md pa-6">
@@ -382,17 +450,25 @@ const defaultPropsByComponent = {
   },
   'progress-linear': {
     size: 'default',
-    range: '1/5',
+    count: '1/5',
     rounded: false,
-    count: 25,
-    percentage: true,
-    currentLimit: true,
-    current: '₹0.00',
-    limit: '₹50,000.00',
+    current: null,
+    limit: null,
   },
   'progress-circular': {
     size: 'default',
     value: '1/4',
+  },
+  chip: {
+    variant: 'flat',
+    color: 'default',
+    closable: false,
+    rounded: false,
+    size: 'default',
+    label: 'label',
+    prependIcon: '',
+    appendIcon: '',
+    disabled: false,
   },
   'radio-button': {
     value: false,
@@ -447,6 +523,9 @@ export default {
     },
     progressCircular() {
       return this.componentProps['progress-circular'] || null;
+    },
+    chip() {
+      return this.componentProps.chip || null;
     },
     radioButton() {
       return this.componentProps['radio-button'] || null;

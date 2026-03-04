@@ -1,19 +1,11 @@
 <template>
-  <div
-    class="radio-button"
-    :class="rootClasses"
-    role="radio"
-    :aria-checked="isChecked ? 'true' : 'false'"
-    :aria-disabled="disabled ? 'true' : 'false'"
-  >
+  <div class="radio-button" :class="rootClasses">
     <div class="radio-state-layer">
-      <v-selection-control
+      <v-radio
         class="radio-control"
         :class="controlClasses"
-        type="radio"
         :model-value="isChecked"
-        :true-value="true"
-        :false-value="false"
+        :value="true"
         :label="undefined"
         :disabled="disabled"
         :ripple="false"
@@ -120,36 +112,17 @@ export default {
 }
 
 .radio-control :deep(.v-selection-control__input) {
-  background: var(--white);
-  border: var(--border-md) solid var(--radio-color-unchecked);
-  border-radius: var(--rounded-pill);
   height: var(--base-24);
-  position: relative;
   width: var(--base-24);
 }
 
-.radio-control :deep(.v-selection-control__input::before) {
-  display: none;
+.radio-control :deep(.v-selection-control__input .v-icon) {
+  color: var(--radio-color-unchecked);
+  font-size: var(--base-24);
 }
 
-.radio-control :deep(.v-selection-control__input > .v-icon) {
-  display: none;
-}
-
-.radio-control.radio-control--checked :deep(.v-selection-control__input) {
-  border-color: var(--radio-color-primary);
-}
-
-.radio-control.radio-control--checked :deep(.v-selection-control__input::after) {
-  background: var(--radio-color-primary);
-  border-radius: var(--rounded-pill);
-  content: '';
-  height: var(--base-12);
-  left: 50%;
-  position: absolute;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: var(--base-12);
+.radio-control.radio-control--checked :deep(.v-selection-control__input .v-icon) {
+  color: var(--radio-color-primary);
 }
 
 .radio-control :deep(.v-label) {
@@ -160,12 +133,8 @@ export default {
   opacity: 1;
 }
 
-.radio-button.disabled .radio-control :deep(.v-selection-control__input) {
-  border-color: var(--radio-color-disabled);
-}
-
-.radio-control.radio-control--checked.radio-control--disabled :deep(.v-selection-control__input::after) {
-  background: var(--radio-color-disabled);
+.radio-control.radio-control--disabled :deep(.v-selection-control__input .v-icon) {
+  color: var(--radio-color-disabled);
 }
 
 .radio-label {

@@ -255,8 +255,7 @@ export default {
   --list-item-title-lh: var(--body-base-lh);
   --list-item-subtext-size: var(--body-sm-size);
   --list-item-subtext-lh: var(--body-sm-lh);
-  --list-item-prepend-icon-size: var(--base-24);
-  --list-item-append-icon-size: var(--base-16);
+  --list-item-icon-size: var(--base-20);
   --list-item-overlay-color: var(--black-87);
   --list-item-selected-overlay-opacity: 0;
   --list-item-state-overlay-opacity: 0;
@@ -320,8 +319,7 @@ export default {
   --list-item-title-lh: var(--body-sm-lh);
   --list-item-subtext-size: var(--body-xs-size);
   --list-item-subtext-lh: var(--body-xs-lh);
-  --list-item-prepend-icon-size: var(--base-20);
-  --list-item-append-icon-size: var(--base-14);
+  --list-item-icon-size: var(--base-16);
 }
 
 .list-item.size-large {
@@ -330,8 +328,7 @@ export default {
   --list-item-title-lh: var(--body-lg-lh);
   --list-item-subtext-size: var(--body-base-size);
   --list-item-subtext-lh: var(--body-base-lh);
-  --list-item-prepend-icon-size: var(--base-24);
-  --list-item-append-icon-size: var(--base-18);
+  --list-item-icon-size: var(--base-24);
 }
 
 .list-item :deep(.v-list-item__overlay) {
@@ -456,15 +453,15 @@ export default {
 }
 
 .list-item-prepend-icon {
-  font-size: var(--list-item-prepend-icon-size);
-  height: var(--list-item-prepend-icon-size);
-  width: var(--list-item-prepend-icon-size);
+  font-size: var(--list-item-icon-size);
+  height: var(--list-item-icon-size);
+  width: var(--list-item-icon-size);
 }
 
 .list-item-append-icon {
-  font-size: var(--list-item-append-icon-size);
-  height: var(--list-item-append-icon-size);
-  width: var(--list-item-append-icon-size);
+  font-size: var(--list-item-icon-size);
+  height: var(--list-item-icon-size);
+  width: var(--list-item-icon-size);
 }
 
 .list-item-image-icon {
@@ -474,22 +471,22 @@ export default {
 }
 
 .list-item-prepend-image {
-  height: var(--list-item-prepend-icon-size);
-  width: var(--list-item-prepend-icon-size);
+  height: var(--list-item-icon-size);
+  width: var(--list-item-icon-size);
 }
 
 .list-item-append-image {
-  height: var(--list-item-append-icon-size);
-  width: var(--list-item-append-icon-size);
+  height: var(--list-item-icon-size);
+  width: var(--list-item-icon-size);
 }
 
 .list-item-prepend-image.flagcdn-icon {
-  min-width: var(--list-item-prepend-icon-size);
+  min-width: var(--list-item-icon-size);
   width: auto;
 }
 
 .list-item-append-image.flagcdn-icon {
-  min-width: var(--list-item-append-icon-size);
+  min-width: var(--list-item-icon-size);
   width: auto;
 }
 </style>

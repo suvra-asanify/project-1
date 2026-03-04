@@ -1,22 +1,44 @@
 <template>
   <div class="avatar" :class="rootClasses" :style="stackStyles">
-    <v-avatar class="avatar-core" :class="avatarClasses" :size="avatarSize" v-bind="$attrs">
-      <v-img v-if="isImg" class="avatar-image" :src="currentImageSrc" cover @error="onImageError" />
-      <template v-else-if="showLabel">
+    <v-avatar-group v-if="showCount" class="avatar-group">
+      <v-avatar
+        class="avatar-core"
+        :class="avatarClasses"
+        :size="avatarSize"
+        :image="isImg ? currentImageSrc : undefined"
+        v-bind="$attrs"
+      >
+        <template v-if="showLabel">
+          <slot :label="displayLabel" :count="normalizedCount" :is-multiple="isMultiple">
+            <span class="avatar-label">{{ displayLabel }}</span>
+            <span v-if="showCount" class="avatar-count">+{{ normalizedCount }}</span>
+          </slot>
+        </template>
+      </v-avatar>
+
+      <v-avatar
+        class="avatar-stacked"
+        :class="{ 'avatar-stacked-square': !rounded }"
+        :size="avatarSize"
+        color="grey-lighten-1"
+      />
+    </v-avatar-group>
+
+    <v-avatar
+      v-else
+      class="avatar-core"
+      :class="avatarClasses"
+      :size="avatarSize"
+      :image="isImg ? currentImageSrc : undefined"
+      v-bind="$attrs"
+    >
+      <template v-if="showLabel">
         <slot :label="displayLabel" :count="normalizedCount" :is-multiple="isMultiple">
           <span class="avatar-label">{{ displayLabel }}</span>
           <span v-if="showCount" class="avatar-count">+{{ normalizedCount }}</span>
         </slot>
       </template>
     </v-avatar>
-
-    <v-avatar
-      v-if="showCount"
-      class="avatar-stacked"
-      :class="{ 'avatar-stacked-square': !rounded }"
-      :size="avatarSize"
-      color="grey-lighten-1"
-    />
   </div>
 </template>
 
@@ -111,6 +133,16 @@ export default {
   z-index: 2;
 }
 
+.avatar-group {
+  align-items: center;
+  display: inline-flex;
+  isolation: isolate;
+}
+
+.avatar-group :deep(.v-avatar + .v-avatar) {
+  margin-left: calc(-1 * var(--avatar-overlap));
+}
+
 .avatar--variant-img {
   background: transparent;
 }
@@ -134,15 +166,9 @@ export default {
   line-height: 1;
 }
 
-.avatar-image {
-  display: block;
-  height: 100%;
-}
-
 .avatar-stacked {
   background: var(--grey-lighten-1);
   border-radius: var(--rounded-pill);
-  margin-left: calc(-1 * var(--avatar-overlap));
   z-index: 1;
 }
 

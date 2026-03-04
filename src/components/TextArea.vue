@@ -7,6 +7,7 @@
       variant="outlined"
       :placeholder="normalizedPlaceholder"
       :disabled="disabled"
+      :auto-grow="autoGrow"
       :maxlength="resolvedCharLimit || undefined"
       :hide-details="$slots.details || showHint || showCounter ? false : 'auto'"
       rows="4"
@@ -64,6 +65,10 @@ export default {
     charLimit: {
       type: Number,
       default: null,
+    },
+    autoGrow: {
+      type: Boolean,
+      default: false,
     },
     disabled: {
       type: Boolean,
@@ -152,6 +157,10 @@ export default {
   line-height: var(--body-base-lh);
   min-height: var(--base-120);
   resize: vertical;
+}
+
+.text-area.auto-grow :deep(textarea) {
+  resize: none;
 }
 
 .text-area :deep(textarea::placeholder) {

@@ -455,6 +455,11 @@
           </label>
 
           <label class="text-label-sm tester-toggle">
+            <input v-model="textArea.autoGrow" type="checkbox" />
+            <span>auto-grow</span>
+          </label>
+
+          <label class="text-label-sm tester-toggle">
             <input v-model="textArea.disabled" type="checkbox" />
             <span>disabled</span>
           </label>
@@ -571,6 +576,7 @@ const defaultPropsByComponent = {
     input: 'Lorem ipsum dolor sit amet consectetur.',
     hint: 'suffix',
     charLimit: null,
+    autoGrow: false,
     disabled: false,
   },
 };

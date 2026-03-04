@@ -49,11 +49,43 @@ export function useAvatar(props) {
   const showCount = computed(() => isMultiple.value && normalizedCount.value > 0);
   const showLabel = computed(() => !isImg.value && displayLabel.value.length > 0);
 
-  // Tracks if current prop URL has failed loading. Reset on src changes.
+  // Tracks if current prop URL has failed loading. Reset and revalidate on src changes.
   const hasImageError = ref(false);
-  watch(() => props.imageSrc, () => {
+  let imageCheckToken = 0;
+  watch(() => [isImg.value, props.imageSrc], ([imageVariant, source]) => {
+    imageCheckToken += 1;
+    const token = imageCheckToken;
+
+    if (!imageVariant) {
+      hasImageError.value = false;
+      return;
+    }
+
+    const normalizedSource = String(source || '').trim();
+    if (!normalizedSource) {
+      hasImageError.value = true;
+      return;
+    }
+
+    if (typeof Image === 'undefined') {
+      hasImageError.value = false;
+      return;
+    }
+
     hasImageError.value = false;
-  });
+    const probe = new Image();
+    probe.onload = () => {
+      if (token === imageCheckToken) {
+        hasImageError.value = false;
+      }
+    };
+    probe.onerror = () => {
+      if (token === imageCheckToken) {
+        hasImageError.value = true;
+      }
+    };
+    probe.src = normalizedSource;
+  }, { immediate: true });
 
   const currentImageSrc = computed(() => {
     if (hasImageError.value || !props.imageSrc) {
@@ -61,11 +93,6 @@ export function useAvatar(props) {
     }
     return props.imageSrc;
   });
-
-  // Called by @error on the <img> when the backend URL fails to load.
-  function onImageError() {
-    hasImageError.value = true;
-  }
 
   // Inline CSS variables injected only for explicit (non-preset) size values.
   // Ratios derived from the default preset: base-60 container, base-22 label
@@ -105,7 +132,6 @@ export function useAvatar(props) {
     normalizedCount,
     avatarSize,
     currentImageSrc,
-    onImageError,
     rootClasses,
     stackStyles,
     avatarClasses,

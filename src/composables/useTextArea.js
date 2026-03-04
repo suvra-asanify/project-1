@@ -1,22 +1,12 @@
 import { computed, ref, watch } from 'vue';
+import {
+  normalizePositiveInteger,
+  normalizeText,
+} from './sharedHelpers';
 
 export const TEXT_AREA_DEFAULT_PLACEHOLDER = 'Placeholder Enter Smthng';
 export const TEXT_AREA_DEFAULT_INPUT = 'Lorem ipsum dolor sit amet consectetur.';
 export const TEXT_AREA_DEFAULT_HINT = '';
-
-function normalizeText(value, fallback = '') {
-  if (typeof value === 'string') {
-    return value;
-  }
-  return fallback;
-}
-
-function normalizePositiveInteger(value, fallback = 1) {
-  if (Number.isFinite(value) && value > 0) {
-    return Math.floor(value);
-  }
-  return fallback;
-}
 
 function clampTextByLimit(value, charLimit) {
   if (!charLimit) {
@@ -80,6 +70,7 @@ export function useTextArea(props, emit) {
   });
 
   const rootClasses = computed(() => [
+    props.autoGrow && 'auto-grow',
     props.disabled && 'disabled',
   ].filter(Boolean));
 

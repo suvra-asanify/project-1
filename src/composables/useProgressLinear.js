@@ -1,20 +1,19 @@
 import { computed } from 'vue';
 
 export const PROGRESS_LINEAR_SIZES = Object.freeze(['default', 'large']);
-export const PROGRESS_LINEAR_RANGES = Object.freeze(['1/5', '2/5', '3/5', '4/5', '5/5']);
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
 }
 
-function parseRangeStep(rawRange) {
-  const text = String(rawRange == null ? '' : rawRange).trim();
-  const match = text.match(/^([1-5])\s*\/\s*5$/);
-  if (!match) return null;
-  return Number(match[1]);
+function formatNumber(value) {
+  if (!Number.isFinite(value)) {
+    return '0';
+  }
+  return `${Number(value)}`;
 }
 
-function parsePercentFromValue(rawValue) {
+function parseProgressValue(rawValue) {
   const value = String(rawValue == null ? '' : rawValue).trim();
   if (!value) return null;
 
@@ -22,57 +21,72 @@ function parsePercentFromValue(rawValue) {
   if (ratioMatch) {
     const numerator = Number(ratioMatch[1]);
     const denominator = Number(ratioMatch[2]);
-    if (Number.isFinite(numerator) && Number.isFinite(denominator) && denominator !== 0) {
-      return clamp((numerator / denominator) * 100, 0, 100);
+    if (Number.isFinite(numerator) && Number.isFinite(denominator) && denominator > 0) {
+      return {
+        fillPercent: clamp((numerator / denominator) * 100, 0, 100),
+        labelText: `${formatNumber(numerator)}/${formatNumber(denominator)}`,
+        rangeText: `${formatNumber(numerator)}/${formatNumber(denominator)}`,
+      };
     }
     return null;
   }
 
   const percentMatch = value.match(/^(-?\d+(?:\.\d+)?)\s*%$/);
   if (percentMatch) {
-    return clamp(Number(percentMatch[1]), 0, 100);
+    const percentValue = Number(percentMatch[1]);
+    if (!Number.isFinite(percentValue)) {
+      return null;
+    }
+    const clampedPercent = clamp(percentValue, 0, 100);
+    return {
+      fillPercent: clampedPercent,
+      labelText: `${formatNumber(clampedPercent)}%`,
+      rangeText: `${formatNumber(clampedPercent)}/100`,
+    };
   }
 
   const parsed = Number(value);
   if (!Number.isFinite(parsed)) {
     return null;
   }
-  return clamp(parsed, 0, 100);
+  const clampedPercent = clamp(parsed, 0, 100);
+  return {
+    fillPercent: clampedPercent,
+    labelText: `${formatNumber(clampedPercent)}%`,
+    rangeText: `${formatNumber(clampedPercent)}/100`,
+  };
 }
 
 export function useProgressLinear(props) {
   const isLarge = computed(() => props.size === 'large');
 
-  const rangeStep = computed(() => {
-    const directStep = parseRangeStep(props.range);
-    if (directStep != null) return directStep;
+  const parsedValue = computed(() => parseProgressValue(props.value));
 
-    // Backward compatibility for previous `value` prop.
-    const fallbackPercent = parsePercentFromValue(props.value);
-    if (fallbackPercent == null) return 1;
-
-    const stepped = clamp(Math.round(fallbackPercent / 20), 1, 5);
-    return stepped;
+  const fillPercent = computed(() => {
+    if (!parsedValue.value) {
+      return 0;
+    }
+    return parsedValue.value.fillPercent;
   });
 
-  const normalizedRange = computed(() => `${rangeStep.value}/5`);
-  const fillPercent = computed(() => rangeStep.value * 20);
+  const normalizedRange = computed(() => (
+    parsedValue.value ? parsedValue.value.rangeText : ''
+  ));
+
+  const labelText = computed(() => (
+    parsedValue.value ? parsedValue.value.labelText : ''
+  ));
+
   const trackHeight = computed(() => (isLarge.value ? 20 : 10));
-  const applyRounded = computed(() => isLarge.value && props.rounded === true);
+  const applyRounded = computed(() => props.rounded === true);
 
   const currentValue = computed(() => String(props.current == null ? '' : props.current).trim());
   const limitValue = computed(() => String(props.limit == null ? '' : props.limit).trim());
 
-  const countText = computed(() => {
-    if (props.count == null || String(props.count).trim().length === 0) {
-      return String(fillPercent.value);
-    }
-    return String(props.count);
-  });
-
-  const showLabel = computed(() => isLarge.value);
-  const showPercentage = computed(() => isLarge.value && props.percentage === true);
-  const showLimit = computed(() => isLarge.value && props.currentLimit === true);
+  const showLabel = computed(() => isLarge.value && labelText.value.length > 0);
+  const showLimit = computed(() => (
+    isLarge.value && (currentValue.value.length > 0 || limitValue.value.length > 0)
+  ));
 
   const rootClasses = computed(() => [
     props.size !== 'default' && `size-${props.size}`,
@@ -80,23 +94,16 @@ export function useProgressLinear(props) {
     showLimit.value && 'show-limit',
   ].filter(Boolean));
 
-  const fillClasses = computed(() => [
-    applyRounded.value && fillPercent.value < 100 && 'progress-linear__fill--partial',
-    applyRounded.value && fillPercent.value >= 100 && 'progress-linear__fill--rounded',
-  ].filter(Boolean));
-
   return {
     normalizedRange,
     fillPercent,
     trackHeight,
     applyRounded,
-    countText,
+    labelText,
     showLabel,
-    showPercentage,
     showLimit,
     currentValue,
     limitValue,
     rootClasses,
-    fillClasses,
   };
 }

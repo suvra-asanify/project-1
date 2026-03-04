@@ -190,28 +190,19 @@
 
       <div v-else-if="entry.name === 'radio-button' && radioButton" class="tester-layout">
         <div class="tester-controls">
-          <label class="text-label-sm tester-field">
-            <span class="tester-field-label">state</span>
-            <select v-model="radioButton.state" class="tester-input">
-              <option value="default">default</option>
-              <option value="hover">hover</option>
-              <option value="pressed">pressed</option>
-            </select>
-          </label>
-
           <label class="text-label-sm tester-toggle">
             <input v-model="radioButton.value" type="checkbox" />
             <span>backend value (selected)</span>
           </label>
 
-          <label class="text-label-sm tester-toggle">
-            <input v-model="radioButton.hasLabel" type="checkbox" />
-            <span>has label</span>
-          </label>
-
-          <label v-if="radioButton.hasLabel" class="text-label-sm tester-field">
+          <label class="text-label-sm tester-field">
             <span class="tester-field-label">backend label</span>
-            <input v-model="radioButton.label" class="tester-input" type="text" />
+            <input
+              v-model="radioButton.label"
+              class="tester-input"
+              type="text"
+              placeholder="leave empty to hide label"
+            />
           </label>
 
           <label class="text-label-sm tester-toggle">
@@ -225,7 +216,7 @@
         </div>
       </div>
 
-      <div v-else-if="entry.name === 'TextField' && textField" class="tester-layout">
+      <div v-else-if="entry.name === 'text-field' && textField" class="tester-layout">
         <div class="tester-controls">
           <label class="text-label-sm tester-field">
             <span class="tester-field-label">variant</span>
@@ -265,24 +256,28 @@
           </label>
 
           <label class="text-label-sm tester-field">
+            <span class="tester-field-label">prefix (backend)</span>
+            <input v-model="textField.prefix" class="tester-input" type="text" />
+          </label>
+
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">suffix (backend)</span>
+            <input v-model="textField.suffix" class="tester-input" type="text" />
+          </label>
+
+          <label class="text-label-sm tester-field">
             <span class="tester-field-label">hint (backend)</span>
             <input v-model="textField.hint" class="tester-input" type="text" />
           </label>
 
-          <label class="text-label-sm tester-toggle">
-            <input v-model="textField.seeCharCount" type="checkbox" />
-            <span>see char count</span>
-          </label>
-
           <label class="text-label-sm tester-field">
-            <span class="tester-field-label">total char (backend)</span>
+            <span class="tester-field-label">char-limit (backend)</span>
             <input
-              v-model.number="textField.totalChar"
+              v-model.number="textField.charLimit"
               class="tester-input"
               type="number"
               min="1"
               step="1"
-              :disabled="!textField.seeCharCount"
             />
           </label>
 
@@ -297,17 +292,8 @@
         </div>
       </div>
 
-      <div v-else-if="entry.name === 'TextArea' && textArea" class="tester-layout">
+      <div v-else-if="entry.name === 'text-area' && textArea" class="tester-layout">
         <div class="tester-controls">
-          <label class="text-label-sm tester-field">
-            <span class="tester-field-label">state</span>
-            <select v-model="textArea.state" class="tester-input">
-              <option value="default">default</option>
-              <option value="hover">hover</option>
-              <option value="active">active</option>
-            </select>
-          </label>
-
           <label class="text-label-sm tester-field">
             <span class="tester-field-label">placeholder</span>
             <input v-model="textArea.placeholder" class="tester-input" type="text" />
@@ -318,47 +304,19 @@
             <textarea v-model="textArea.input" class="tester-input tester-code" />
           </label>
 
-          <label class="text-label-sm tester-toggle">
-            <input v-model="textArea.hasHint" type="checkbox" />
-            <span>has hint</span>
-          </label>
-
           <label class="text-label-sm tester-field">
             <span class="tester-field-label">hint</span>
-            <input
-              v-model="textArea.hint"
-              class="tester-input"
-              type="text"
-              :disabled="!textArea.hasHint"
-            />
-          </label>
-
-          <label class="text-label-sm tester-toggle">
-            <input v-model="textArea.seeCharCount" type="checkbox" />
-            <span>see char count</span>
+            <input v-model="textArea.hint" class="tester-input" type="text" />
           </label>
 
           <label class="text-label-sm tester-field">
-            <span class="tester-field-label">char count</span>
+            <span class="tester-field-label">char-limit</span>
             <input
-              v-model.number="textArea.charCount"
-              class="tester-input"
-              type="number"
-              min="0"
-              step="1"
-              :disabled="!textArea.seeCharCount"
-            />
-          </label>
-
-          <label class="text-label-sm tester-field">
-            <span class="tester-field-label">total char</span>
-            <input
-              v-model.number="textArea.totalChar"
+              v-model.number="textArea.charLimit"
               class="tester-input"
               type="number"
               min="1"
               step="1"
-              :disabled="!textArea.seeCharCount"
             />
           </label>
 
@@ -437,13 +395,11 @@ const defaultPropsByComponent = {
     value: '1/4',
   },
   'radio-button': {
-    state: 'default',
     value: false,
-    hasLabel: false,
-    label: 'label',
+    label: '',
     disabled: false,
   },
-  TextField: {
+  'text-field': {
     variant: 'default',
     size: 'default',
     placeholder: 'Placeholder Enter Smthng',
@@ -453,19 +409,14 @@ const defaultPropsByComponent = {
     prefix: '',
     suffix: '',
     hint: '',
-    seeCharCount: false,
-    totalChar: null,
+    charLimit: null,
     disabled: false,
   },
-  TextArea: {
-    state: 'default',
+  'text-area': {
     placeholder: 'Placeholder Enter Smthng',
     input: 'Lorem ipsum dolor sit amet consectetur.',
-    hasHint: false,
     hint: 'suffix',
-    seeCharCount: false,
-    charCount: 0,
-    totalChar: 600,
+    charLimit: null,
     disabled: false,
   },
 };
@@ -501,10 +452,10 @@ export default {
       return this.componentProps['radio-button'] || null;
     },
     textField() {
-      return this.componentProps.TextField || null;
+      return this.componentProps['text-field'] || null;
     },
     textArea() {
-      return this.componentProps.TextArea || null;
+      return this.componentProps['text-area'] || null;
     },
     avatarSizeMode: {
       get() {

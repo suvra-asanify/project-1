@@ -1,21 +1,12 @@
 import { computed, ref, watch } from 'vue';
 
-export const TEXT_AREA_STATES = Object.freeze(['default', 'hover', 'active']);
-
 export const TEXT_AREA_DEFAULT_PLACEHOLDER = 'Placeholder Enter Smthng';
 export const TEXT_AREA_DEFAULT_INPUT = 'Lorem ipsum dolor sit amet consectetur.';
-export const TEXT_AREA_DEFAULT_HINT = 'suffix';
+export const TEXT_AREA_DEFAULT_HINT = '';
 
 function normalizeText(value, fallback = '') {
   if (typeof value === 'string') {
     return value;
-  }
-  return fallback;
-}
-
-function normalizeNonNegativeInteger(value, fallback = 0) {
-  if (Number.isFinite(value) && value >= 0) {
-    return Math.floor(value);
   }
   return fallback;
 }
@@ -27,23 +18,53 @@ function normalizePositiveInteger(value, fallback = 1) {
   return fallback;
 }
 
+function clampTextByLimit(value, charLimit) {
+  if (!charLimit) {
+    return value;
+  }
+  return value.slice(0, charLimit);
+}
+
 export function useTextArea(props, emit) {
   const internalValue = ref('');
+  const resolvedCharLimit = computed(() => normalizePositiveInteger(props.charLimit, null));
 
-  watch(() => props.input, (value) => {
-    internalValue.value = normalizeText(value, TEXT_AREA_DEFAULT_INPUT);
+  watch(() => (
+    typeof props.modelValue === 'string' ? props.modelValue : props.input
+  ), (value) => {
+    const normalizedValue = normalizeText(value, TEXT_AREA_DEFAULT_INPUT);
+    const clampedValue = clampTextByLimit(normalizedValue, resolvedCharLimit.value);
+    internalValue.value = clampedValue;
+
+    if (clampedValue !== normalizedValue) {
+      emit('update:input', clampedValue);
+      emit('update:modelValue', clampedValue);
+    }
   }, { immediate: true });
+
+  watch(resolvedCharLimit, (nextLimit) => {
+    const clampedValue = clampTextByLimit(internalValue.value, nextLimit);
+    if (clampedValue !== internalValue.value) {
+      internalValue.value = clampedValue;
+      emit('update:input', clampedValue);
+      emit('update:modelValue', clampedValue);
+    }
+  });
 
   const normalizedPlaceholder = computed(() =>
     normalizeText(props.placeholder, TEXT_AREA_DEFAULT_PLACEHOLDER)
   );
 
   const normalizedHint = computed(() => normalizeText(props.hint, TEXT_AREA_DEFAULT_HINT));
-  const showHint = computed(() => props.hasHint && normalizedHint.value.trim().length > 0);
+  const showHint = computed(() => normalizedHint.value.trim().length > 0);
+  const showCounter = computed(() => resolvedCharLimit.value !== null);
 
-  const resolvedTotalChar = computed(() => (
-    props.seeCharCount ? normalizePositiveInteger(props.totalChar, 600) : null
-  ));
+  const counterText = computed(() => {
+    if (resolvedCharLimit.value) {
+      return `${internalValue.value.length}/${resolvedCharLimit.value}`;
+    }
+    return `${internalValue.value.length}`;
+  });
 
   const inputValue = computed({
     get() {
@@ -51,40 +72,14 @@ export function useTextArea(props, emit) {
     },
     set(nextValue) {
       const nextText = String(nextValue ?? '');
-      const clamped = resolvedTotalChar.value
-        ? nextText.slice(0, resolvedTotalChar.value)
-        : nextText;
+      const clamped = clampTextByLimit(nextText, resolvedCharLimit.value);
       internalValue.value = clamped;
       emit('update:input', clamped);
+      emit('update:modelValue', clamped);
     },
   });
 
-  const effectiveCharCount = computed(() => {
-    if (!props.seeCharCount) {
-      return 0;
-    }
-
-    const providedCount = normalizeNonNegativeInteger(props.charCount, -1);
-    if (providedCount >= 0) {
-      return resolvedTotalChar.value
-        ? Math.min(providedCount, resolvedTotalChar.value)
-        : providedCount;
-    }
-    return internalValue.value.length;
-  });
-
-  const counterText = computed(() => {
-    if (!props.seeCharCount) {
-      return '';
-    }
-    if (resolvedTotalChar.value) {
-      return `${effectiveCharCount.value}/${resolvedTotalChar.value}`;
-    }
-    return `${effectiveCharCount.value}`;
-  });
-
   const rootClasses = computed(() => [
-    `state-${props.state}`,
     props.disabled && 'disabled',
   ].filter(Boolean));
 
@@ -93,7 +88,8 @@ export function useTextArea(props, emit) {
     normalizedPlaceholder,
     normalizedHint,
     showHint,
-    resolvedTotalChar,
+    showCounter,
+    resolvedCharLimit,
     counterText,
     rootClasses,
   };

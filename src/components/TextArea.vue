@@ -1,48 +1,53 @@
 <template>
-  <v-textarea
-    v-model="inputValue"
-    class="text-area"
-    :class="rootClasses"
-    variant="outlined"
-    :placeholder="normalizedPlaceholder"
-    :disabled="disabled"
-    :maxlength="resolvedTotalChar || undefined"
-    :hide-details="$slots.details || showHint || seeCharCount ? false : 'auto'"
-    rows="4"
-    flat
-    v-bind="$attrs"
-  >
-    <template v-if="$slots.details || showHint || seeCharCount" #details>
-      <slot name="details" :hint="normalizedHint" :counter="counterText">
-        <div class="text-area-meta">
-          <span v-if="showHint" class="text-area-hint">{{ normalizedHint }}</span>
-          <span v-if="seeCharCount" class="text-area-counter">{{ counterText }}</span>
-        </div>
-      </slot>
-    </template>
-  </v-textarea>
+  <div class="text-area-shell" :class="{ disabled }">
+    <v-textarea
+      v-model="inputValue"
+      class="text-area"
+      :class="rootClasses"
+      variant="outlined"
+      :placeholder="normalizedPlaceholder"
+      :disabled="disabled"
+      :maxlength="resolvedCharLimit || undefined"
+      :hide-details="$slots.details || showHint || showCounter ? false : 'auto'"
+      rows="4"
+      flat
+      v-bind="$attrs"
+    >
+      <template v-for="slotName in forwardedSlotNames" :key="slotName" #[slotName]="slotProps">
+        <slot :name="slotName" v-bind="slotProps" />
+      </template>
+
+      <template v-if="$slots.details || showHint || showCounter" #details>
+        <slot name="details" :hint="normalizedHint" :counter="counterText">
+          <div class="text-area-meta">
+            <span v-if="showHint" class="text-area-hint">{{ normalizedHint }}</span>
+            <span v-if="showCounter" class="text-area-counter">{{ counterText }}</span>
+          </div>
+        </slot>
+      </template>
+    </v-textarea>
+
+    <span v-if="disabled" class="text-area-disabled-overlay" aria-hidden="true"></span>
+  </div>
 </template>
 
 <script>
+import { computed } from 'vue';
 import {
   TEXT_AREA_DEFAULT_HINT,
   TEXT_AREA_DEFAULT_INPUT,
   TEXT_AREA_DEFAULT_PLACEHOLDER,
-  TEXT_AREA_STATES,
   useTextArea,
 } from '../composables/useTextArea';
 
 export default {
-  name: 'TextArea',
+  name: 'text-area',
   inheritAttrs: false,
-  emits: ['update:input'],
+  emits: ['update:input', 'update:modelValue'],
   props: {
-    state: {
+    modelValue: {
       type: String,
-      default: 'default',
-      validator(value) {
-        return TEXT_AREA_STATES.includes(value);
-      },
+      default: null,
     },
     placeholder: {
       type: String,
@@ -52,38 +57,53 @@ export default {
       type: String,
       default: TEXT_AREA_DEFAULT_INPUT,
     },
-    hasHint: {
-      type: Boolean,
-      default: false,
-    },
     hint: {
       type: String,
       default: TEXT_AREA_DEFAULT_HINT,
     },
-    seeCharCount: {
-      type: Boolean,
-      default: false,
-    },
-    charCount: {
+    charLimit: {
       type: Number,
-      default: 0,
-    },
-    totalChar: {
-      type: Number,
-      default: 600,
+      default: null,
     },
     disabled: {
       type: Boolean,
       default: false,
     },
   },
-  setup(props, { emit }) {
-    return useTextArea(props, emit);
+  setup(props, { emit, slots }) {
+    const textAreaState = useTextArea(props, emit);
+    const forwardedSlotNames = computed(() => (
+      Object.keys(slots).filter((name) => name !== 'details')
+    ));
+
+    return {
+      ...textAreaState,
+      forwardedSlotNames,
+    };
   },
 };
 </script>
 
 <style scoped>
+.text-area-shell {
+  display: inline-flex;
+  flex-direction: column;
+  position: relative;
+  width: 100%;
+}
+
+.text-area-shell.disabled {
+  cursor: not-allowed;
+}
+
+.text-area-disabled-overlay {
+  background: transparent;
+  cursor: not-allowed;
+  inset: 0;
+  position: absolute;
+  z-index: 4;
+}
+
 .text-area {
   display: inline-flex;
   flex-direction: column;
@@ -111,11 +131,11 @@ export default {
   color: inherit;
 }
 
-.text-area.state-hover:not(.disabled) :deep(.v-field) {
+.text-area:not(.disabled) :deep(.v-field:hover) {
   color: rgba(0, 0, 0, 0.5);
 }
 
-.text-area.state-active:not(.disabled) :deep(.v-field) {
+.text-area:not(.disabled) :deep(.v-field.v-field--focused) {
   box-shadow: 0 0 0 var(--base-1) rgba(0, 90, 156, 0.24);
   color: var(--primary, #005a9c);
 }
@@ -144,17 +164,30 @@ export default {
   resize: none;
 }
 
+.text-area.disabled,
+.text-area.disabled :deep(.v-field),
+.text-area.disabled :deep(.v-field__input),
+.text-area.disabled :deep(textarea) {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.text-area.disabled :deep(*) {
+  -webkit-user-select: none !important;
+  user-select: none !important;
+}
+
 .text-area :deep(.v-input__details) {
   align-items: center;
   min-height: var(--base-16);
-  padding-top: 0;
+  padding-top: 4px;
 }
 
 .text-area-meta {
-  align-items: center;
-  display: inline-flex;
-  gap: var(--spacing-2);
-  justify-content: space-between;
+  align-items: start;
+  column-gap: var(--spacing-2);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   width: 100%;
 }
 
@@ -166,7 +199,11 @@ export default {
   line-height: var(--body-xs-lh);
 }
 
+.text-area-hint {
+  overflow-wrap: anywhere;
+}
+
 .text-area-counter {
-  margin-left: auto;
+  justify-self: end;
 }
 </style>

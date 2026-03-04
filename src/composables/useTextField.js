@@ -20,18 +20,19 @@ function normalizePositiveInteger(value, fallback = 1) {
   return fallback;
 }
 
+function clampTextByLimit(value, charLimit) {
+  if (!charLimit) {
+    return value;
+  }
+  return value.slice(0, charLimit);
+}
+
 function toMdiClass(rawIcon) {
-  const icon = normalizeText(rawIcon).trim();
-  if (!icon) {
+  const icon = toMdiIcon(rawIcon);
+  if (!icon || icon.startsWith('$')) {
     return '';
   }
-  if (icon.startsWith('mdi mdi-')) {
-    return icon;
-  }
-  if (icon.startsWith('mdi-')) {
-    return `mdi ${icon}`;
-  }
-  return `mdi mdi-${icon}`;
+  return `mdi ${icon}`;
 }
 
 function toMdiIcon(rawIcon) {
@@ -39,13 +40,27 @@ function toMdiIcon(rawIcon) {
   if (!icon) {
     return '';
   }
-  if (icon.startsWith('mdi mdi-')) {
-    return icon.split(' ').pop() || '';
-  }
-  if (icon.startsWith('mdi-')) {
+  if (icon.startsWith('$')) {
     return icon;
   }
-  return `mdi-${icon}`;
+
+  const token = icon
+    .split(/\s+/)
+    .find((part) => /^mdi-[a-z0-9-]+$/i.test(part));
+  if (token) {
+    return token;
+  }
+
+  const normalized = icon
+    .replace(/^mdi:/i, '')
+    .replace(/^mdi-/i, '')
+    .trim();
+
+  if (!normalized || normalized.toLowerCase() === 'mdi') {
+    return '';
+  }
+
+  return `mdi-${normalized}`;
 }
 
 function isFlagCdnUrl(icon) {
@@ -54,6 +69,13 @@ function isFlagCdnUrl(icon) {
 
 function isUrlLike(icon) {
   return /^(?:https?:\/\/|\/\/|\/|\.\/|\.\.\/|data:image\/|blob:)/i.test(icon);
+}
+
+function isImageFilePath(icon) {
+  if (/\s/.test(icon)) {
+    return false;
+  }
+  return /\.(?:svg|png|jpe?g|gif|webp|avif|bmp|ico)(?:[?#].*)?$/i.test(icon);
 }
 
 function ensureHttpsUrl(icon) {
@@ -76,13 +98,21 @@ function toIconConfig(rawIcon) {
   const icon = normalizeText(rawIcon).trim();
 
   if (!icon) {
-    return { type: 'none', className: '', icon: '', src: '', alt: '' };
+    return {
+      type: 'none',
+      assetType: '',
+      className: '',
+      icon: '',
+      src: '',
+      alt: '',
+    };
   }
 
   // Accept direct FlagCDN URLs.
   if (isFlagCdnUrl(icon)) {
     return {
       type: 'asset',
+      assetType: 'flag',
       className: '',
       icon: '',
       src: ensureHttpsUrl(icon),
@@ -97,6 +127,7 @@ function toIconConfig(rawIcon) {
     const shorthand = flagMatch[1].toLowerCase();
     return {
       type: 'asset',
+      assetType: 'flag',
       className: '',
       icon: '',
       src: `https://flagcdn.com/w20/${shorthand}.png`,
@@ -108,6 +139,19 @@ function toIconConfig(rawIcon) {
   if (isUrlLike(icon)) {
     return {
       type: 'asset',
+      assetType: 'image',
+      className: '',
+      icon: '',
+      src: ensureHttpsUrl(icon),
+      alt: 'icon',
+    };
+  }
+
+  // Accept plain image file names/paths from backend (e.g. "icon.svg", "assets/icon.png").
+  if (isImageFilePath(icon)) {
+    return {
+      type: 'asset',
+      assetType: 'image',
       className: '',
       icon: '',
       src: ensureHttpsUrl(icon),
@@ -118,6 +162,7 @@ function toIconConfig(rawIcon) {
   // Fallback to MDI syntax.
   return {
     type: 'mdi',
+    assetType: '',
     className: toMdiClass(icon),
     icon: toMdiIcon(icon),
     src: '',
@@ -127,10 +172,25 @@ function toIconConfig(rawIcon) {
 
 export function useTextField(props, emit) {
   const internalValue = ref('');
+  const resolvedCharLimit = computed(() => normalizePositiveInteger(props.charLimit, null));
 
   watch(() => props.modelValue, (value) => {
-    internalValue.value = normalizeText(value, TEXT_FIELD_DEFAULT_INPUT);
+    const normalizedValue = normalizeText(value, TEXT_FIELD_DEFAULT_INPUT);
+    const clampedValue = clampTextByLimit(normalizedValue, resolvedCharLimit.value);
+    internalValue.value = clampedValue;
+
+    if (clampedValue !== normalizedValue) {
+      emit('update:modelValue', clampedValue);
+    }
   }, { immediate: true });
+
+  watch(resolvedCharLimit, (nextLimit) => {
+    const clampedValue = clampTextByLimit(internalValue.value, nextLimit);
+    if (clampedValue !== internalValue.value) {
+      internalValue.value = clampedValue;
+      emit('update:modelValue', clampedValue);
+    }
+  });
 
   const normalizedPlaceholder = computed(() =>
     normalizeText(props.placeholder, TEXT_FIELD_DEFAULT_PLACEHOLDER)
@@ -144,20 +204,16 @@ export function useTextField(props, emit) {
   const prependIconConfig = computed(() => toIconConfig(resolvedPrependIcon.value));
   const appendIconConfig = computed(() => toIconConfig(resolvedAppendIcon.value));
 
-  const resolvedTotalChar = computed(() => (
-    props.seeCharCount ? normalizePositiveInteger(props.totalChar, null) : null
-  ));
-
   const showPrependInnerIcon = computed(() => prependIconConfig.value.type !== 'none');
   const showAppendInnerIcon = computed(() => appendIconConfig.value.type !== 'none');
   const showPrefix = computed(() => normalizedPrefix.value.trim().length > 0);
   const showSuffix = computed(() => normalizedSuffix.value.trim().length > 0);
   const showHint = computed(() => normalizedHint.value.trim().length > 0);
-  const showCounter = computed(() => props.seeCharCount);
+  const showCounter = computed(() => resolvedCharLimit.value !== null);
 
   const counterText = computed(() => {
-    if (resolvedTotalChar.value) {
-      return `${internalValue.value.length}/${resolvedTotalChar.value}`;
+    if (resolvedCharLimit.value) {
+      return `${internalValue.value.length}/${resolvedCharLimit.value}`;
     }
     return `${internalValue.value.length}`;
   });
@@ -168,9 +224,7 @@ export function useTextField(props, emit) {
     },
     set(nextValue) {
       const nextText = String(nextValue ?? '');
-      const clamped = resolvedTotalChar.value
-        ? nextText.slice(0, resolvedTotalChar.value)
-        : nextText;
+      const clamped = clampTextByLimit(nextText, resolvedCharLimit.value);
       internalValue.value = clamped;
       emit('update:modelValue', clamped);
     },
@@ -220,7 +274,7 @@ export function useTextField(props, emit) {
     rootClasses,
     vuetifyVariant,
     vuetifyDensity,
-    resolvedTotalChar,
+    resolvedCharLimit,
     hintId,
     counterId,
     describedBy,

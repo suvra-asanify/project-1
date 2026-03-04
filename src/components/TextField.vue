@@ -1,68 +1,79 @@
 <template>
-  <v-text-field
-    v-model="inputValue"
-    class="text-field"
-    :class="rootClasses"
-    :variant="vuetifyVariant"
-    :density="vuetifyDensity"
-    :placeholder="normalizedPlaceholder"
-    :prefix="showPrefix ? normalizedPrefix : undefined"
-    :suffix="showSuffix ? normalizedSuffix : undefined"
-    :maxlength="resolvedTotalChar || undefined"
-    :disabled="disabled"
-    :id="id"
-    :name="name"
-    :autocomplete="autocomplete"
-    :error="ariaInvalid"
-    :aria-invalid="ariaInvalid ? 'true' : undefined"
-    :aria-describedby="describedBy"
-    :hide-details="$slots.details || showHint || showCounter ? false : 'auto'"
-    single-line
-    flat
-    v-bind="$attrs"
-  >
-    <template v-if="$slots['prepend-inner'] || showPrependInnerIcon" #prepend-inner>
-      <slot name="prepend-inner">
-        <v-icon v-if="prependIconConfig.type === 'mdi'" class="text-field-icon" :icon="prependIconConfig.icon" />
-        <img
-          v-else
-          class="flagcdn-icon text-field-flag-icon"
-          :src="prependIconConfig.src"
-          :alt="prependIconConfig.alt"
-          crossorigin="anonymous"
-          referrerpolicy="no-referrer"
-          loading="lazy"
-        />
-      </slot>
-    </template>
+  <div class="text-field-shell" :class="{ disabled }">
+    <v-text-field
+      v-model="inputValue"
+      class="text-field"
+      :class="rootClasses"
+      :variant="vuetifyVariant"
+      :density="vuetifyDensity"
+      :placeholder="normalizedPlaceholder"
+      :prefix="showPrefix ? normalizedPrefix : undefined"
+      :suffix="showSuffix ? normalizedSuffix : undefined"
+      :maxlength="resolvedCharLimit || undefined"
+      :disabled="disabled"
+      :id="id"
+      :name="name"
+      :autocomplete="autocomplete"
+      :error="ariaInvalid"
+      :aria-invalid="ariaInvalid ? 'true' : undefined"
+      :aria-describedby="describedBy"
+      :hide-details="$slots.details || showHint || showCounter ? false : 'auto'"
+      single-line
+      flat
+      v-bind="$attrs"
+    >
+      <template v-if="$slots['prepend-inner'] || showPrependInnerIcon" #prepend-inner>
+        <slot name="prepend-inner">
+          <v-icon v-if="prependIconConfig.type === 'mdi'" class="text-field-icon">{{ prependIconConfig.icon }}</v-icon>
+          <img
+            v-else
+            class="flagcdn-icon text-field-flag-icon"
+            :class="prependIconConfig.assetType === 'image' ? 'text-field-custom-icon' : null"
+            :src="prependIconConfig.src"
+            :alt="prependIconConfig.alt"
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"
+            loading="lazy"
+          />
+        </slot>
+      </template>
 
-    <template v-if="$slots['append-inner'] || showAppendInnerIcon" #append-inner>
-      <slot name="append-inner">
-        <v-icon v-if="appendIconConfig.type === 'mdi'" class="text-field-icon" :icon="appendIconConfig.icon" />
-        <img
-          v-else
-          class="flagcdn-icon text-field-flag-icon"
-          :src="appendIconConfig.src"
-          :alt="appendIconConfig.alt"
-          crossorigin="anonymous"
-          referrerpolicy="no-referrer"
-          loading="lazy"
-        />
-      </slot>
-    </template>
+      <template v-if="$slots['append-inner'] || showAppendInnerIcon" #append-inner>
+        <slot name="append-inner">
+          <v-icon v-if="appendIconConfig.type === 'mdi'" class="text-field-icon">{{ appendIconConfig.icon }}</v-icon>
+          <img
+            v-else
+            class="flagcdn-icon text-field-flag-icon"
+            :class="appendIconConfig.assetType === 'image' ? 'text-field-custom-icon' : null"
+            :src="appendIconConfig.src"
+            :alt="appendIconConfig.alt"
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"
+            loading="lazy"
+          />
+        </slot>
+      </template>
 
-    <template v-if="$slots.details || showHint || showCounter" #details>
-      <slot name="details" :hint="normalizedHint" :counter="counterText">
-        <div class="text-field-meta">
-          <span v-if="showHint" :id="hintId" class="text-field-hint">{{ normalizedHint }}</span>
-          <span v-if="showCounter" :id="counterId" class="text-field-counter">{{ counterText }}</span>
-        </div>
-      </slot>
-    </template>
-  </v-text-field>
+      <template v-for="slotName in forwardedSlotNames" :key="slotName" #[slotName]="slotProps">
+        <slot :name="slotName" v-bind="slotProps" />
+      </template>
+
+      <template v-if="$slots.details || showHint || showCounter" #details>
+        <slot name="details" :hint="normalizedHint" :counter="counterText">
+          <div class="text-field-meta">
+            <span v-if="showHint" :id="hintId" class="text-field-hint">{{ normalizedHint }}</span>
+            <span v-if="showCounter" :id="counterId" class="text-field-counter">{{ counterText }}</span>
+          </div>
+        </slot>
+      </template>
+    </v-text-field>
+
+    <span v-if="disabled" class="text-field-disabled-overlay" aria-hidden="true"></span>
+  </div>
 </template>
 
 <script>
+import { computed } from 'vue';
 import {
   TEXT_FIELD_DEFAULT_INPUT,
   TEXT_FIELD_DEFAULT_PLACEHOLDER,
@@ -72,7 +83,7 @@ import {
 } from '../composables/useTextField';
 
 export default {
-  name: 'TextField',
+  name: 'text-field',
   inheritAttrs: false,
   emits: ['update:modelValue'],
   props: {
@@ -126,11 +137,7 @@ export default {
       type: String,
       default: '',
     },
-    seeCharCount: {
-      type: Boolean,
-      default: false,
-    },
-    totalChar: {
+    charLimit: {
       type: Number,
       default: null,
     },
@@ -155,19 +162,46 @@ export default {
       default: false,
     },
   },
-  setup(props, { emit }) {
-    return useTextField(props, emit);
+  setup(props, { emit, slots }) {
+    const textFieldState = useTextField(props, emit);
+    const forwardedSlotNames = computed(() => (
+      Object.keys(slots).filter((name) => !['prepend-inner', 'append-inner', 'details'].includes(name))
+    ));
+
+    return {
+      ...textFieldState,
+      forwardedSlotNames,
+    };
   },
 };
 </script>
 
 <style scoped>
+.text-field-shell {
+  display: inline-flex;
+  flex-direction: column;
+  min-width: 260px;
+  position: relative;
+  width: 100%;
+}
+
+.text-field-shell.disabled {
+  cursor: not-allowed;
+}
+
+.text-field-disabled-overlay {
+  background: transparent;
+  cursor: not-allowed;
+  inset: 0;
+  position: absolute;
+  z-index: 4;
+}
+
 .text-field {
   --text-field-height: var(--base-40);
 
   display: inline-flex;
   flex-direction: column;
-  min-width: 260px;
   width: 100%;
 }
 
@@ -235,6 +269,12 @@ export default {
 
 .text-field.underlined :deep(.v-field--variant-underlined .v-field__outline::before) {
   border-bottom-width: var(--border-sm);
+  border-top-width: 0;
+}
+
+.text-field.underlined :deep(.v-field--variant-underlined .v-field__outline::after) {
+  border-bottom-width: var(--base-2);
+  border-top-width: 0;
 }
 
 .text-field:not(.disabled).underlined :deep(.v-field--focused) {
@@ -260,8 +300,16 @@ export default {
 .text-field :deep(.v-text-field__prefix),
 .text-field :deep(.v-text-field__suffix) {
   color: rgba(0, 0, 0, 0.62);
-  font-size: var(--body-sm-size);
-  line-height: var(--body-sm-lh);
+  font-size: var(--body-base-size);
+  line-height: var(--body-base-lh);
+}
+
+.text-field :deep(.v-text-field__prefix),
+.text-field :deep(.v-text-field__suffix) {
+  align-self: center;
+  min-height: auto;
+  padding-bottom: 0;
+  padding-top: 0;
 }
 
 .text-field-icon {
@@ -272,6 +320,13 @@ export default {
   flex: 0 0 auto;
 }
 
+.text-field-custom-icon {
+  border-radius: 2px;
+  height: var(--base-16);
+  object-fit: cover;
+  width: var(--base-16);
+}
+
 .text-field.disabled .text-field-icon,
 .text-field.disabled :deep(input::placeholder),
 .text-field.disabled :deep(.v-text-field__prefix),
@@ -279,17 +334,34 @@ export default {
   color: rgba(0, 0, 0, 0.4);
 }
 
+.text-field.disabled,
+.text-field.disabled :deep(.v-field),
+.text-field.disabled :deep(.v-field__input),
+.text-field.disabled :deep(input),
+.text-field.disabled :deep(.v-text-field__prefix),
+.text-field.disabled :deep(.v-text-field__suffix),
+.text-field.disabled :deep(.text-field-icon),
+.text-field.disabled :deep(.text-field-flag-icon) {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.text-field.disabled :deep(*) {
+  -webkit-user-select: none !important;
+  user-select: none !important;
+}
+
 .text-field :deep(.v-input__details) {
   align-items: center;
   min-height: var(--base-16);
-  padding-top: 0;
+  padding-top: 4px;
 }
 
 .text-field-meta {
-  align-items: center;
-  display: inline-flex;
-  gap: var(--spacing-2);
-  justify-content: space-between;
+  align-items: start;
+  column-gap: var(--spacing-2);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   width: 100%;
 }
 
@@ -301,8 +373,12 @@ export default {
   line-height: var(--body-xs-lh);
 }
 
+.text-field-hint {
+  overflow-wrap: anywhere;
+}
+
 .text-field-counter {
-  margin-left: auto;
+  justify-self: end;
 }
 
 .text-field.disabled {

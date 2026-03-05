@@ -4,11 +4,11 @@
       v-model="inputValue"
       class="text-area"
       :class="rootClasses"
-      variant="outlined"
+      variant="filled"
       :placeholder="normalizedPlaceholder"
       :disabled="disabled"
       :auto-grow="autoGrow"
-      :maxlength="resolvedCharLimit || undefined"
+      :maxlength="resolvedMaxlength || undefined"
       :error="ariaInvalid"
       :aria-invalid="ariaInvalid ? 'true' : undefined"
       :aria-label="ariaLabel || undefined"
@@ -46,25 +46,21 @@ import { useForwardSlots } from '../shared/useForwardSlots';
 
 export default {
   name: 'text-area',
-  emits: ['update:input', 'update:modelValue'],
+  emits: ['update:modelValue'],
   props: {
     modelValue: {
       type: String,
-      default: null,
+      default: TEXT_AREA_DEFAULT_INPUT,
     },
     placeholder: {
       type: String,
       default: TEXT_AREA_DEFAULT_PLACEHOLDER,
     },
-    input: {
-      type: String,
-      default: TEXT_AREA_DEFAULT_INPUT,
-    },
     hint: {
       type: String,
       default: TEXT_AREA_DEFAULT_HINT,
     },
-    charLimit: {
+    maxlength: {
       type: Number,
       default: null,
     },

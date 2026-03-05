@@ -9,7 +9,7 @@
       :placeholder="normalizedPlaceholder"
       :prefix="showPrefix ? normalizedPrefix : undefined"
       :suffix="showSuffix ? normalizedSuffix : undefined"
-      :maxlength="resolvedCharLimit || undefined"
+      :maxlength="resolvedMaxlength || undefined"
       :disabled="disabled"
       :id="id"
       :name="name"
@@ -23,7 +23,7 @@
       single-line
       flat
     >
-      <template v-if="$slots['prepend-inner'] || showPrependInnerIcon" #prepend-inner>
+      <template v-if="$slots['prepend-inner'] || showPrependIcon" #prepend-inner>
         <slot name="prepend-inner">
           <ds-icon
             :config="prependIconConfig"
@@ -33,7 +33,7 @@
         </slot>
       </template>
 
-      <template v-if="$slots['append-inner'] || showAppendInnerIcon" #append-inner>
+      <template v-if="$slots['append-inner'] || showAppendIcon" #append-inner>
         <slot name="append-inner">
           <ds-icon
             :config="appendIconConfig"
@@ -99,15 +99,7 @@ export default {
       type: String,
       default: TEXT_FIELD_DEFAULT_INPUT,
     },
-    prependInnerIcon: {
-      type: String,
-      default: '',
-    },
     prependIcon: {
-      type: String,
-      default: '',
-    },
-    appendInnerIcon: {
       type: String,
       default: '',
     },
@@ -127,7 +119,7 @@ export default {
       type: String,
       default: '',
     },
-    charLimit: {
+    maxlength: {
       type: Number,
       default: null,
     },
@@ -216,11 +208,11 @@ export default {
 .text-field :deep(.v-field) {
   --v-field-border-opacity: 1;
 
-  background: var(--white, #ffffff);
+  background: var(--black-04, rgba(0, 0, 0, 0.04));
   border-radius: var(--rounded-md);
-  color: rgba(0, 0, 0, 0.26);
+  color: var(--black-38, rgba(0, 0, 0, 0.38));
   min-height: var(--text-field-height);
-  transition: border-color 120ms ease, box-shadow 120ms ease;
+  transition: background-color 120ms ease, color 120ms ease;
 }
 
 .text-field :deep(.v-field__overlay) {
@@ -249,18 +241,21 @@ export default {
   padding-top: 0;
 }
 
-.text-field:not(.disabled) :deep(.v-field:hover) {
-  color: rgba(0, 0, 0, 0.5);
+.text-field:not(.disabled):not(.underlined) :deep(.v-field:hover) {
+  background: rgba(0, 0, 0, 0.08);
+  color: var(--black-38, rgba(0, 0, 0, 0.38));
 }
 
 .text-field:not(.disabled):not(.underlined) :deep(.v-field.v-field--focused) {
-  box-shadow: 0 0 0 var(--base-1) rgba(0, 90, 156, 0.24);
-  color: var(--primary, #005a9c);
+  background: rgba(0, 0, 0, 0.16);
+  box-shadow: none;
+  color: var(--brand-87, rgba(0, 90, 156, 0.87));
 }
 
 .text-field.underlined :deep(.v-field) {
   background: transparent;
   border-radius: 0;
+  color: #767676;
 }
 
 .text-field.underlined :deep(.v-field--variant-underlined .v-field__outline::before) {
@@ -273,9 +268,13 @@ export default {
   border-top-width: 0;
 }
 
+.text-field:not(.disabled).underlined :deep(.v-field:hover) {
+  color: #717171;
+}
+
 .text-field:not(.disabled).underlined :deep(.v-field--focused) {
   box-shadow: none;
-  color: var(--primary, #005a9c);
+  color: var(--brand-87, rgba(0, 90, 156, 0.87));
 }
 
 .text-field.disabled :deep(.v-field) {
@@ -288,14 +287,14 @@ export default {
 }
 
 .text-field :deep(input::placeholder) {
-  color: rgba(0, 0, 0, 0.48);
+  color: var(--black-60, rgba(0, 0, 0, 0.6));
   opacity: 1;
 }
 
 .text-field-icon,
 .text-field :deep(.v-text-field__prefix),
 .text-field :deep(.v-text-field__suffix) {
-  color: rgba(0, 0, 0, 0.62);
+  color: var(--black-60, rgba(0, 0, 0, 0.6));
   font-size: var(--body-base-size);
   line-height: var(--body-base-lh);
 }

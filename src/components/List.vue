@@ -119,7 +119,7 @@ export default {
     const forwardedAttrs = computed(() => {
       const rest = {};
       Object.keys(attrs).forEach((key) => {
-        if (!['items', 'modelValue', 'label'].includes(key)) {
+        if (!['items', 'modelValue'].includes(key)) {
           rest[key] = attrs[key];
         }
       });

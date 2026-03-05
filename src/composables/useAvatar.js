@@ -1,6 +1,6 @@
 import { computed, ref, watch } from 'vue';
 
-// Neutral person-silhouette placeholder shown when imageSrc is empty or fails to load.
+// Neutral person-silhouette placeholder shown when image is empty or fails to load.
 export const AVATAR_FALLBACK_IMAGE =
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%23e0e0e0'/%3E%3Ccircle cx='20' cy='15' r='7' fill='%23bdbdbd'/%3E%3Cpath d='M5 35c0-8.3 6.7-15 15-15s15 6.7 15 15' fill='%23bdbdbd'/%3E%3C/svg%3E";
 
@@ -52,7 +52,7 @@ export function useAvatar(props) {
   // Tracks if current prop URL has failed loading. Reset and revalidate on src changes.
   const hasImageError = ref(false);
   let imageCheckToken = 0;
-  watch(() => [isImg.value, props.imageSrc], ([imageVariant, source]) => {
+  watch(() => [isImg.value, props.image], ([imageVariant, source]) => {
     imageCheckToken += 1;
     const token = imageCheckToken;
 
@@ -88,10 +88,10 @@ export function useAvatar(props) {
   }, { immediate: true });
 
   const currentImageSrc = computed(() => {
-    if (hasImageError.value || !props.imageSrc) {
+    if (hasImageError.value || !props.image) {
       return AVATAR_FALLBACK_IMAGE;
     }
-    return props.imageSrc;
+    return props.image;
   });
 
   // Inline CSS variables injected only for explicit (non-preset) size values.

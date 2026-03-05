@@ -66,7 +66,7 @@
           <label v-if="avatar.variant === 'img'" class="text-label-sm tester-field">
             <span class="tester-field-label">backend image url</span>
             <input
-              v-model="avatar.imageSrc"
+              v-model="avatar.image"
               class="tester-input"
               type="text"
               placeholder="https://..."
@@ -243,7 +243,7 @@
 
           <label class="text-label-sm tester-toggle">
             <input
-              v-model="comboBox.multiSelect"
+              v-model="comboBox.multiple"
               type="checkbox"
               @change="onComboBoxMultiSelectChange"
             />
@@ -289,7 +289,7 @@
           <label class="text-label-sm tester-field">
             <span class="tester-field-label">model-value (backend)</span>
             <input
-              v-if="comboBox.multiSelect"
+              v-if="comboBox.multiple"
               :value="Array.isArray(comboBox.modelValue) ? comboBox.modelValue.join(', ') : ''"
               class="tester-input"
               type="text"
@@ -424,7 +424,7 @@
       <div v-else-if="entry.name === 'radio-button' && radioButton" class="tester-layout">
         <div class="tester-controls">
           <label class="text-label-sm tester-toggle">
-            <input v-model="radioButton.value" type="checkbox" />
+            <input v-model="radioButton.modelValue" type="checkbox" />
             <span>backend value (selected)</span>
           </label>
 
@@ -477,12 +477,12 @@
 
           <label class="text-label-sm tester-field">
             <span class="tester-field-label">prepend icon (mdi-* | flag:in | flagcdn.com/in.svg | custom image url)</span>
-            <input v-model="textField.prependInnerIcon" class="tester-input" type="text" placeholder="flag:in" />
+            <input v-model="textField.prependIcon" class="tester-input" type="text" placeholder="flag:in" />
           </label>
 
           <label class="text-label-sm tester-field">
             <span class="tester-field-label">append icon (mdi-* | flag:us | https://flagcdn.com/us.svg | custom image url)</span>
-            <input v-model="textField.appendInnerIcon" class="tester-input" type="text" placeholder="mdi-plus" />
+            <input v-model="textField.appendIcon" class="tester-input" type="text" placeholder="mdi-plus" />
           </label>
 
           <label class="text-label-sm tester-field">
@@ -503,7 +503,7 @@
           <label class="text-label-sm tester-field">
             <span class="tester-field-label">char-limit (backend)</span>
             <input
-              v-model.number="textField.charLimit"
+              v-model.number="textField.maxlength"
               class="tester-input"
               type="number"
               min="1"
@@ -531,7 +531,7 @@
 
           <label class="text-label-sm tester-field">
             <span class="tester-field-label">input</span>
-            <textarea v-model="textArea.input" class="tester-input tester-code" />
+            <textarea v-model="textArea.modelValue" class="tester-input tester-code" />
           </label>
 
           <label class="text-label-sm tester-field">
@@ -542,7 +542,7 @@
           <label class="text-label-sm tester-field">
             <span class="tester-field-label">char-limit</span>
             <input
-              v-model.number="textArea.charLimit"
+              v-model.number="textArea.maxlength"
               class="tester-input"
               type="number"
               min="1"
@@ -647,7 +647,7 @@ const defaultPropsByComponent = {
     variant: 'default',
     size: 'default',
     label: 'AA',
-    imageSrc: '',
+    image: '',
     count: 1,
     rounded: true,
   },
@@ -675,7 +675,7 @@ const defaultPropsByComponent = {
   },
   'combo-box': {
     variant: 'default',
-    multiSelect: false,
+    multiple: false,
     placeholder: 'Placeholder Select Something',
     icon: '',
     hint: '',
@@ -703,7 +703,7 @@ const defaultPropsByComponent = {
     disabled: false,
   },
   'radio-button': {
-    value: false,
+    modelValue: false,
     label: '',
     disabled: false,
   },
@@ -712,19 +712,19 @@ const defaultPropsByComponent = {
     size: 'default',
     placeholder: 'Placeholder Enter Smthng',
     modelValue: 'Input Text',
-    prependInnerIcon: '',
-    appendInnerIcon: '',
+    prependIcon: '',
+    appendIcon: '',
     prefix: '',
     suffix: '',
     hint: '',
-    charLimit: null,
+    maxlength: null,
     disabled: false,
   },
   'text-area': {
     placeholder: 'Placeholder Enter Smthng',
-    input: 'Lorem ipsum dolor sit amet consectetur.',
+    modelValue: 'Lorem ipsum dolor sit amet consectetur.',
     hint: 'suffix',
-    charLimit: null,
+    maxlength: null,
     autoGrow: false,
     disabled: false,
   },
@@ -848,7 +848,7 @@ export default {
       if (name === 'combo-box') {
         return {
           variant: props.variant,
-          multiSelect: props.multiSelect,
+          multiple: props.multiple,
           placeholder: props.placeholder,
           icon: props.icon,
           hint: props.hint,
@@ -876,7 +876,7 @@ export default {
           return;
         }
 
-        this.avatar.imageSrc = typeof reader.result === 'string' ? reader.result : '';
+        this.avatar.image = typeof reader.result === 'string' ? reader.result : '';
         this.avatar.variant = 'img';
       };
       reader.readAsDataURL(file);
@@ -886,7 +886,7 @@ export default {
         return;
       }
 
-      if (String(this.avatar.imageSrc || '').trim().length > 0) {
+      if (String(this.avatar.image || '').trim().length > 0) {
         this.avatar.variant = 'img';
       }
     },
@@ -912,7 +912,7 @@ export default {
         value,
       }));
 
-      if (this.comboBox.multiSelect === true) {
+      if (this.comboBox.multiple === true) {
         const current = Array.isArray(this.comboBox.modelValue)
           ? this.comboBox.modelValue
           : [];
@@ -940,7 +940,7 @@ export default {
         return;
       }
 
-      if (this.comboBox.multiSelect === true) {
+      if (this.comboBox.multiple === true) {
         if (!Array.isArray(this.comboBox.modelValue)) {
           const singleValue = this.comboBox.modelValue;
           this.comboBox.modelValue = singleValue == null || singleValue === ''
@@ -955,7 +955,7 @@ export default {
       }
     },
     onComboBoxModelInput(event) {
-      if (!this.comboBox || this.comboBox.multiSelect !== true) {
+      if (!this.comboBox || this.comboBox.multiple !== true) {
         return;
       }
 
@@ -1095,7 +1095,8 @@ export default {
 
 .tester-preview {
   align-items: center;
-  background: var(--color-surface-background, #f2f3f8);
+  background: var(--white, #ffffff);
+  border: var(--border-sm) solid var(--black, #000000);
   display: flex;
   justify-content: center;
   min-height: 200px;

@@ -8,35 +8,31 @@ export const TEXT_AREA_DEFAULT_PLACEHOLDER = 'Placeholder Enter Smthng';
 export const TEXT_AREA_DEFAULT_INPUT = 'Lorem ipsum dolor sit amet consectetur.';
 export const TEXT_AREA_DEFAULT_HINT = '';
 
-function clampTextByLimit(value, charLimit) {
-  if (!charLimit) {
+function clampTextByLimit(value, maxlength) {
+  if (!maxlength) {
     return value;
   }
-  return value.slice(0, charLimit);
+  return value.slice(0, maxlength);
 }
 
 export function useTextArea(props, emit) {
   const internalValue = ref('');
-  const resolvedCharLimit = computed(() => normalizePositiveInteger(props.charLimit, null));
+  const resolvedMaxlength = computed(() => normalizePositiveInteger(props.maxlength, null));
 
-  watch(() => (
-    typeof props.modelValue === 'string' ? props.modelValue : props.input
-  ), (value) => {
+  watch(() => props.modelValue, (value) => {
     const normalizedValue = normalizeText(value, TEXT_AREA_DEFAULT_INPUT);
-    const clampedValue = clampTextByLimit(normalizedValue, resolvedCharLimit.value);
+    const clampedValue = clampTextByLimit(normalizedValue, resolvedMaxlength.value);
     internalValue.value = clampedValue;
 
     if (clampedValue !== normalizedValue) {
-      emit('update:input', clampedValue);
       emit('update:modelValue', clampedValue);
     }
   }, { immediate: true });
 
-  watch(resolvedCharLimit, (nextLimit) => {
+  watch(resolvedMaxlength, (nextLimit) => {
     const clampedValue = clampTextByLimit(internalValue.value, nextLimit);
     if (clampedValue !== internalValue.value) {
       internalValue.value = clampedValue;
-      emit('update:input', clampedValue);
       emit('update:modelValue', clampedValue);
     }
   });
@@ -47,11 +43,11 @@ export function useTextArea(props, emit) {
 
   const normalizedHint = computed(() => normalizeText(props.hint, TEXT_AREA_DEFAULT_HINT));
   const showHint = computed(() => normalizedHint.value.trim().length > 0);
-  const showCounter = computed(() => resolvedCharLimit.value !== null);
+  const showCounter = computed(() => resolvedMaxlength.value !== null);
 
   const counterText = computed(() => {
-    if (resolvedCharLimit.value) {
-      return `${internalValue.value.length}/${resolvedCharLimit.value}`;
+    if (resolvedMaxlength.value) {
+      return `${internalValue.value.length}/${resolvedMaxlength.value}`;
     }
     return `${internalValue.value.length}`;
   });
@@ -62,9 +58,8 @@ export function useTextArea(props, emit) {
     },
     set(nextValue) {
       const nextText = String(nextValue ?? '');
-      const clamped = clampTextByLimit(nextText, resolvedCharLimit.value);
+      const clamped = clampTextByLimit(nextText, resolvedMaxlength.value);
       internalValue.value = clamped;
-      emit('update:input', clamped);
       emit('update:modelValue', clamped);
     },
   });
@@ -80,7 +75,7 @@ export function useTextArea(props, emit) {
     normalizedHint,
     showHint,
     showCounter,
-    resolvedCharLimit,
+    resolvedMaxlength,
     counterText,
     rootClasses,
   };

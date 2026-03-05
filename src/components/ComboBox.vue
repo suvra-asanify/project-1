@@ -181,7 +181,7 @@ export default {
         return COMBO_BOX_VARIANTS.includes(value);
       },
     },
-    multiSelect: {
+    multiple: {
       type: Boolean,
       default: false,
     },

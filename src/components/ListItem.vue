@@ -41,9 +41,7 @@
           </slot>
 
           <slot name="avatar" :label="avatarLabel" :selected="selected" :disabled="disabled">
-            <v-avatar v-if="showAvatar" class="list-item-avatar" :size="avatarSize">
-              <span class="list-item-avatar-label">{{ avatarLabel }}</span>
-            </v-avatar>
+            <avatar v-if="showAvatar" :size="avatarSize" :label="avatarLabel" />
           </slot>
 
           <slot name="prepend-icon" :icon="prependIconConfig" :disabled="disabled">
@@ -148,9 +146,11 @@ import {
   LIST_ITEM_SIZE_KEYS,
   useListItem,
 } from '../composables/useListItem';
+import Avatar from './Avatar.vue';
 
 export default {
   name: 'list-item',
+  components: { Avatar },
   emits: ['click', 'update:selected', 'click:checkbox'],
   props: {
     size: {
@@ -434,16 +434,6 @@ export default {
   width: var(--base-24);
 }
 
-.list-item-avatar {
-  background: var(--primary);
-  color: var(--white);
-}
-
-.list-item-avatar-label {
-  font-size: var(--body-sm-size);
-  font-weight: var(--font-weight-semibold);
-  line-height: var(--body-sm-lh);
-}
 
 .list-item-prepend-icon,
 .list-item-append-icon {

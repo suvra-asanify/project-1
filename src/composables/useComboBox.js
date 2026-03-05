@@ -116,7 +116,7 @@ export function useComboBox(props, emit) {
 
   const showPrependIcon = computed(() => iconConfig.value.type !== 'none');
   const showHint = computed(() => normalizedHint.value.length > 0);
-  const isMultiple = computed(() => props.multiSelect === true);
+  const isMultiple = computed(() => props.multiple === true);
 
   const inputValue = computed({
     get() {

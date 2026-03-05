@@ -101,17 +101,13 @@ export function useList(props, attrs) {
     normalizePositiveInteger(props.maxHeight, LIST_DEFAULT_MAX_HEIGHT)
   );
 
-  const fallbackLabel = computed(() =>
-    normalizeLabel(attrs.label, LIST_DEFAULT_LABEL)
-  );
-
   const normalizedItems = computed(() => {
     if (!Array.isArray(attrs.items) || attrs.items.length === 0) {
-      return buildFallbackItems(fallbackLabel.value);
+      return buildFallbackItems(LIST_DEFAULT_LABEL);
     }
 
     return attrs.items.map((item, index) =>
-      normalizeItem(item, index + 1, fallbackLabel.value)
+      normalizeItem(item, index + 1, LIST_DEFAULT_LABEL)
     );
   });
 

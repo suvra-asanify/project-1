@@ -83,7 +83,7 @@ export default {
       type: Boolean,
       default: true,
     },
-    imageSrc: {
+    image: {
       type: String,
       default: '',
     },

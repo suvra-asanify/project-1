@@ -11,20 +11,20 @@ export const TEXT_FIELD_SIZE_KEYS = Object.freeze(['default', 'small', 'large'])
 export const TEXT_FIELD_DEFAULT_PLACEHOLDER = '';
 export const TEXT_FIELD_DEFAULT_INPUT = '';
 
-function clampTextByLimit(value, charLimit) {
-  if (!charLimit) {
+function clampTextByLimit(value, maxlength) {
+  if (!maxlength) {
     return value;
   }
-  return value.slice(0, charLimit);
+  return value.slice(0, maxlength);
 }
 
 export function useTextField(props, emit) {
   const internalValue = ref('');
-  const resolvedCharLimit = computed(() => normalizePositiveInteger(props.charLimit, null));
+  const resolvedMaxlength = computed(() => normalizePositiveInteger(props.maxlength, null));
 
   watch(() => props.modelValue, (value) => {
     const normalizedValue = normalizeText(value, TEXT_FIELD_DEFAULT_INPUT);
-    const clampedValue = clampTextByLimit(normalizedValue, resolvedCharLimit.value);
+    const clampedValue = clampTextByLimit(normalizedValue, resolvedMaxlength.value);
     internalValue.value = clampedValue;
 
     if (clampedValue !== normalizedValue) {
@@ -32,7 +32,7 @@ export function useTextField(props, emit) {
     }
   }, { immediate: true });
 
-  watch(resolvedCharLimit, (nextLimit) => {
+  watch(resolvedMaxlength, (nextLimit) => {
     const clampedValue = clampTextByLimit(internalValue.value, nextLimit);
     if (clampedValue !== internalValue.value) {
       internalValue.value = clampedValue;
@@ -46,22 +46,19 @@ export function useTextField(props, emit) {
   const normalizedPrefix = computed(() => normalizeText(props.prefix));
   const normalizedSuffix = computed(() => normalizeText(props.suffix));
   const normalizedHint = computed(() => normalizeText(props.hint));
-  const resolvedPrependIcon = computed(() => props.prependInnerIcon || props.prependIcon);
-  const resolvedAppendIcon = computed(() => props.appendInnerIcon || props.appendIcon);
+  const prependIconConfig = computed(() => toIconConfig(props.prependIcon));
+  const appendIconConfig = computed(() => toIconConfig(props.appendIcon));
 
-  const prependIconConfig = computed(() => toIconConfig(resolvedPrependIcon.value));
-  const appendIconConfig = computed(() => toIconConfig(resolvedAppendIcon.value));
-
-  const showPrependInnerIcon = computed(() => prependIconConfig.value.type !== 'none');
-  const showAppendInnerIcon = computed(() => appendIconConfig.value.type !== 'none');
+  const showPrependIcon = computed(() => prependIconConfig.value.type !== 'none');
+  const showAppendIcon = computed(() => appendIconConfig.value.type !== 'none');
   const showPrefix = computed(() => normalizedPrefix.value.trim().length > 0);
   const showSuffix = computed(() => normalizedSuffix.value.trim().length > 0);
   const showHint = computed(() => normalizedHint.value.trim().length > 0);
-  const showCounter = computed(() => resolvedCharLimit.value !== null);
+  const showCounter = computed(() => resolvedMaxlength.value !== null);
 
   const counterText = computed(() => {
-    if (resolvedCharLimit.value) {
-      return `${internalValue.value.length}/${resolvedCharLimit.value}`;
+    if (resolvedMaxlength.value) {
+      return `${internalValue.value.length}/${resolvedMaxlength.value}`;
     }
     return `${internalValue.value.length}`;
   });
@@ -72,7 +69,7 @@ export function useTextField(props, emit) {
     },
     set(nextValue) {
       const nextText = String(nextValue ?? '');
-      const clamped = clampTextByLimit(nextText, resolvedCharLimit.value);
+      const clamped = clampTextByLimit(nextText, resolvedMaxlength.value);
       internalValue.value = clamped;
       emit('update:modelValue', clamped);
     },
@@ -85,7 +82,7 @@ export function useTextField(props, emit) {
   ].filter(Boolean));
 
   const vuetifyVariant = computed(() => (
-    props.variant === 'underlined' ? 'underlined' : 'outlined'
+    props.variant === 'underlined' ? 'underlined' : 'filled'
   ));
 
   const vuetifyDensity = computed(() => {
@@ -112,8 +109,8 @@ export function useTextField(props, emit) {
     normalizedHint,
     prependIconConfig,
     appendIconConfig,
-    showPrependInnerIcon,
-    showAppendInnerIcon,
+    showPrependIcon,
+    showAppendIcon,
     showPrefix,
     showSuffix,
     showHint,
@@ -122,7 +119,7 @@ export function useTextField(props, emit) {
     rootClasses,
     vuetifyVariant,
     vuetifyDensity,
-    resolvedCharLimit,
+    resolvedMaxlength,
     hintId,
     counterId,
     describedBy,

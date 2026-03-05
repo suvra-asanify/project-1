@@ -46,9 +46,9 @@ import { useForwardSlots } from '../shared/useForwardSlots';
 
 export default {
   name: 'text-area',
-  emits: ['update:modelValue'],
+  emits: ['update:value'],
   props: {
-    modelValue: {
+    value: {
       type: String,
       default: TEXT_AREA_DEFAULT_INPUT,
     },
@@ -130,10 +130,10 @@ export default {
 .text-area :deep(.v-field) {
   --v-field-border-opacity: 1;
 
-  background: var(--white, #ffffff);
-  border-radius: var(--rounded-md);
-  color: rgba(0, 0, 0, 0.26);
-  transition: border-color 120ms ease, box-shadow 120ms ease;
+  background: var(--black-04, rgba(0, 0, 0, 0.04));
+  border-radius: var(--rounded-md) var(--rounded-md) 0 0;
+  color: var(--black-38, rgba(0, 0, 0, 0.38));
+  transition: background-color 120ms ease, color 120ms ease;
 }
 
 .text-area :deep(.v-field__overlay) {
@@ -145,12 +145,14 @@ export default {
 }
 
 .text-area:not(.disabled) :deep(.v-field:hover) {
-  color: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.08);
+  color: var(--black-38, rgba(0, 0, 0, 0.38));
 }
 
 .text-area:not(.disabled) :deep(.v-field.v-field--focused) {
-  box-shadow: 0 0 0 var(--base-1) rgba(0, 90, 156, 0.24);
-  color: var(--primary, #005a9c);
+  background: rgba(0, 0, 0, 0.16);
+  box-shadow: none;
+  color: var(--brand-87, rgba(0, 90, 156, 0.87));
 }
 
 .text-area.disabled :deep(.v-field) {
@@ -172,7 +174,7 @@ export default {
 }
 
 .text-area :deep(textarea::placeholder) {
-  color: rgba(0, 0, 0, 0.48);
+  color: var(--black-60, rgba(0, 0, 0, 0.6));
   opacity: 1;
 }
 

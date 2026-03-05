@@ -172,7 +172,7 @@ export default {
     DsIcon,
     ListItem,
   },
-  emits: ['update:modelValue', 'update:menu', 'update:search', 'click:clear'],
+  emits: ['update:value', 'update:menu', 'update:search', 'click:clear'],
   props: {
     variant: {
       type: String,
@@ -201,7 +201,7 @@ export default {
       type: Boolean,
       default: false,
     },
-    modelValue: {
+    value: {
       type: [String, Number, Boolean, Object, Array],
       default: null,
     },

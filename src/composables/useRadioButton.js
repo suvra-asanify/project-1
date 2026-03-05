@@ -4,7 +4,7 @@ export const RADIO_BUTTON_DEFAULT_LABEL = '';
 
 export function useRadioButton(props) {
   const displayLabel = computed(() => (props.label == null ? '' : String(props.label).trim()));
-  const isChecked = computed(() => props.modelValue === true);
+  const isChecked = computed(() => props.value === true);
   const showLabel = computed(() => displayLabel.value.length > 0);
 
   const rootClasses = computed(() => [

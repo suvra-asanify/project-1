@@ -75,7 +75,7 @@ import { useForwardSlots } from '../shared/useForwardSlots';
 export default {
   name: 'text-field',
   components: { DsIcon },
-  emits: ['update:modelValue'],
+  emits: ['update:value'],
   props: {
     variant: {
       type: String,
@@ -95,7 +95,7 @@ export default {
       type: String,
       default: TEXT_FIELD_DEFAULT_PLACEHOLDER,
     },
-    modelValue: {
+    value: {
       type: String,
       default: TEXT_FIELD_DEFAULT_INPUT,
     },

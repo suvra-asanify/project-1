@@ -74,21 +74,21 @@ function normalizeItems(items, itemTitle, itemValue) {
   return items.map((item, index) => normalizeItem(item, index, itemTitle, itemValue));
 }
 
-function resolveSingleLabel(modelValue, items) {
-  if (modelValue == null || modelValue === '') {
+function resolveSingleLabel(value, items) {
+  if (value == null || value === '') {
     return '';
   }
 
-  const matched = items.find((item) => isSameValue(item.value, modelValue));
+  const matched = items.find((item) => isSameValue(item.value, value));
   if (matched) {
     return matched.title;
   }
 
-  if (typeof modelValue === 'object' && modelValue !== null) {
-    return normalizeText(modelValue.title ?? modelValue.label ?? modelValue.text, '').trim();
+  if (typeof value === 'object' && value !== null) {
+    return normalizeText(value.title ?? value.label ?? value.text, '').trim();
   }
 
-  return String(modelValue);
+  return String(value);
 }
 
 export function useComboBox(props, emit) {
@@ -121,27 +121,27 @@ export function useComboBox(props, emit) {
   const inputValue = computed({
     get() {
       if (isMultiple.value) {
-        return Array.isArray(props.modelValue) ? props.modelValue : [];
+        return Array.isArray(props.value) ? props.value : [];
       }
 
-      if (Array.isArray(props.modelValue)) {
-        return props.modelValue[0] ?? null;
+      if (Array.isArray(props.value)) {
+        return props.value[0] ?? null;
       }
 
-      return props.modelValue ?? null;
+      return props.value ?? null;
     },
     set(nextValue) {
       if (isMultiple.value) {
-        emit('update:modelValue', Array.isArray(nextValue) ? nextValue : []);
+        emit('update:value',Array.isArray(nextValue) ? nextValue : []);
         return;
       }
 
       if (Array.isArray(nextValue)) {
-        emit('update:modelValue', nextValue[0] ?? null);
+        emit('update:value',nextValue[0] ?? null);
         return;
       }
 
-      emit('update:modelValue', nextValue ?? null);
+      emit('update:value',nextValue ?? null);
     },
   });
 

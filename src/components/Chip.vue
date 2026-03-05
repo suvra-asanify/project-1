@@ -2,7 +2,7 @@
   <v-chip
     class="chip"
     :class="rootClasses"
-    :variant="variant"
+    :variant="variant === 'default' ? 'flat' : variant"
     :closable="showClose"
     :close-icon="'mdi-close-circle'"
     :disabled="disabled"
@@ -82,7 +82,7 @@ export default {
   props: {
     variant: {
       type: String,
-      default: 'flat',
+      default: 'default',
       validator(value) {
         return CHIP_VARIANTS.includes(value);
       },
@@ -239,12 +239,12 @@ export default {
   width: auto;
 }
 
-.chip.variant-flat {
+.chip.variant-default {
   background: var(--chip-bg-flat) !important;
   color: var(--chip-fg-flat);
 }
 
-.chip.variant-flat.closable {
+.chip.variant-default.closable {
   background: var(--chip-bg-flat-closable) !important;
 }
 

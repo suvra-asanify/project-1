@@ -290,7 +290,7 @@
             <span class="tester-field-label">model-value (backend)</span>
             <input
               v-if="comboBox.multiple"
-              :value="Array.isArray(comboBox.modelValue) ? comboBox.modelValue.join(', ') : ''"
+              :value="Array.isArray(comboBox.value) ? comboBox.value.join(', ') : ''"
               class="tester-input"
               type="text"
               placeholder="comma separated values"
@@ -298,7 +298,7 @@
             />
             <input
               v-else
-              v-model="comboBox.modelValue"
+              v-model="comboBox.value"
               class="tester-input"
               type="text"
               placeholder="single selected value"
@@ -315,7 +315,7 @@
           <component
             :is="entry.name"
             v-bind="propsFor(entry.name)"
-            @update:modelValue="onComboBoxModelValueUpdate"
+            @update:value="onComboBoxValueUpdate"
           />
         </div>
       </div>
@@ -350,7 +350,7 @@
           <component
             :is="entry.name"
             v-bind="propsFor(entry.name)"
-            @update:modelValue="onListModelValueUpdate"
+            @update:value="onListValueUpdate"
           />
         </div>
       </div>
@@ -424,7 +424,7 @@
       <div v-else-if="entry.name === 'radio-button' && radioButton" class="tester-layout">
         <div class="tester-controls">
           <label class="text-label-sm tester-toggle">
-            <input v-model="radioButton.modelValue" type="checkbox" />
+            <input v-model="radioButton.value" type="checkbox" />
             <span>backend value (selected)</span>
           </label>
 
@@ -471,8 +471,8 @@
           </label>
 
           <label class="text-label-sm tester-field">
-            <span class="tester-field-label">input / modelValue (backend)</span>
-            <input v-model="textField.modelValue" class="tester-input" type="text" />
+            <span class="tester-field-label">input / value (backend)</span>
+            <input v-model="textField.value" class="tester-input" type="text" />
           </label>
 
           <label class="text-label-sm tester-field">
@@ -531,7 +531,7 @@
 
           <label class="text-label-sm tester-field">
             <span class="tester-field-label">input</span>
-            <textarea v-model="textArea.modelValue" class="tester-input tester-code" />
+            <textarea v-model="textArea.value" class="tester-input tester-code" />
           </label>
 
           <label class="text-label-sm tester-field">
@@ -663,7 +663,7 @@ const defaultPropsByComponent = {
     value: '1/4',
   },
   chip: {
-    variant: 'flat',
+    variant: 'default',
     color: 'default',
     closable: false,
     rounded: false,
@@ -680,13 +680,13 @@ const defaultPropsByComponent = {
     icon: '',
     hint: '',
     disabled: false,
-    modelValue: null,
+    value: null,
     items: buildComboBoxTesterItems(),
     itemsCsv: buildComboBoxItemsCsv(buildComboBoxTesterItems()),
   },
   list: {
     maxHeight: 304,
-    modelValue: 2,
+    value: 2,
     itemsCount: 6,
     items: buildListTesterItems(6),
   },
@@ -703,7 +703,7 @@ const defaultPropsByComponent = {
     disabled: false,
   },
   'radio-button': {
-    modelValue: false,
+    value: false,
     label: '',
     disabled: false,
   },
@@ -711,7 +711,7 @@ const defaultPropsByComponent = {
     variant: 'default',
     size: 'default',
     placeholder: 'Placeholder Enter Smthng',
-    modelValue: 'Input Text',
+    value: 'Input Text',
     prependIcon: '',
     appendIcon: '',
     prefix: '',
@@ -722,7 +722,7 @@ const defaultPropsByComponent = {
   },
   'text-area': {
     placeholder: 'Placeholder Enter Smthng',
-    modelValue: 'Lorem ipsum dolor sit amet consectetur.',
+    value: 'Lorem ipsum dolor sit amet consectetur.',
     hint: 'suffix',
     maxlength: null,
     autoGrow: false,
@@ -841,7 +841,7 @@ export default {
       if (name === 'list') {
         return {
           maxHeight: props.maxHeight,
-          modelValue: props.modelValue,
+          value: props.value,
           items: Array.isArray(props.items) ? props.items : [],
         };
       }
@@ -853,7 +853,7 @@ export default {
           icon: props.icon,
           hint: props.hint,
           disabled: props.disabled,
-          modelValue: props.modelValue,
+          value: props.value,
           items: Array.isArray(props.items) ? props.items : [],
         };
       }

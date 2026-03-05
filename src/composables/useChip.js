@@ -4,7 +4,7 @@ import {
   toIconConfig,
 } from '../shared/sharedHelpers';
 
-export const CHIP_VARIANTS = Object.freeze(['flat', 'tonal']);
+export const CHIP_VARIANTS = Object.freeze(['default', 'tonal']);
 export const CHIP_SIZE_KEYS = Object.freeze(['default', 'small', 'large']);
 export const CHIP_COLORS = Object.freeze([
   'default',

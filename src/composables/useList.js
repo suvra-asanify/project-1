@@ -71,13 +71,13 @@ function buildFallbackItems(label) {
   );
 }
 
-function resolveSelectedValue(modelValue, items) {
+function resolveSelectedValue(value, items) {
   if (items.length === 0) {
     return null;
   }
 
-  if (modelValue != null && modelValue !== '') {
-    const matched = items.find((item) => areValuesEqual(item.value, modelValue));
+  if (value != null && value !== '') {
+    const matched = items.find((item) => areValuesEqual(item.value, value));
     if (matched) {
       return matched.value;
     }
@@ -114,9 +114,9 @@ export function useList(props, attrs) {
   const selectedValue = ref(null);
 
   watch(
-    [normalizedItems, () => attrs.modelValue],
-    ([items, modelValue]) => {
-      selectedValue.value = resolveSelectedValue(modelValue, items);
+    [normalizedItems, () => attrs.value],
+    ([items, value]) => {
+      selectedValue.value = resolveSelectedValue(value, items);
     },
     { immediate: true }
   );

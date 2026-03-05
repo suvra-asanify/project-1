@@ -22,13 +22,13 @@ export function useTextField(props, emit) {
   const internalValue = ref('');
   const resolvedMaxlength = computed(() => normalizePositiveInteger(props.maxlength, null));
 
-  watch(() => props.modelValue, (value) => {
+  watch(() => props.value, (value) => {
     const normalizedValue = normalizeText(value, TEXT_FIELD_DEFAULT_INPUT);
     const clampedValue = clampTextByLimit(normalizedValue, resolvedMaxlength.value);
     internalValue.value = clampedValue;
 
     if (clampedValue !== normalizedValue) {
-      emit('update:modelValue', clampedValue);
+      emit('update:value',clampedValue);
     }
   }, { immediate: true });
 
@@ -36,7 +36,7 @@ export function useTextField(props, emit) {
     const clampedValue = clampTextByLimit(internalValue.value, nextLimit);
     if (clampedValue !== internalValue.value) {
       internalValue.value = clampedValue;
-      emit('update:modelValue', clampedValue);
+      emit('update:value',clampedValue);
     }
   });
 
@@ -71,7 +71,7 @@ export function useTextField(props, emit) {
       const nextText = String(nextValue ?? '');
       const clamped = clampTextByLimit(nextText, resolvedMaxlength.value);
       internalValue.value = clamped;
-      emit('update:modelValue', clamped);
+      emit('update:value',clamped);
     },
   });
 

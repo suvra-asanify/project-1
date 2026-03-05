@@ -97,7 +97,7 @@ export default {
   name: 'list',
   components: { ListItem },
   inheritAttrs: false,
-  emits: ['update:selected', 'update:modelValue', 'click:item'],
+  emits: ['update:selected', 'update:value', 'click:item'],
   props: {
     maxHeight: {
       type: Number,
@@ -119,7 +119,7 @@ export default {
     const forwardedAttrs = computed(() => {
       const rest = {};
       Object.keys(attrs).forEach((key) => {
-        if (!['items', 'modelValue'].includes(key)) {
+        if (!['items', 'value'].includes(key)) {
           rest[key] = attrs[key];
         }
       });
@@ -153,7 +153,7 @@ export default {
 
       listState.selectedValue.value = matched.value;
       emit('update:selected', matched.value);
-      emit('update:modelValue', matched.value);
+      emit('update:value', matched.value);
     };
 
     const onItemClick = (event, item, index) => {

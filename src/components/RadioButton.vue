@@ -31,9 +31,9 @@ import {
 
 export default {
   name: 'radio-button',
-  emits: ['update:modelValue'],
+  emits: ['update:value'],
   props: {
-    modelValue: {
+    value: {
       type: Boolean,
       default: false,
     },
@@ -59,7 +59,7 @@ export default {
   },
   methods: {
     onUpdate(nextValue) {
-      this.$emit('update:modelValue', nextValue === true);
+      this.$emit('update:value', nextValue === true);
     },
   },
 };

@@ -6,7 +6,7 @@
     :width="4"
     :model-value="fillPercent"
     color="green-darken-1"
-    v-bind="$attrs"
+    :aria-label="ariaLabel || undefined"
   >
     <slot :label="displayLabel" :value="fillPercent">
       <span class="progress-circular__label">{{ displayLabel }}</span>
@@ -22,7 +22,6 @@ import {
 
 export default {
   name: 'progress-circular',
-  inheritAttrs: false,
   props: {
     size: {
       type: String,
@@ -42,6 +41,10 @@ export default {
     label: {
       type: String,
       default: '',
+    },
+    ariaLabel: {
+      type: String,
+      default: null,
     },
   },
   setup(props) {

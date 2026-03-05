@@ -7,7 +7,7 @@
     :close-icon="'mdi-close-circle'"
     :disabled="disabled"
     :ripple="false"
-    v-bind="$attrs"
+    :aria-label="ariaLabel || undefined"
   >
     <template v-if="$slots.prepend || showPrependIcon" #prepend>
       <slot
@@ -79,7 +79,6 @@ import { useForwardSlots } from '../shared/useForwardSlots';
 export default {
   name: 'chip',
   components: { DsIcon },
-  inheritAttrs: false,
   props: {
     variant: {
       type: String,
@@ -125,6 +124,10 @@ export default {
     disabled: {
       type: Boolean,
       default: false,
+    },
+    ariaLabel: {
+      type: String,
+      default: null,
     },
   },
   setup(props, { slots }) {

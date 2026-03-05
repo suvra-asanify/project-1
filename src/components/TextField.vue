@@ -16,11 +16,12 @@
       :autocomplete="autocomplete"
       :error="ariaInvalid"
       :aria-invalid="ariaInvalid ? 'true' : undefined"
+      :aria-label="ariaLabel || undefined"
+      :aria-required="ariaRequired ? 'true' : undefined"
       :aria-describedby="describedBy"
       :hide-details="$slots.details || showHint || showCounter ? false : 'auto'"
       single-line
       flat
-      v-bind="$attrs"
     >
       <template v-if="$slots['prepend-inner'] || showPrependInnerIcon" #prepend-inner>
         <slot name="prepend-inner">
@@ -74,7 +75,6 @@ import { useForwardSlots } from '../shared/useForwardSlots';
 export default {
   name: 'text-field',
   components: { DsIcon },
-  inheritAttrs: false,
   emits: ['update:modelValue'],
   props: {
     variant: {
@@ -148,6 +148,14 @@ export default {
       default: 'off',
     },
     ariaInvalid: {
+      type: Boolean,
+      default: false,
+    },
+    ariaLabel: {
+      type: String,
+      default: null,
+    },
+    ariaRequired: {
       type: Boolean,
       default: false,
     },

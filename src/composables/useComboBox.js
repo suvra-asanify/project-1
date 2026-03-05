@@ -5,11 +5,10 @@ import {
 } from '../shared/sharedHelpers';
 
 export const COMBO_BOX_VARIANTS = Object.freeze(['default', 'underlined']);
-export const COMBO_BOX_STATES = Object.freeze(['default', 'hover', 'active']);
 
 export const COMBO_BOX_DEFAULT_PLACEHOLDER = 'Placeholder Select Something';
-export const COMBO_BOX_DEFAULT_ICON = 'mdi-plus';
-export const COMBO_BOX_DEFAULT_HINT = 'suffix';
+export const COMBO_BOX_DEFAULT_ICON = '';
+export const COMBO_BOX_DEFAULT_HINT = '';
 export const COMBO_BOX_DEFAULT_ITEMS = Object.freeze([
   { title: 'Option Four', value: 'Option Four' },
   { title: 'Selected Value', value: 'Selected Value' },
@@ -25,13 +24,6 @@ function normalizeVariant(value) {
     return 'default';
   }
   return COMBO_BOX_VARIANTS.includes(value) ? value : 'default';
-}
-
-function normalizeState(value) {
-  if (typeof value !== 'string') {
-    return 'default';
-  }
-  return COMBO_BOX_STATES.includes(value) ? value : 'default';
 }
 
 function normalizeKey(value, fallback) {
@@ -101,9 +93,10 @@ function resolveSingleLabel(modelValue, items) {
 
 export function useComboBox(props, emit) {
   const internalMenuValue = ref(false);
+  const internalSearchValue = ref('');
+  const isFocused = ref(false);
 
   const normalizedVariant = computed(() => normalizeVariant(props.variant));
-  const normalizedState = computed(() => normalizeState(props.state));
   const normalizedPlaceholder = computed(() =>
     normalizeText(props.placeholder, COMBO_BOX_DEFAULT_PLACEHOLDER)
   );
@@ -121,15 +114,9 @@ export function useComboBox(props, emit) {
     toIconConfig(normalizeText(props.icon, COMBO_BOX_DEFAULT_ICON).trim())
   );
 
-  const showPrependIcon = computed(() =>
-    props.hasIcon === true && iconConfig.value.type !== 'none'
-  );
-  const showHint = computed(() => props.hasHint === true && normalizedHint.value.length > 0);
-
+  const showPrependIcon = computed(() => iconConfig.value.type !== 'none');
+  const showHint = computed(() => normalizedHint.value.length > 0);
   const isMultiple = computed(() => props.multiSelect === true);
-  const forcedActiveMenu = computed(() =>
-    normalizedState.value === 'active' && props.disabled !== true
-  );
 
   const inputValue = computed({
     get() {
@@ -159,40 +146,32 @@ export function useComboBox(props, emit) {
   });
 
   watch(
-    forcedActiveMenu,
-    (isForced) => {
-      if (isForced) {
-        internalMenuValue.value = true;
-      }
-    },
-    { immediate: true }
-  );
-
-  watch(
     () => props.disabled,
     (isDisabled) => {
       if (isDisabled) {
         internalMenuValue.value = false;
+        isFocused.value = false;
       }
     }
   );
 
   const menuValue = computed({
     get() {
-      if (forcedActiveMenu.value) {
-        return true;
-      }
       return internalMenuValue.value;
     },
     set(nextValue) {
-      if (forcedActiveMenu.value) {
-        internalMenuValue.value = true;
-        emit('update:menu', true);
-        return;
-      }
-
       internalMenuValue.value = nextValue === true;
       emit('update:menu', internalMenuValue.value);
+    },
+  });
+
+  const searchValue = computed({
+    get() {
+      return internalSearchValue.value;
+    },
+    set(nextValue) {
+      internalSearchValue.value = normalizeText(nextValue, '');
+      emit('update:search', internalSearchValue.value);
     },
   });
 
@@ -204,26 +183,43 @@ export function useComboBox(props, emit) {
   });
 
   const selectedCountText = computed(() => `${selectedCount.value} selected`);
-  const selectedSingleText = computed(() =>
-    resolveSingleLabel(inputValue.value, normalizedItems.value)
+  const selectedSingleText = computed(() => {
+    if (isMultiple.value) {
+      const firstValue = Array.isArray(inputValue.value) ? inputValue.value[0] : null;
+      return resolveSingleLabel(firstValue, normalizedItems.value);
+    }
+
+    return resolveSingleLabel(inputValue.value, normalizedItems.value);
+  });
+
+  const showSelectionChip = computed(() =>
+    isMultiple.value
+    && selectedCount.value === 1
+    && selectedSingleText.value.length > 0
+  );
+  const showSelectionCount = computed(() =>
+    isMultiple.value && selectedCount.value > 1
   );
 
+  const isActive = computed(() =>
+    props.disabled !== true && (menuValue.value || isFocused.value)
+  );
   const showClearButton = computed(() =>
-    isMultiple.value && selectedCount.value > 0 && menuValue.value
+    isMultiple.value && selectedCount.value > 0 && isActive.value
   );
   const menuIcon = computed(() => (menuValue.value ? 'mdi-menu-up' : 'mdi-menu-down'));
 
   const rootClasses = computed(() => [
     normalizedVariant.value === 'underlined' ? 'underlined' : 'default',
-    normalizedState.value !== 'default' && `state-${normalizedState.value}`,
     isMultiple.value && 'multi-select',
     props.disabled && 'disabled',
     showPrependIcon.value && 'has-icon',
     showHint.value && 'has-hint',
+    isActive.value && 'is-active',
   ].filter(Boolean));
 
   const vuetifyVariant = computed(() => (
-    normalizedVariant.value === 'underlined' ? 'underlined' : 'outlined'
+    normalizedVariant.value === 'underlined' ? 'underlined' : 'filled'
   ));
 
   const menuProps = computed(() => ({
@@ -232,20 +228,33 @@ export function useComboBox(props, emit) {
     maxHeight: 304,
   }));
 
-  function onToggleMenu() {
-    menuValue.value = !menuValue.value;
-  }
-
   function onClearSelection() {
     inputValue.value = isMultiple.value ? [] : null;
     emit('click:clear');
+  }
+
+  function onFocus() {
+    if (props.disabled) {
+      return;
+    }
+    isFocused.value = true;
+  }
+
+  function onBlur() {
+    isFocused.value = false;
   }
 
   function triggerItemSelection(itemSlotProps, event) {
     if (!itemSlotProps || typeof itemSlotProps.onClick !== 'function') {
       return;
     }
-    itemSlotProps.onClick(event);
+
+    if (event && typeof event === 'object') {
+      itemSlotProps.onClick(event);
+      return;
+    }
+
+    itemSlotProps.onClick();
   }
 
   function isOptionSelected(option) {
@@ -265,6 +274,7 @@ export function useComboBox(props, emit) {
   return {
     inputValue,
     menuValue,
+    searchValue,
     normalizedItems,
     normalizedVariant,
     normalizedPlaceholder,
@@ -278,13 +288,16 @@ export function useComboBox(props, emit) {
     selectedCount,
     selectedCountText,
     selectedSingleText,
+    showSelectionChip,
+    showSelectionCount,
     showClearButton,
     menuIcon,
     rootClasses,
     vuetifyVariant,
     menuProps,
-    onToggleMenu,
     onClearSelection,
+    onFocus,
+    onBlur,
     triggerItemSelection,
     isOptionSelected,
   };

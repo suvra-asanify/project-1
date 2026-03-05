@@ -9,7 +9,7 @@
       class="progress-linear__track"
       :height="trackHeight"
       :model-value="fillPercent"
-      v-bind="$attrs"
+      :aria-label="ariaLabel || undefined"
     >
       <slot
         :count="normalizedCount"
@@ -35,7 +35,6 @@ import {
 
 export default {
   name: 'progress-linear',
-  inheritAttrs: false,
   props: {
     size: {
       type: String,
@@ -62,6 +61,10 @@ export default {
     },
     limit: {
       type: [String, Number],
+      default: null,
+    },
+    ariaLabel: {
+      type: String,
       default: null,
     },
   },

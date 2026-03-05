@@ -9,7 +9,6 @@
     :tabindex="disabled ? -1 : 0"
     role="listitem"
     :aria-selected="selected ? 'true' : 'false'"
-    v-bind="$attrs"
     @click="onClick"
   >
     <template
@@ -152,7 +151,6 @@ import {
 
 export default {
   name: 'list-item',
-  inheritAttrs: false,
   emits: ['click', 'update:selected', 'click:checkbox'],
   props: {
     size: {

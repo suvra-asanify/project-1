@@ -9,10 +9,13 @@
       :disabled="disabled"
       :auto-grow="autoGrow"
       :maxlength="resolvedCharLimit || undefined"
+      :error="ariaInvalid"
+      :aria-invalid="ariaInvalid ? 'true' : undefined"
+      :aria-label="ariaLabel || undefined"
+      :aria-required="ariaRequired ? 'true' : undefined"
       :hide-details="$slots.details || showHint || showCounter ? false : 'auto'"
       rows="4"
       flat
-      v-bind="$attrs"
     >
       <template v-for="slotName in forwardedSlotNames" :key="slotName" #[slotName]="slotProps">
         <slot :name="slotName" v-bind="slotProps" />
@@ -43,7 +46,6 @@ import { useForwardSlots } from '../shared/useForwardSlots';
 
 export default {
   name: 'text-area',
-  inheritAttrs: false,
   emits: ['update:input', 'update:modelValue'],
   props: {
     modelValue: {
@@ -71,6 +73,18 @@ export default {
       default: false,
     },
     disabled: {
+      type: Boolean,
+      default: false,
+    },
+    ariaInvalid: {
+      type: Boolean,
+      default: false,
+    },
+    ariaLabel: {
+      type: String,
+      default: null,
+    },
+    ariaRequired: {
       type: Boolean,
       default: false,
     },

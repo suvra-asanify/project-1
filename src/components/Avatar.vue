@@ -6,7 +6,7 @@
         :class="avatarClasses"
         :size="avatarSize"
         :image="isImg ? currentImageSrc : undefined"
-        v-bind="$attrs"
+        :aria-label="ariaLabel || undefined"
       >
         <template v-if="showLabel">
           <slot :label="displayLabel" :count="normalizedCount" :is-multiple="isMultiple">
@@ -30,7 +30,7 @@
       :class="avatarClasses"
       :size="avatarSize"
       :image="isImg ? currentImageSrc : undefined"
-      v-bind="$attrs"
+      :aria-label="ariaLabel || undefined"
     >
       <template v-if="showLabel">
         <slot :label="displayLabel" :count="normalizedCount" :is-multiple="isMultiple">
@@ -53,7 +53,6 @@ import {
 
 export default {
   name: 'avatar',
-  inheritAttrs: false,
   props: {
     variant: {
       type: String,
@@ -87,6 +86,10 @@ export default {
     imageSrc: {
       type: String,
       default: '',
+    },
+    ariaLabel: {
+      type: String,
+      default: null,
     },
   },
   setup(props) {

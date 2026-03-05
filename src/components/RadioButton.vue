@@ -9,7 +9,8 @@
         :label="undefined"
         :disabled="disabled"
         :ripple="false"
-        v-bind="$attrs"
+        :aria-label="ariaLabel || undefined"
+        :aria-required="ariaRequired ? 'true' : undefined"
         @update:modelValue="onUpdate"
       />
     </div>
@@ -30,7 +31,6 @@ import {
 
 export default {
   name: 'radio-button',
-  inheritAttrs: false,
   emits: ['update:value', 'update:modelValue'],
   props: {
     modelValue: {
@@ -46,6 +46,14 @@ export default {
       default: RADIO_BUTTON_DEFAULT_LABEL,
     },
     disabled: {
+      type: Boolean,
+      default: false,
+    },
+    ariaLabel: {
+      type: String,
+      default: null,
+    },
+    ariaRequired: {
       type: Boolean,
       default: false,
     },

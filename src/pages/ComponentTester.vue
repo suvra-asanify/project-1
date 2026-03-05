@@ -232,6 +232,94 @@
         </div>
       </div>
 
+      <div v-else-if="entry.name === 'combo-box' && comboBox" class="tester-layout">
+        <div class="tester-controls">
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">variant</span>
+            <select v-model="comboBox.variant" class="tester-input">
+              <option v-for="v in COMBO_BOX_VARIANTS" :key="v" :value="v">{{ v }}</option>
+            </select>
+          </label>
+
+          <label class="text-label-sm tester-toggle">
+            <input
+              v-model="comboBox.multiSelect"
+              type="checkbox"
+              @change="onComboBoxMultiSelectChange"
+            />
+            <span>multi-select</span>
+          </label>
+
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">placeholder (backend)</span>
+            <input v-model="comboBox.placeholder" class="tester-input" type="text" />
+          </label>
+
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">icon (mdi-* | flag:in | image url)</span>
+            <input
+              v-model="comboBox.icon"
+              class="tester-input"
+              type="text"
+              placeholder="leave empty to hide"
+            />
+          </label>
+
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">hint</span>
+            <input
+              v-model="comboBox.hint"
+              class="tester-input"
+              type="text"
+              placeholder="leave empty to hide"
+            />
+          </label>
+
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">items (comma separated backend)</span>
+            <input
+              v-model="comboBox.itemsCsv"
+              class="tester-input"
+              type="text"
+              placeholder="Option A, Option B, Option C"
+              @input="onComboBoxItemsCsvInput"
+            />
+          </label>
+
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">model-value (backend)</span>
+            <input
+              v-if="comboBox.multiSelect"
+              :value="Array.isArray(comboBox.modelValue) ? comboBox.modelValue.join(', ') : ''"
+              class="tester-input"
+              type="text"
+              placeholder="comma separated values"
+              @input="onComboBoxModelInput"
+            />
+            <input
+              v-else
+              v-model="comboBox.modelValue"
+              class="tester-input"
+              type="text"
+              placeholder="single selected value"
+            />
+          </label>
+
+          <label class="text-label-sm tester-toggle">
+            <input v-model="comboBox.disabled" type="checkbox" />
+            <span>disabled</span>
+          </label>
+        </div>
+
+        <div class="tester-preview rounded-md pa-6">
+          <component
+            :is="entry.name"
+            v-bind="propsFor(entry.name)"
+            @update:modelValue="onComboBoxModelValueUpdate"
+          />
+        </div>
+      </div>
+
       <div v-else-if="entry.name === 'list' && list" class="tester-layout">
         <div class="tester-controls">
           <label class="text-label-sm tester-field">
@@ -499,6 +587,10 @@ import {
   isValidExplicitSize,
 } from '../composables/useAvatar';
 import { CHIP_COLORS, CHIP_SIZE_KEYS, CHIP_VARIANTS } from '../composables/useChip';
+import {
+  COMBO_BOX_DEFAULT_ITEMS,
+  COMBO_BOX_VARIANTS,
+} from '../composables/useComboBox';
 import { PROGRESS_CIRCULAR_SIZES } from '../composables/useProgressCircular';
 import { PROGRESS_LINEAR_SIZES } from '../composables/useProgressLinear';
 import { TEXT_FIELD_SIZE_KEYS, TEXT_FIELD_VARIANTS } from '../composables/useTextField';
@@ -528,6 +620,26 @@ function buildListTesterItems(count = 6) {
     value: index + 1,
     label: 'Title',
   }));
+}
+
+function buildComboBoxTesterItems() {
+  return COMBO_BOX_DEFAULT_ITEMS.map((item) => ({ ...item }));
+}
+
+function buildComboBoxItemsCsv(items) {
+  if (!Array.isArray(items) || items.length === 0) {
+    return '';
+  }
+
+  return items
+    .map((item) => {
+      if (item && typeof item === 'object' && !Array.isArray(item)) {
+        return String(item.title ?? item.label ?? item.value ?? '').trim();
+      }
+      return String(item ?? '').trim();
+    })
+    .filter((token) => token.length > 0)
+    .join(', ');
 }
 
 const defaultPropsByComponent = {
@@ -560,6 +672,17 @@ const defaultPropsByComponent = {
     prependIcon: '',
     appendIcon: '',
     disabled: false,
+  },
+  'combo-box': {
+    variant: 'default',
+    multiSelect: false,
+    placeholder: 'Placeholder Select Something',
+    icon: '',
+    hint: '',
+    disabled: false,
+    modelValue: null,
+    items: buildComboBoxTesterItems(),
+    itemsCsv: buildComboBoxItemsCsv(buildComboBoxTesterItems()),
   },
   list: {
     maxHeight: 304,
@@ -618,6 +741,7 @@ export default {
       CHIP_COLORS,
       CHIP_SIZE_KEYS,
       CHIP_VARIANTS,
+      COMBO_BOX_VARIANTS,
       PROGRESS_CIRCULAR_SIZES,
       PROGRESS_LINEAR_SIZES,
       TEXT_FIELD_SIZE_KEYS,
@@ -648,6 +772,9 @@ export default {
     },
     chip() {
       return this.componentProps.chip || null;
+    },
+    comboBox() {
+      return this.componentProps['combo-box'] || null;
     },
     list() {
       return this.componentProps.list || null;
@@ -718,6 +845,18 @@ export default {
           items: Array.isArray(props.items) ? props.items : [],
         };
       }
+      if (name === 'combo-box') {
+        return {
+          variant: props.variant,
+          multiSelect: props.multiSelect,
+          placeholder: props.placeholder,
+          icon: props.icon,
+          hint: props.hint,
+          disabled: props.disabled,
+          modelValue: props.modelValue,
+          items: Array.isArray(props.items) ? props.items : [],
+        };
+      }
       return props;
     },
     onAvatarImageFileChange(event) {
@@ -750,6 +889,81 @@ export default {
       if (String(this.avatar.imageSrc || '').trim().length > 0) {
         this.avatar.variant = 'img';
       }
+    },
+    onComboBoxModelValueUpdate(nextValue) {
+      if (!this.comboBox) {
+        return;
+      }
+
+      this.comboBox.modelValue = nextValue;
+    },
+    onComboBoxItemsCsvInput() {
+      if (!this.comboBox) {
+        return;
+      }
+
+      const values = String(this.comboBox.itemsCsv || '')
+        .split(',')
+        .map((token) => token.trim())
+        .filter((token) => token.length > 0);
+
+      this.comboBox.items = values.map((value) => ({
+        title: value,
+        value,
+      }));
+
+      if (this.comboBox.multiSelect === true) {
+        const current = Array.isArray(this.comboBox.modelValue)
+          ? this.comboBox.modelValue
+          : [];
+
+        this.comboBox.modelValue = current.filter((entry) =>
+          values.includes(String(entry))
+        );
+        return;
+      }
+
+      if (Array.isArray(this.comboBox.modelValue)) {
+        this.comboBox.modelValue = this.comboBox.modelValue[0] ?? null;
+      }
+
+      if (this.comboBox.modelValue == null || this.comboBox.modelValue === '') {
+        return;
+      }
+
+      if (!values.includes(String(this.comboBox.modelValue))) {
+        this.comboBox.modelValue = null;
+      }
+    },
+    onComboBoxMultiSelectChange() {
+      if (!this.comboBox) {
+        return;
+      }
+
+      if (this.comboBox.multiSelect === true) {
+        if (!Array.isArray(this.comboBox.modelValue)) {
+          const singleValue = this.comboBox.modelValue;
+          this.comboBox.modelValue = singleValue == null || singleValue === ''
+            ? []
+            : [singleValue];
+        }
+        return;
+      }
+
+      if (Array.isArray(this.comboBox.modelValue)) {
+        this.comboBox.modelValue = this.comboBox.modelValue[0] ?? null;
+      }
+    },
+    onComboBoxModelInput(event) {
+      if (!this.comboBox || this.comboBox.multiSelect !== true) {
+        return;
+      }
+
+      const nextText = event && event.target ? event.target.value : '';
+      this.comboBox.modelValue = String(nextText || '')
+        .split(',')
+        .map((token) => token.trim())
+        .filter((token) => token.length > 0);
     },
     onListItemsCountInput() {
       if (!this.list) {

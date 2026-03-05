@@ -561,8 +561,13 @@
           </label>
         </div>
 
-        <div class="tester-preview rounded-md pa-6">
-          <component :is="entry.name" v-bind="propsFor(entry.name)" />
+        <div class="tester-preview tester-preview-text-area rounded-md pa-6">
+          <component
+            :is="entry.name"
+            v-bind="propsFor(entry.name)"
+            @update:value="onTextAreaValueUpdate"
+            @update:modelValue="onTextAreaModelValueUpdate"
+          />
         </div>
       </div>
 
@@ -857,6 +862,17 @@ export default {
           items: Array.isArray(props.items) ? props.items : [],
         };
       }
+      if (name === 'text-area') {
+        return {
+          placeholder: props.placeholder,
+          value: props.value,
+          modelValue: props.value,
+          hint: props.hint,
+          maxlength: props.maxlength,
+          autoGrow: props.autoGrow,
+          disabled: props.disabled,
+        };
+      }
       return props;
     },
     onAvatarImageFileChange(event) {
@@ -1002,6 +1018,20 @@ export default {
 
       this.listItem.selected = nextValue === true;
     },
+    onTextAreaValueUpdate(nextValue) {
+      if (!this.textArea) {
+        return;
+      }
+
+      this.textArea.value = String(nextValue ?? '');
+    },
+    onTextAreaModelValueUpdate(nextValue) {
+      if (!this.textArea) {
+        return;
+      }
+
+      this.textArea.value = String(nextValue ?? '');
+    },
   },
 };
 </script>
@@ -1109,6 +1139,12 @@ export default {
 
 .tester-preview-list {
   align-items: flex-start;
+}
+
+.tester-preview-text-area {
+  align-items: flex-start;
+  justify-content: flex-start;
+  min-height: 0;
 }
 
 @media (max-width: 900px) {

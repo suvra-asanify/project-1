@@ -18,14 +18,22 @@ function clampTextByLimit(value, maxlength) {
 export function useTextArea(props, emit) {
   const internalValue = ref('');
   const resolvedMaxlength = computed(() => normalizePositiveInteger(props.maxlength, null));
+  const resolvedSourceValue = computed(() => (
+    typeof props.modelValue === 'string' ? props.modelValue : props.value
+  ));
 
-  watch(() => props.value, (value) => {
+  function emitValue(nextValue) {
+    emit('update:value', nextValue);
+    emit('update:modelValue', nextValue);
+  }
+
+  watch(resolvedSourceValue, (value) => {
     const normalizedValue = normalizeText(value, TEXT_AREA_DEFAULT_INPUT);
     const clampedValue = clampTextByLimit(normalizedValue, resolvedMaxlength.value);
     internalValue.value = clampedValue;
 
     if (clampedValue !== normalizedValue) {
-      emit('update:value',clampedValue);
+      emitValue(clampedValue);
     }
   }, { immediate: true });
 
@@ -33,7 +41,7 @@ export function useTextArea(props, emit) {
     const clampedValue = clampTextByLimit(internalValue.value, nextLimit);
     if (clampedValue !== internalValue.value) {
       internalValue.value = clampedValue;
-      emit('update:value',clampedValue);
+      emitValue(clampedValue);
     }
   });
 
@@ -60,7 +68,7 @@ export function useTextArea(props, emit) {
       const nextText = String(nextValue ?? '');
       const clamped = clampTextByLimit(nextText, resolvedMaxlength.value);
       internalValue.value = clamped;
-      emit('update:value',clamped);
+      emitValue(clamped);
     },
   });
 

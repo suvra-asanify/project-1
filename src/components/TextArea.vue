@@ -14,7 +14,7 @@
       :aria-label="ariaLabel || undefined"
       :aria-required="ariaRequired ? 'true' : undefined"
       :hide-details="$slots.details || showHint || showCounter ? false : 'auto'"
-      rows="4"
+      :rows="autoGrow ? 1 : 4"
       flat
     >
       <template v-for="slotName in forwardedSlotNames" :key="slotName" #[slotName]="slotProps">
@@ -46,8 +46,12 @@ import { useForwardSlots } from '../shared/useForwardSlots';
 
 export default {
   name: 'text-area',
-  emits: ['update:value'],
+  emits: ['update:value', 'update:modelValue'],
   props: {
+    modelValue: {
+      type: String,
+      default: null,
+    },
     value: {
       type: String,
       default: TEXT_AREA_DEFAULT_INPUT,
@@ -170,7 +174,14 @@ export default {
 }
 
 .text-area.auto-grow :deep(textarea) {
+  min-height: 0;
+  overflow-y: hidden;
   resize: none;
+}
+
+.text-area.auto-grow :deep(.v-field__input) {
+  min-height: 0;
+  overflow-y: hidden;
 }
 
 .text-area :deep(textarea::placeholder) {

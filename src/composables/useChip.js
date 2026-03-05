@@ -1,8 +1,6 @@
 import { computed } from 'vue';
-import {
-  normalizeText,
-  toIconConfig,
-} from '../shared/sharedHelpers';
+import { normalizeText } from '../shared/sharedHelpers';
+import { toIconConfig } from '../shared/iconHelpers';
 
 export const CHIP_VARIANTS = Object.freeze(['default', 'tonal']);
 export const CHIP_SIZE_KEYS = Object.freeze(['default', 'small', 'large']);

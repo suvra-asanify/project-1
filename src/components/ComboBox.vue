@@ -278,7 +278,7 @@ export default {
 
       return {
         label,
-        size: nestedProps.size ?? rawItem.size,
+        size: nestedProps.size ?? rawItem.size ?? 'default',
         avatar: nestedProps.avatar ?? rawItem.avatar,
         prependIcon: nestedProps.prependIcon ?? rawItem.prependIcon,
         appendIcon: nestedProps.appendIcon ?? rawItem.appendIcon,
@@ -575,7 +575,13 @@ export default {
 
 :deep(.combo-box-menu-content .combo-box-item.list-item) {
   border-radius: var(--rounded-0);
-  max-width: none;
+  max-width: 100%;
   min-height: var(--base-48);
+  width: 100%;
+}
+
+:deep(.combo-box-menu-content .v-list-item.combo-box-item) {
+  max-width: 100%;
+  width: 100%;
 }
 </style>

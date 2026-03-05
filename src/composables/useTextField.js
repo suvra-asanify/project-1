@@ -1,9 +1,6 @@
 import { computed, ref, watch } from 'vue';
-import {
-  normalizePositiveInteger,
-  normalizeText,
-  toIconConfig,
-} from '../shared/sharedHelpers';
+import { normalizePositiveInteger, normalizeText } from '../shared/sharedHelpers';
+import { toIconConfig } from '../shared/iconHelpers';
 
 export const TEXT_FIELD_VARIANTS = Object.freeze(['default', 'underlined']);
 export const TEXT_FIELD_SIZE_KEYS = Object.freeze(['default', 'small', 'large']);

@@ -18,13 +18,10 @@ function clampTextByLimit(value, maxlength) {
 export function useTextArea(props, emit) {
   const internalValue = ref('');
   const resolvedMaxlength = computed(() => normalizePositiveInteger(props.maxlength, null));
-  const resolvedSourceValue = computed(() => (
-    typeof props.modelValue === 'string' ? props.modelValue : props.value
-  ));
+  const resolvedSourceValue = computed(() => props.value);
 
   function emitValue(nextValue) {
     emit('update:value', nextValue);
-    emit('update:modelValue', nextValue);
   }
 
   watch(resolvedSourceValue, (value) => {

@@ -566,7 +566,6 @@
             :is="entry.name"
             v-bind="propsFor(entry.name)"
             @update:value="onTextAreaValueUpdate"
-            @update:modelValue="onTextAreaModelValueUpdate"
           />
         </div>
       </div>
@@ -728,7 +727,7 @@ const defaultPropsByComponent = {
   'text-area': {
     placeholder: 'Placeholder Enter Smthng',
     value: 'Lorem ipsum dolor sit amet consectetur.',
-    hint: 'suffix',
+    hint: '',
     maxlength: null,
     autoGrow: false,
     disabled: false,
@@ -866,7 +865,6 @@ export default {
         return {
           placeholder: props.placeholder,
           value: props.value,
-          modelValue: props.value,
           hint: props.hint,
           maxlength: props.maxlength,
           autoGrow: props.autoGrow,
@@ -906,12 +904,12 @@ export default {
         this.avatar.variant = 'img';
       }
     },
-    onComboBoxModelValueUpdate(nextValue) {
+    onComboBoxValueUpdate(nextValue) {
       if (!this.comboBox) {
         return;
       }
 
-      this.comboBox.modelValue = nextValue;
+      this.comboBox.value = nextValue;
     },
     onComboBoxItemsCsvInput() {
       if (!this.comboBox) {
@@ -929,26 +927,26 @@ export default {
       }));
 
       if (this.comboBox.multiple === true) {
-        const current = Array.isArray(this.comboBox.modelValue)
-          ? this.comboBox.modelValue
+        const current = Array.isArray(this.comboBox.value)
+          ? this.comboBox.value
           : [];
 
-        this.comboBox.modelValue = current.filter((entry) =>
+        this.comboBox.value = current.filter((entry) =>
           values.includes(String(entry))
         );
         return;
       }
 
-      if (Array.isArray(this.comboBox.modelValue)) {
-        this.comboBox.modelValue = this.comboBox.modelValue[0] ?? null;
+      if (Array.isArray(this.comboBox.value)) {
+        this.comboBox.value = this.comboBox.value[0] ?? null;
       }
 
-      if (this.comboBox.modelValue == null || this.comboBox.modelValue === '') {
+      if (this.comboBox.value == null || this.comboBox.value === '') {
         return;
       }
 
-      if (!values.includes(String(this.comboBox.modelValue))) {
-        this.comboBox.modelValue = null;
+      if (!values.includes(String(this.comboBox.value))) {
+        this.comboBox.value = null;
       }
     },
     onComboBoxMultiSelectChange() {
@@ -957,17 +955,17 @@ export default {
       }
 
       if (this.comboBox.multiple === true) {
-        if (!Array.isArray(this.comboBox.modelValue)) {
-          const singleValue = this.comboBox.modelValue;
-          this.comboBox.modelValue = singleValue == null || singleValue === ''
+        if (!Array.isArray(this.comboBox.value)) {
+          const singleValue = this.comboBox.value;
+          this.comboBox.value = singleValue == null || singleValue === ''
             ? []
             : [singleValue];
         }
         return;
       }
 
-      if (Array.isArray(this.comboBox.modelValue)) {
-        this.comboBox.modelValue = this.comboBox.modelValue[0] ?? null;
+      if (Array.isArray(this.comboBox.value)) {
+        this.comboBox.value = this.comboBox.value[0] ?? null;
       }
     },
     onComboBoxModelInput(event) {
@@ -976,7 +974,7 @@ export default {
       }
 
       const nextText = event && event.target ? event.target.value : '';
-      this.comboBox.modelValue = String(nextText || '')
+      this.comboBox.value = String(nextText || '')
         .split(',')
         .map((token) => token.trim())
         .filter((token) => token.length > 0);
@@ -995,21 +993,21 @@ export default {
       this.list.items = buildListTesterItems(normalizedCount);
 
       if (normalizedCount === 0) {
-        this.list.modelValue = null;
+        this.list.value = null;
         return;
       }
 
-      const numericModel = Number(this.list.modelValue);
+      const numericModel = Number(this.list.value);
       if (!Number.isFinite(numericModel) || numericModel < 1 || numericModel > normalizedCount) {
-        this.list.modelValue = Math.min(2, normalizedCount);
+        this.list.value = Math.min(2, normalizedCount);
       }
     },
-    onListModelValueUpdate(nextValue) {
+    onListValueUpdate(nextValue) {
       if (!this.list) {
         return;
       }
 
-      this.list.modelValue = nextValue;
+      this.list.value = nextValue;
     },
     onListItemSelectedUpdate(nextValue) {
       if (!this.listItem) {
@@ -1019,13 +1017,6 @@ export default {
       this.listItem.selected = nextValue === true;
     },
     onTextAreaValueUpdate(nextValue) {
-      if (!this.textArea) {
-        return;
-      }
-
-      this.textArea.value = String(nextValue ?? '');
-    },
-    onTextAreaModelValueUpdate(nextValue) {
       if (!this.textArea) {
         return;
       }
@@ -1143,7 +1134,9 @@ export default {
 
 .tester-preview-text-area {
   align-items: flex-start;
+  align-self: flex-start;
   justify-content: flex-start;
+  height: auto;
   min-height: 0;
 }
 

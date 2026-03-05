@@ -1,8 +1,6 @@
 import { computed, ref, watch } from 'vue';
-import {
-  normalizeText,
-  toIconConfig,
-} from '../shared/sharedHelpers';
+import { normalizeText } from '../shared/sharedHelpers';
+import { toIconConfig } from '../shared/iconHelpers';
 
 export const COMBO_BOX_VARIANTS = Object.freeze(['default', 'underlined']);
 

@@ -46,12 +46,8 @@ import { useForwardSlots } from '../shared/useForwardSlots';
 
 export default {
   name: 'text-area',
-  emits: ['update:value', 'update:modelValue'],
+  emits: ['update:value'],
   props: {
-    modelValue: {
-      type: String,
-      default: null,
-    },
     value: {
       type: String,
       default: TEXT_AREA_DEFAULT_INPUT,

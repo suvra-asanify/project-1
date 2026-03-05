@@ -1,8 +1,6 @@
 import { computed } from 'vue';
-import {
-  normalizeText,
-  toIconConfig,
-} from '../shared/sharedHelpers';
+import { normalizeText } from '../shared/sharedHelpers';
+import { toIconConfig } from '../shared/iconHelpers';
 
 export const LIST_ITEM_SIZE_KEYS = Object.freeze(['default', 'small', 'large']);
 
@@ -75,7 +73,7 @@ export function useListItem(props) {
     return 'default';
   });
   const vuetifyLines = computed(() => (
-    showSubtext.value ? 'three' : 'two'
+    showSubtext.value ? 'three' : 'one'
   ));
 
   return {

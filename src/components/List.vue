@@ -81,7 +81,7 @@
 </template>
 
 <script>
-import { computed, ref } from 'vue';
+import { ref } from 'vue';
 import {
   LIST_DEFAULT_MAX_HEIGHT,
   useList,
@@ -109,87 +109,75 @@ export default {
       default: null,
     },
   },
-  setup(props, { slots, emit }) {
-    const listState = useList(props);
-    const forwardedSlotNames = useForwardSlots(slots, [
-      'default',
-      'items',
-      'item',
-      'title',
-      'prepend',
-      'append',
-    ]);
-
+  setup(props, { slots }) {
     const listBodyRef = ref(null);
-    const scrollTop = ref(0);
-
-    const scrollbarThumbStyles = computed(() => {
-      const el = listBodyRef.value;
+    return {
+      ...useList(props),
+      forwardedSlotNames: useForwardSlots(slots, [
+        'default',
+        'items',
+        'item',
+        'title',
+        'prepend',
+        'append',
+      ]),
+      listBodyRef,
+    };
+  },
+  data() {
+    return {
+      scrollTop: 0,
+    };
+  },
+  computed: {
+    scrollbarThumbStyles() {
+      const el = this.listBodyRef;
       if (!el) return { height: '100%', top: '0%' };
       const { scrollHeight, clientHeight } = el;
       if (scrollHeight <= clientHeight) return { height: '100%', top: '0%' };
       const thumbHeight = (clientHeight / scrollHeight) * 100;
-      const thumbTop = (scrollTop.value / (scrollHeight - clientHeight)) * (100 - thumbHeight);
+      const thumbTop = (this.scrollTop / (scrollHeight - clientHeight)) * (100 - thumbHeight);
       return { height: `${thumbHeight}%`, top: `${thumbTop}%` };
-    });
-
-    const onBodyScroll = (event) => {
-      scrollTop.value = event.target.scrollTop;
-    };
-
-    const resolveItemValue = (candidate) => (
-      candidate && typeof candidate === 'object' && 'value' in candidate
+    },
+  },
+  methods: {
+    onBodyScroll(event) {
+      this.scrollTop = event.target.scrollTop;
+    },
+    resolveItemValue(candidate) {
+      return candidate && typeof candidate === 'object' && 'value' in candidate
         ? candidate.value
-        : candidate
-    );
-
-    const isItemSelected = (item) => (
-      listState.selectedValue.value != null
-      && areValuesEqual(item.value, listState.selectedValue.value)
-    );
-
-    const selectItem = (candidate) => {
-      const value = resolveItemValue(candidate);
+        : candidate;
+    },
+    isItemSelected(item) {
+      return this.selectedValue != null && areValuesEqual(item.value, this.selectedValue);
+    },
+    selectItem(candidate) {
+      const value = this.resolveItemValue(candidate);
       if (value == null || value === '') return;
 
-      const matched = listState.normalizedItems.value.find((item) =>
-        areValuesEqual(item.value, value)
-      );
+      const matched = this.normalizedItems.find((item) => areValuesEqual(item.value, value));
       if (!matched) return;
 
-      listState.selectedValue.value = matched.value;
-      emit('update:selected', matched.value);
-      emit('update:value', matched.value);
-    };
-
-    const onItemClick = (event, item, index) => {
-      selectItem(item.value);
-      emit('click:item', {
+      this.selectedValue = matched.value;
+      this.$emit('update:selected', matched.value);
+      this.$emit('update:value', matched.value);
+    },
+    onItemClick(event, item, index) {
+      this.selectItem(item.value);
+      this.$emit('click:item', {
         event,
         index: index + 1,
         key: item.key,
         value: item.value,
         item: item.raw,
       });
-    };
-
-    const onItemSelectedUpdate = (item, nextValue) => {
+    },
+    onItemSelectedUpdate(item, nextValue) {
       if (nextValue === true) {
-        selectItem(item.value);
+        this.selectItem(item.value);
       }
-    };
-
-    return {
-      ...listState,
-      forwardedSlotNames,
-      listBodyRef,
-      scrollbarThumbStyles,
-      onBodyScroll,
-      selectItem,
-      isItemSelected,
-      onItemClick,
-      onItemSelectedUpdate,
-    };
+    },
   },
 };
 </script>

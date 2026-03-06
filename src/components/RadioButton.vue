@@ -11,7 +11,7 @@
         :ripple="false"
         :aria-label="ariaLabel || undefined"
         :aria-required="ariaRequired ? 'true' : undefined"
-        @update:modelValue="onUpdate"
+        @update:model-value="onUpdate"
       />
     </div>
 

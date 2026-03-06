@@ -78,16 +78,11 @@ export function useProgressLinear(props) {
 
   const fillPercent = computed(() => parsedValue.value?.fillPercent ?? 0);
 
-  const normalizedRange = computed(() => (
-    parsedValue.value ? parsedValue.value.rangeText : ''
-  ));
+  const normalizedRange = computed(() => parsedValue.value?.rangeText ?? '');
 
-  const labelText = computed(() => (
-    parsedValue.value ? parsedValue.value.labelText : ''
-  ));
+  const labelText = computed(() => parsedValue.value?.labelText ?? '');
 
   const trackHeight = computed(() => (isLarge.value ? 20 : 10));
-  const applyRounded = computed(() => isLarge.value && props.rounded === true);
 
   const currentValue = computed(() => {
     const explicit = normalizeOptionalText(props.current);
@@ -105,7 +100,7 @@ export function useProgressLinear(props) {
 
   const rootClasses = computed(() => [
     props.size !== 'default' && `size-${props.size}`,
-    applyRounded.value && 'rounded',
+    isLarge.value && props.rounded === true && 'rounded',
     showLimit.value && 'show-limit',
   ].filter(Boolean));
 

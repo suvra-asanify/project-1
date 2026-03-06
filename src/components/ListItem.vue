@@ -36,7 +36,7 @@
               density="compact"
               tabindex="-1"
               @click.stop
-              @update:modelValue="onCheckboxUpdate"
+              @update:model-value="onCheckboxUpdate"
             />
           </slot>
 
@@ -137,7 +137,6 @@
 </template>
 
 <script>
-import { computed } from 'vue';
 import {
   LIST_ITEM_DEFAULT_APPEND_TEXT,
   LIST_ITEM_DEFAULT_ICON,
@@ -199,35 +198,28 @@ export default {
     },
   },
   setup(props, { slots }) {
-    const listItemState = useListItem(props);
-    const avatarSize = computed(() => {
-      if (listItemState.normalizedSize.value === 'small') {
-        return 32;
-      }
-      if (listItemState.normalizedSize.value === 'large') {
-        return 40;
-      }
-      return 36;
-    });
-
-    const forwardedSlotNames = useForwardSlots(slots, [
-      'default',
-      'prepend',
-      'append',
-      'title',
-      'subtitle',
-      'checkbox',
-      'avatar',
-      'prepend-icon',
-      'append-text',
-      'append-icon',
-    ]);
-
     return {
-      ...listItemState,
-      avatarSize,
-      forwardedSlotNames,
+      ...useListItem(props),
+      forwardedSlotNames: useForwardSlots(slots, [
+        'default',
+        'prepend',
+        'append',
+        'title',
+        'subtitle',
+        'checkbox',
+        'avatar',
+        'prepend-icon',
+        'append-text',
+        'append-icon',
+      ]),
     };
+  },
+  computed: {
+    avatarSize() {
+      if (this.normalizedSize === 'small') return 32;
+      if (this.normalizedSize === 'large') return 40;
+      return 36;
+    },
   },
   methods: {
     onClick(event) {

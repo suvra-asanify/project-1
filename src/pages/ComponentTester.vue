@@ -592,6 +592,9 @@ import {
 } from '../composables/useAvatar';
 import { CHIP_COLORS, CHIP_SIZE_KEYS, CHIP_VARIANTS } from '../composables/useChip';
 import { COMBO_BOX_VARIANTS } from '../composables/useComboBox';
+import { PROGRESS_CIRCULAR_SIZES } from '../composables/useProgressCircular';
+import { PROGRESS_LINEAR_SIZES } from '../composables/useProgressLinear';
+import { TEXT_FIELD_SIZE_KEYS, TEXT_FIELD_VARIANTS } from '../composables/useTextField';
 
 const COMBO_BOX_TESTER_ITEMS = Object.freeze([
   { title: 'Option Four', value: 'Option Four' },
@@ -602,9 +605,6 @@ const COMBO_BOX_TESTER_ITEMS = Object.freeze([
   { title: 'Option Two', value: 'Option Two' },
   { title: 'Title', value: 'Title' },
 ]);
-import { PROGRESS_CIRCULAR_SIZES } from '../composables/useProgressCircular';
-import { PROGRESS_LINEAR_SIZES } from '../composables/useProgressLinear';
-import { TEXT_FIELD_SIZE_KEYS, TEXT_FIELD_VARIANTS } from '../composables/useTextField';
 
 const componentFiles = require.context('../components', false, /\.vue$/);
 const autoComponents = {};

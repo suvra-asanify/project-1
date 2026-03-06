@@ -449,6 +449,107 @@
         </div>
       </div>
 
+      <div v-else-if="entry.name === 'date-time-picker' && dateTimePicker" class="tester-layout">
+        <div class="tester-controls">
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">variant</span>
+            <select v-model="dateTimePicker.variant" class="tester-input">
+              <option v-for="v in DATE_TIME_PICKER_VARIANTS" :key="v" :value="v">{{ v }}</option>
+            </select>
+          </label>
+
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">type</span>
+            <select v-model="dateTimePicker.type" class="tester-input" @change="onDateTimePickerTypeChange">
+              <option v-for="t in DATE_TIME_PICKER_TYPES" :key="t" :value="t">{{ t }}</option>
+            </select>
+          </label>
+
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">state</span>
+            <select v-model="dateTimePicker.state" class="tester-input">
+              <option v-for="s in DATE_TIME_PICKER_STATES" :key="s" :value="s">{{ s }}</option>
+            </select>
+          </label>
+
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">placeholder (backend)</span>
+            <input v-model="dateTimePicker.placeholder" class="tester-input" type="text" />
+          </label>
+
+          <label class="text-label-sm tester-toggle">
+            <input v-model="dateTimePicker.hasIcon" type="checkbox" />
+            <span>has-icon</span>
+          </label>
+
+          <label v-if="dateTimePicker.hasIcon" class="text-label-sm tester-field">
+            <span class="tester-field-label">icon (mdi-* | flag:in | image url)</span>
+            <input v-model="dateTimePicker.icon" class="tester-input" type="text" />
+          </label>
+
+          <label class="text-label-sm tester-toggle">
+            <input v-model="dateTimePicker.hasHint" type="checkbox" />
+            <span>has-hint</span>
+          </label>
+
+          <label v-if="dateTimePicker.hasHint" class="text-label-sm tester-field">
+            <span class="tester-field-label">hint (backend)</span>
+            <input v-model="dateTimePicker.hint" class="tester-input" type="text" />
+          </label>
+
+          <label v-if="dateTimePicker.type === 'date-range'" class="text-label-sm tester-field">
+            <span class="tester-field-label">value range (comma separated)</span>
+            <input
+              :value="Array.isArray(dateTimePicker.value) ? dateTimePicker.value.join(', ') : ''"
+              class="tester-input"
+              type="text"
+              placeholder="2020-09-18, 2020-09-23"
+              @input="onDateTimePickerRangeInput"
+            />
+          </label>
+
+          <label v-else-if="dateTimePicker.type === 'date-time'" class="text-label-sm tester-field">
+            <span class="tester-field-label">value date (YYYY-MM-DD)</span>
+            <input
+              :value="dateTimePicker.value && dateTimePicker.value.date ? dateTimePicker.value.date : ''"
+              class="tester-input"
+              type="text"
+              placeholder="2020-09-18"
+              @input="onDateTimePickerDateInput"
+            />
+          </label>
+
+          <label v-if="dateTimePicker.type === 'date-time'" class="text-label-sm tester-field">
+            <span class="tester-field-label">value time (HH:mm)</span>
+            <input
+              :value="dateTimePicker.value && dateTimePicker.value.time ? dateTimePicker.value.time : ''"
+              class="tester-input"
+              type="text"
+              placeholder="09:30"
+              @input="onDateTimePickerTimeInput"
+            />
+          </label>
+
+          <label v-if="dateTimePicker.type !== 'date-range' && dateTimePicker.type !== 'date-time'" class="text-label-sm tester-field">
+            <span class="tester-field-label">value (backend)</span>
+            <input v-model="dateTimePicker.value" class="tester-input" type="text" />
+          </label>
+
+          <label class="text-label-sm tester-toggle">
+            <input v-model="dateTimePicker.disabled" type="checkbox" />
+            <span>disabled</span>
+          </label>
+        </div>
+
+        <div class="tester-preview rounded-md pa-6">
+          <component
+            :is="entry.name"
+            v-bind="propsFor(entry.name)"
+            @update:value="onDateTimePickerValueUpdate"
+          />
+        </div>
+      </div>
+
       <div v-else-if="entry.name === 'text-field' && textField" class="tester-layout">
         <div class="tester-controls">
           <label class="text-label-sm tester-field">
@@ -570,6 +671,68 @@
         </div>
       </div>
 
+      <div v-else-if="entry.name === 'rich-text-editor' && richTextEditor" class="tester-layout">
+        <div class="tester-controls">
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">placeholder</span>
+            <input v-model="richTextEditor.placeholder" class="tester-input" type="text" />
+          </label>
+
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">value (html)</span>
+            <textarea v-model="richTextEditor.value" class="tester-input tester-code" />
+          </label>
+
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">hint</span>
+            <input v-model="richTextEditor.hint" class="tester-input" type="text" />
+          </label>
+
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">min-height</span>
+            <input v-model.number="richTextEditor.minHeight" class="tester-input" type="number" min="120" step="1" />
+          </label>
+
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">max-height</span>
+            <input v-model.number="richTextEditor.maxHeight" class="tester-input" type="number" min="120" step="1" />
+          </label>
+
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">formats (comma separated)</span>
+            <input v-model="richTextEditor.formatsCsv" class="tester-input" type="text" />
+          </label>
+
+          <label class="text-label-sm tester-toggle">
+            <input v-model="richTextEditor.toolbarEnabled" type="checkbox" />
+            <span>module.toolbar</span>
+          </label>
+
+          <label class="text-label-sm tester-toggle">
+            <input v-model="richTextEditor.historyEnabled" type="checkbox" />
+            <span>module.history</span>
+          </label>
+
+          <label class="text-label-sm tester-toggle">
+            <input v-model="richTextEditor.readonly" type="checkbox" />
+            <span>readonly</span>
+          </label>
+
+          <label class="text-label-sm tester-toggle">
+            <input v-model="richTextEditor.disabled" type="checkbox" />
+            <span>disabled</span>
+          </label>
+        </div>
+
+        <div class="tester-preview tester-preview-quill rounded-md pa-6">
+          <component
+            :is="entry.name"
+            v-bind="propsFor(entry.name)"
+            @update:value="onRichTextEditorValueUpdate"
+          />
+        </div>
+      </div>
+
       <div v-else class="tester-preview rounded-md pa-6">
         <component :is="entry.name" v-bind="propsFor(entry.name)" />
       </div>
@@ -592,6 +755,11 @@ import {
 } from '../composables/useAvatar';
 import { CHIP_COLORS, CHIP_SIZE_KEYS, CHIP_VARIANTS } from '../composables/useChip';
 import { COMBO_BOX_VARIANTS } from '../composables/useComboBox';
+import {
+  DATE_TIME_PICKER_STATES,
+  DATE_TIME_PICKER_TYPES,
+  DATE_TIME_PICKER_VARIANTS,
+} from '../composables/useDateTimePicker';
 import { PROGRESS_CIRCULAR_SIZES } from '../composables/useProgressCircular';
 import { PROGRESS_LINEAR_SIZES } from '../composables/useProgressLinear';
 import { TEXT_FIELD_SIZE_KEYS, TEXT_FIELD_VARIANTS } from '../composables/useTextField';
@@ -739,6 +907,30 @@ const defaultPropsByComponent = {
     autoGrow: false,
     disabled: false,
   },
+  'date-time-picker': {
+    variant: 'default',
+    type: 'date',
+    state: 'default',
+    placeholder: '',
+    hasIcon: false,
+    icon: 'mdi-plus',
+    hasHint: false,
+    hint: '',
+    disabled: false,
+    value: null,
+  },
+  'rich-text-editor': {
+    placeholder: 'Compose an epic...',
+    value: '<p>Start writing with <strong>brand-styled</strong> controls.</p>',
+    hint: '',
+    minHeight: 200,
+    maxHeight: null,
+    formatsCsv: 'header,font,size,bold,italic,underline,strike,script,blockquote,code-block,list,indent,align,direction,color,background,link,image,video,formula,clean,history',
+    toolbarEnabled: true,
+    historyEnabled: true,
+    readonly: false,
+    disabled: false,
+  },
 };
 
 export default {
@@ -753,6 +945,9 @@ export default {
       CHIP_SIZE_KEYS,
       CHIP_VARIANTS,
       COMBO_BOX_VARIANTS,
+      DATE_TIME_PICKER_STATES,
+      DATE_TIME_PICKER_TYPES,
+      DATE_TIME_PICKER_VARIANTS,
       PROGRESS_CIRCULAR_SIZES,
       PROGRESS_LINEAR_SIZES,
       TEXT_FIELD_SIZE_KEYS,
@@ -801,6 +996,12 @@ export default {
     },
     textArea() {
       return this.componentProps['text-area'] || null;
+    },
+    dateTimePicker() {
+      return this.componentProps['date-time-picker'] || null;
+    },
+    richTextEditor() {
+      return this.componentProps['rich-text-editor'] || null;
     },
     avatarSizeMode: {
       get() {
@@ -875,6 +1076,41 @@ export default {
           hint: props.hint,
           maxlength: props.maxlength,
           autoGrow: props.autoGrow,
+          disabled: props.disabled,
+        };
+      }
+      if (name === 'date-time-picker') {
+        return {
+          variant: props.variant,
+          type: props.type,
+          state: props.state,
+          placeholder: props.placeholder,
+          hasIcon: props.hasIcon,
+          icon: props.icon,
+          hasHint: props.hasHint,
+          hint: props.hint,
+          disabled: props.disabled,
+          value: props.value,
+        };
+      }
+      if (name === 'rich-text-editor') {
+        const parsedFormats = String(props.formatsCsv || '')
+          .split(',')
+          .map((token) => token.trim())
+          .filter((token) => token.length > 0);
+
+        return {
+          placeholder: props.placeholder,
+          value: props.value,
+          hint: props.hint,
+          minHeight: props.minHeight,
+          maxHeight: props.maxHeight,
+          formats: parsedFormats,
+          modules: {
+            toolbar: props.toolbarEnabled !== false,
+            history: props.historyEnabled !== false,
+          },
+          readonly: props.readonly,
           disabled: props.disabled,
         };
       }
@@ -986,6 +1222,72 @@ export default {
         .map((token) => token.trim())
         .filter((token) => token.length > 0);
     },
+    onDateTimePickerTypeChange() {
+      if (!this.dateTimePicker) {
+        return;
+      }
+
+      if (this.dateTimePicker.type === 'date-range') {
+        this.dateTimePicker.value = [];
+        return;
+      }
+
+      if (this.dateTimePicker.type === 'date-time') {
+        this.dateTimePicker.value = { date: '', time: '' };
+        return;
+      }
+
+      this.dateTimePicker.value = '';
+    },
+    onDateTimePickerValueUpdate(nextValue) {
+      if (!this.dateTimePicker) {
+        return;
+      }
+
+      this.dateTimePicker.value = nextValue;
+    },
+    onDateTimePickerRangeInput(event) {
+      if (!this.dateTimePicker || this.dateTimePicker.type !== 'date-range') {
+        return;
+      }
+
+      const nextText = event && event.target ? event.target.value : '';
+      this.dateTimePicker.value = String(nextText || '')
+        .split(',')
+        .map((token) => token.trim())
+        .filter((token) => token.length > 0)
+        .slice(0, 2);
+    },
+    onDateTimePickerDateInput(event) {
+      if (!this.dateTimePicker || this.dateTimePicker.type !== 'date-time') {
+        return;
+      }
+
+      const nextText = String(event && event.target ? event.target.value : '').trim();
+      const currentValue = this.dateTimePicker.value && typeof this.dateTimePicker.value === 'object'
+        ? this.dateTimePicker.value
+        : { date: '', time: '' };
+
+      this.dateTimePicker.value = {
+        ...currentValue,
+        date: nextText,
+      };
+    },
+    onDateTimePickerTimeInput(event) {
+      if (!this.dateTimePicker || this.dateTimePicker.type !== 'date-time') {
+        return;
+      }
+
+      const nextText = String(event && event.target ? event.target.value : '').trim();
+      const currentValue = this.dateTimePicker.value && typeof this.dateTimePicker.value === 'object'
+        ? this.dateTimePicker.value
+        : { date: '', time: '' };
+
+      this.dateTimePicker.value = {
+        ...currentValue,
+        time: nextText,
+      };
+    },
     onListItemsCountInput() {
       if (!this.list) {
         return;
@@ -1029,6 +1331,13 @@ export default {
       }
 
       this.textArea.value = String(nextValue ?? '');
+    },
+    onRichTextEditorValueUpdate(nextValue) {
+      if (!this.richTextEditor) {
+        return;
+      }
+
+      this.richTextEditor.value = String(nextValue ?? '');
     },
   },
 };
@@ -1145,6 +1454,11 @@ export default {
   justify-content: flex-start;
   height: auto;
   min-height: 0;
+}
+
+.tester-preview-quill {
+  align-items: flex-start;
+  justify-content: flex-start;
 }
 
 @media (max-width: 900px) {

@@ -224,27 +224,26 @@ export default {
     },
   },
   setup(props, { emit, slots }) {
-    const comboBoxState = useComboBox(props, emit);
-    const forwardedSlotNames = useForwardSlots(slots, [
-      'prepend-inner',
-      'selection',
-      'item',
-      'details',
-      'item-title',
-      'item-prepend',
-      'item-append',
-    ]);
-
-    const resolveListItemProps = (item) => extractListItemProps(
-      item?.raw ?? item,
-      typeof item?.title === 'string' ? item.title : ''
-    );
-
     return {
-      ...comboBoxState,
-      forwardedSlotNames,
-      resolveListItemProps,
+      ...useComboBox(props, emit),
+      forwardedSlotNames: useForwardSlots(slots, [
+        'prepend-inner',
+        'selection',
+        'item',
+        'details',
+        'item-title',
+        'item-prepend',
+        'item-append',
+      ]),
     };
+  },
+  methods: {
+    resolveListItemProps(item) {
+      return extractListItemProps(
+        item?.raw ?? item,
+        typeof item?.title === 'string' ? item.title : ''
+      );
+    },
   },
 };
 </script>

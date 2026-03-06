@@ -1,3 +1,4 @@
+/** @type { import('@storybook/vue3-webpack5').StorybookConfig } */
 module.exports = {
   framework: {
     name: '@storybook/vue3-webpack5',

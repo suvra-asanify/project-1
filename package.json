@@ -10,13 +10,13 @@
   },
   "dependencies": {
     "@mdi/font": "^7.4.47",
-    "storybook": "7.0",
+    "storybook": "^8.6.18",
     "vue": "^3.4.0",
     "vuetify": "3.7.5"
   },
   "devDependencies": {
-    "@storybook/addon-essentials": "7.0",
-    "@storybook/vue3-webpack5": "7.0",
+    "@storybook/addon-essentials": "^8.6.18",
+    "@storybook/vue3-webpack5": "^8.6.18",
     "@vue/cli-service": "^5.0.9",
     "sass": "^1.97.3",
     "sass-loader": "^16.0.7"

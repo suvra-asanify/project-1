@@ -1,8 +1,5 @@
 import { computed } from 'vue';
-
-function clamp(value, min, max) {
-  return Math.min(max, Math.max(min, value));
-}
+import { clamp } from '../shared/sharedHelpers';
 
 function parseProgressValue(rawValue) {
   const value = String(rawValue == null ? '' : rawValue).trim();
@@ -33,7 +30,6 @@ function parseProgressValue(rawValue) {
 }
 
 export const PROGRESS_CIRCULAR_SIZES = Object.freeze(['default', 'small', 'large']);
-const PROGRESS_CIRCULAR_DEFAULTS = Object.freeze({ size: 'default' });
 const PROGRESS_CIRCULAR_SIZE_VALUES = Object.freeze({
   default: 54,
   small: 36,
@@ -41,17 +37,14 @@ const PROGRESS_CIRCULAR_SIZE_VALUES = Object.freeze({
 });
 
 export function useProgressCircular(props) {
-  const rawValue = computed(() => {
-    const source = props.value ?? props.progress;
-    return String(source == null ? '' : source).trim();
-  });
+  const rawValue = computed(() => String(props.value == null ? '' : props.value).trim());
   const normalizedLabel = computed(() => String(props.label == null ? '' : props.label).trim());
 
   const fillPercent = computed(() => parseProgressValue(rawValue.value));
   const displayLabel = computed(() => normalizedLabel.value || rawValue.value);
 
   const rootClasses = computed(() => [
-    props.size !== PROGRESS_CIRCULAR_DEFAULTS.size && `size-${props.size}`,
+    props.size !== 'default' && `size-${props.size}`,
   ].filter(Boolean));
 
   const vuetifySize = computed(() => PROGRESS_CIRCULAR_SIZE_VALUES[props.size] || PROGRESS_CIRCULAR_SIZE_VALUES.default);

@@ -1,30 +1,23 @@
 import { computed, ref, watch } from 'vue';
 import {
+  clampTextByLimit,
   normalizePositiveInteger,
   normalizeText,
 } from '../shared/sharedHelpers';
 
-export const TEXT_AREA_DEFAULT_PLACEHOLDER = 'Placeholder Enter Smthng';
-export const TEXT_AREA_DEFAULT_INPUT = 'Lorem ipsum dolor sit amet consectetur.';
+export const TEXT_AREA_DEFAULT_PLACEHOLDER = '';
+export const TEXT_AREA_DEFAULT_INPUT = '';
 export const TEXT_AREA_DEFAULT_HINT = '';
-
-function clampTextByLimit(value, maxlength) {
-  if (!maxlength) {
-    return value;
-  }
-  return value.slice(0, maxlength);
-}
 
 export function useTextArea(props, emit) {
   const internalValue = ref('');
   const resolvedMaxlength = computed(() => normalizePositiveInteger(props.maxlength, null));
-  const resolvedSourceValue = computed(() => props.value);
 
   function emitValue(nextValue) {
     emit('update:value', nextValue);
   }
 
-  watch(resolvedSourceValue, (value) => {
+  watch(() => props.value, (value) => {
     const normalizedValue = normalizeText(value, TEXT_AREA_DEFAULT_INPUT);
     const clampedValue = clampTextByLimit(normalizedValue, resolvedMaxlength.value);
     internalValue.value = clampedValue;

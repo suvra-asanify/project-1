@@ -1,5 +1,9 @@
 import { computed, ref, watch } from 'vue';
-import { normalizePositiveInteger, normalizeText } from '../shared/sharedHelpers';
+import {
+  clampTextByLimit,
+  normalizePositiveInteger,
+  normalizeText,
+} from '../shared/sharedHelpers';
 import { toIconConfig } from '../shared/iconHelpers';
 
 export const TEXT_FIELD_VARIANTS = Object.freeze(['default', 'underlined']);
@@ -7,13 +11,6 @@ export const TEXT_FIELD_SIZE_KEYS = Object.freeze(['default', 'small', 'large'])
 
 export const TEXT_FIELD_DEFAULT_PLACEHOLDER = '';
 export const TEXT_FIELD_DEFAULT_INPUT = '';
-
-function clampTextByLimit(value, maxlength) {
-  if (!maxlength) {
-    return value;
-  }
-  return value.slice(0, maxlength);
-}
 
 export function useTextField(props, emit) {
   const internalValue = ref('');
@@ -25,7 +22,7 @@ export function useTextField(props, emit) {
     internalValue.value = clampedValue;
 
     if (clampedValue !== normalizedValue) {
-      emit('update:value',clampedValue);
+      emit('update:value', clampedValue);
     }
   }, { immediate: true });
 
@@ -33,7 +30,7 @@ export function useTextField(props, emit) {
     const clampedValue = clampTextByLimit(internalValue.value, nextLimit);
     if (clampedValue !== internalValue.value) {
       internalValue.value = clampedValue;
-      emit('update:value',clampedValue);
+      emit('update:value', clampedValue);
     }
   });
 
@@ -68,7 +65,7 @@ export function useTextField(props, emit) {
       const nextText = String(nextValue ?? '');
       const clamped = clampTextByLimit(nextText, resolvedMaxlength.value);
       internalValue.value = clamped;
-      emit('update:value',clamped);
+      emit('update:value', clamped);
     },
   });
 

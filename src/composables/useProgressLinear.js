@@ -1,16 +1,13 @@
 import { computed } from 'vue';
+import { clamp } from '../shared/sharedHelpers';
 
 export const PROGRESS_LINEAR_SIZES = Object.freeze(['default', 'large']);
-
-function clamp(value, min, max) {
-  return Math.min(max, Math.max(min, value));
-}
 
 function formatNumber(value) {
   if (!Number.isFinite(value)) {
     return '0';
   }
-  return `${Number(value)}`;
+  return String(value);
 }
 
 function parseProgressValue(rawValue) {
@@ -79,12 +76,7 @@ export function useProgressLinear(props) {
   });
   const parsedValue = computed(() => parseProgressValue(normalizedCount.value));
 
-  const fillPercent = computed(() => {
-    if (!parsedValue.value) {
-      return 0;
-    }
-    return parsedValue.value.fillPercent;
-  });
+  const fillPercent = computed(() => parsedValue.value?.fillPercent ?? 0);
 
   const normalizedRange = computed(() => (
     parsedValue.value ? parsedValue.value.rangeText : ''
@@ -97,18 +89,14 @@ export function useProgressLinear(props) {
   const trackHeight = computed(() => (isLarge.value ? 20 : 10));
   const applyRounded = computed(() => isLarge.value && props.rounded === true);
 
-  const explicitCurrent = computed(() => normalizeOptionalText(props.current));
-  const explicitLimit = computed(() => normalizeOptionalText(props.limit));
-  const currentValue = computed(() => (
-    explicitCurrent.value != null
-      ? explicitCurrent.value
-      : (parsedValue.value ? parsedValue.value.currentText : '')
-  ));
-  const limitValue = computed(() => (
-    explicitLimit.value != null
-      ? explicitLimit.value
-      : (parsedValue.value ? parsedValue.value.limitText : '')
-  ));
+  const currentValue = computed(() => {
+    const explicit = normalizeOptionalText(props.current);
+    return explicit != null ? explicit : (parsedValue.value?.currentText ?? '');
+  });
+  const limitValue = computed(() => {
+    const explicit = normalizeOptionalText(props.limit);
+    return explicit != null ? explicit : (parsedValue.value?.limitText ?? '');
+  });
 
   const showLabel = computed(() => isLarge.value && labelText.value.length > 0);
   const showLimit = computed(() => (
@@ -126,7 +114,6 @@ export function useProgressLinear(props) {
     normalizedRange,
     fillPercent,
     trackHeight,
-    applyRounded,
     labelText,
     showLabel,
     showLimit,

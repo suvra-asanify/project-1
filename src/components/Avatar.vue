@@ -35,7 +35,6 @@
       <template v-if="showLabel">
         <slot :label="displayLabel" :count="normalizedCount" :is-multiple="isMultiple">
           <span class="avatar-label">{{ displayLabel }}</span>
-          <span v-if="showCount" class="avatar-count">+{{ normalizedCount }}</span>
         </slot>
       </template>
     </v-avatar>

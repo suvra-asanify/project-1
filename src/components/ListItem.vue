@@ -146,6 +146,7 @@ import {
   LIST_ITEM_SIZE_KEYS,
   useListItem,
 } from '../composables/useListItem';
+import { useForwardSlots } from '../shared/useForwardSlots';
 import Avatar from './Avatar.vue';
 
 export default {
@@ -209,20 +210,18 @@ export default {
       return 36;
     });
 
-    const forwardedSlotNames = computed(() => (
-      Object.keys(slots).filter((name) => ![
-        'default',
-        'prepend',
-        'append',
-        'title',
-        'subtitle',
-        'checkbox',
-        'avatar',
-        'prepend-icon',
-        'append-text',
-        'append-icon',
-      ].includes(name))
-    ));
+    const forwardedSlotNames = useForwardSlots(slots, [
+      'default',
+      'prepend',
+      'append',
+      'title',
+      'subtitle',
+      'checkbox',
+      'avatar',
+      'prepend-icon',
+      'append-text',
+      'append-icon',
+    ]);
 
     return {
       ...listItemState,

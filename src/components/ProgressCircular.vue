@@ -34,10 +34,6 @@ export default {
       type: [Number, String],
       default: '1/4',
     },
-    progress: {
-      type: [Number, String],
-      default: null,
-    },
     label: {
       type: String,
       default: '',

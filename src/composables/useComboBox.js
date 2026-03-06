@@ -7,22 +7,6 @@ export const COMBO_BOX_VARIANTS = Object.freeze(['default', 'underlined']);
 export const COMBO_BOX_DEFAULT_PLACEHOLDER = 'Placeholder Select Something';
 export const COMBO_BOX_DEFAULT_ICON = '';
 export const COMBO_BOX_DEFAULT_HINT = '';
-export const COMBO_BOX_DEFAULT_ITEMS = Object.freeze([
-  { title: 'Option Four', value: 'Option Four' },
-  { title: 'Selected Value', value: 'Selected Value' },
-  { title: 'Option Five', value: 'Option Five' },
-  { title: 'Option Six', value: 'Option Six' },
-  { title: 'Option Seven', value: 'Option Seven' },
-  { title: 'Option Two', value: 'Option Two' },
-  { title: 'Title', value: 'Title' },
-]);
-
-function normalizeVariant(value) {
-  if (typeof value !== 'string') {
-    return 'default';
-  }
-  return COMBO_BOX_VARIANTS.includes(value) ? value : 'default';
-}
 
 function normalizeKey(value, fallback) {
   const normalized = normalizeText(value, fallback).trim();
@@ -65,10 +49,7 @@ function normalizeItem(item, index, titleKey, valueKey) {
 }
 
 function normalizeItems(items, itemTitle, itemValue) {
-  if (!Array.isArray(items) || items.length === 0) {
-    return COMBO_BOX_DEFAULT_ITEMS.map((item) => ({ ...item }));
-  }
-
+  if (!Array.isArray(items) || items.length === 0) return [];
   return items.map((item, index) => normalizeItem(item, index, itemTitle, itemValue));
 }
 
@@ -94,7 +75,6 @@ export function useComboBox(props, emit) {
   const internalSearchValue = ref('');
   const isFocused = ref(false);
 
-  const normalizedVariant = computed(() => normalizeVariant(props.variant));
   const normalizedPlaceholder = computed(() =>
     normalizeText(props.placeholder, COMBO_BOX_DEFAULT_PLACEHOLDER)
   );
@@ -114,6 +94,10 @@ export function useComboBox(props, emit) {
 
   const showPrependIcon = computed(() => iconConfig.value.type !== 'none');
   const showHint = computed(() => normalizedHint.value.length > 0);
+  const hintId = computed(() => (
+    props.id && showHint.value ? `${props.id}-hint` : null
+  ));
+  const describedBy = computed(() => hintId.value || null);
   const isMultiple = computed(() => props.multiple === true);
 
   const inputValue = computed({
@@ -208,7 +192,7 @@ export function useComboBox(props, emit) {
   const menuIcon = computed(() => (menuValue.value ? 'mdi-menu-up' : 'mdi-menu-down'));
 
   const rootClasses = computed(() => [
-    normalizedVariant.value === 'underlined' ? 'underlined' : 'default',
+    props.variant === 'underlined' ? 'underlined' : 'default',
     isMultiple.value && 'multi-select',
     props.disabled && 'disabled',
     showPrependIcon.value && 'has-icon',
@@ -217,7 +201,7 @@ export function useComboBox(props, emit) {
   ].filter(Boolean));
 
   const vuetifyVariant = computed(() => (
-    normalizedVariant.value === 'underlined' ? 'underlined' : 'filled'
+    props.variant === 'underlined' ? 'underlined' : 'filled'
   ));
 
   const menuProps = computed(() => ({
@@ -243,16 +227,9 @@ export function useComboBox(props, emit) {
   }
 
   function triggerItemSelection(itemSlotProps, event) {
-    if (!itemSlotProps || typeof itemSlotProps.onClick !== 'function') {
-      return;
+    if (typeof itemSlotProps?.onClick === 'function') {
+      itemSlotProps.onClick(event instanceof Event ? event : undefined);
     }
-
-    if (event && typeof event === 'object') {
-      itemSlotProps.onClick(event);
-      return;
-    }
-
-    itemSlotProps.onClick();
   }
 
   function isOptionSelected(option) {
@@ -274,7 +251,6 @@ export function useComboBox(props, emit) {
     menuValue,
     searchValue,
     normalizedItems,
-    normalizedVariant,
     normalizedPlaceholder,
     normalizedHint,
     normalizedItemTitle,
@@ -282,6 +258,8 @@ export function useComboBox(props, emit) {
     iconConfig,
     showPrependIcon,
     showHint,
+    hintId,
+    describedBy,
     isMultiple,
     selectedCount,
     selectedCountText,

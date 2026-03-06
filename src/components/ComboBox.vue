@@ -65,7 +65,7 @@
           <span v-else-if="showSelectionCount && index === 0" class="combo-box-selection-text">
             {{ selectedCountText }}
           </span>
-          <span v-else-if="!isMultiple && selectedSingleText.length > 0 && index === 0" class="combo-box-selection-text">
+          <span v-else-if="!isMultiple && selectedSingleText.length > 0" class="combo-box-selection-text">
             {{ selectedSingleText }}
           </span>
         </slot>
@@ -137,33 +137,18 @@
 </template>
 
 <script>
-import { computed } from 'vue';
 import {
   COMBO_BOX_DEFAULT_HINT,
   COMBO_BOX_DEFAULT_ICON,
-  COMBO_BOX_DEFAULT_ITEMS,
   COMBO_BOX_DEFAULT_PLACEHOLDER,
   COMBO_BOX_VARIANTS,
   useComboBox,
 } from '../composables/useComboBox';
-import { normalizeText } from '../shared/sharedHelpers';
+import { extractListItemProps } from '../shared/sharedHelpers';
 import DsIcon from '../shared/DsIcon.vue';
 import { useForwardSlots } from '../shared/useForwardSlots';
 import Chip from './Chip.vue';
 import ListItem from './ListItem.vue';
-
-function resolveRawItem(item) {
-  if (!item || typeof item !== 'object') {
-    return {};
-  }
-
-  const raw = item.raw ?? item;
-  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
-    return {};
-  }
-
-  return raw;
-}
 
 export default {
   name: 'combo-box',
@@ -207,7 +192,7 @@ export default {
     },
     items: {
       type: Array,
-      default: () => COMBO_BOX_DEFAULT_ITEMS.map((item) => ({ ...item })),
+      default: () => [],
     },
     itemTitle: {
       type: String,
@@ -250,49 +235,14 @@ export default {
       'item-append',
     ]);
 
-    const hintId = computed(() => (
-      props.id && comboBoxState.showHint.value ? `${props.id}-hint` : null
-    ));
-    const describedBy = computed(() => (
-      hintId.value || null
-    ));
-
-    const resolveListItemProps = (item) => {
-      const rawItem = resolveRawItem(item);
-      const nestedProps = rawItem.props && typeof rawItem.props === 'object'
-        ? rawItem.props
-        : {};
-
-      const label = normalizeText(
-        nestedProps.label
-          ?? rawItem.label
-          ?? rawItem.title
-          ?? rawItem.text
-          ?? item.title,
-        ''
-      ).trim();
-
-      const disabled = nestedProps.disabled !== undefined
-        ? nestedProps.disabled
-        : rawItem.disabled;
-
-      return {
-        label,
-        size: nestedProps.size ?? rawItem.size ?? 'default',
-        avatar: nestedProps.avatar ?? rawItem.avatar,
-        prependIcon: nestedProps.prependIcon ?? rawItem.prependIcon,
-        appendIcon: nestedProps.appendIcon ?? rawItem.appendIcon,
-        subtext: nestedProps.subtext ?? rawItem.subtext,
-        appendText: nestedProps.appendText ?? rawItem.appendText,
-        disabled: disabled === true,
-      };
-    };
+    const resolveListItemProps = (item) => extractListItemProps(
+      item?.raw ?? item,
+      typeof item?.title === 'string' ? item.title : ''
+    );
 
     return {
       ...comboBoxState,
       forwardedSlotNames,
-      hintId,
-      describedBy,
       resolveListItemProps,
     };
   },

@@ -7,9 +7,9 @@
     density="comfortable"
     nav
     role="listbox"
-    v-bind="forwardedAttrs"
+    v-bind="$attrs"
   >
-    <div class="list-body">
+    <div ref="listBodyRef" class="list-body" @scroll="onBodyScroll">
       <slot
         name="items"
         :items="normalizedItems"
@@ -81,17 +81,14 @@
 </template>
 
 <script>
-import { computed, useAttrs } from 'vue';
+import { computed, ref } from 'vue';
 import {
   LIST_DEFAULT_MAX_HEIGHT,
   useList,
 } from '../composables/useList';
+import { areValuesEqual } from '../shared/sharedHelpers';
 import ListItem from './ListItem.vue';
 import { useForwardSlots } from '../shared/useForwardSlots';
-
-function areValuesEqual(left, right) {
-  return String(left) === String(right);
-}
 
 export default {
   name: 'list',
@@ -103,10 +100,17 @@ export default {
       type: Number,
       default: LIST_DEFAULT_MAX_HEIGHT,
     },
+    items: {
+      type: Array,
+      default: () => [],
+    },
+    value: {
+      type: [String, Number, Boolean, Object],
+      default: null,
+    },
   },
   setup(props, { slots, emit }) {
-    const attrs = useAttrs();
-    const listState = useList(props, attrs);
+    const listState = useList(props);
     const forwardedSlotNames = useForwardSlots(slots, [
       'default',
       'items',
@@ -116,15 +120,22 @@ export default {
       'append',
     ]);
 
-    const forwardedAttrs = computed(() => {
-      const rest = {};
-      Object.keys(attrs).forEach((key) => {
-        if (!['items', 'value'].includes(key)) {
-          rest[key] = attrs[key];
-        }
-      });
-      return rest;
+    const listBodyRef = ref(null);
+    const scrollTop = ref(0);
+
+    const scrollbarThumbStyles = computed(() => {
+      const el = listBodyRef.value;
+      if (!el) return { height: '100%', top: '0%' };
+      const { scrollHeight, clientHeight } = el;
+      if (scrollHeight <= clientHeight) return { height: '100%', top: '0%' };
+      const thumbHeight = (clientHeight / scrollHeight) * 100;
+      const thumbTop = (scrollTop.value / (scrollHeight - clientHeight)) * (100 - thumbHeight);
+      return { height: `${thumbHeight}%`, top: `${thumbTop}%` };
     });
+
+    const onBodyScroll = (event) => {
+      scrollTop.value = event.target.scrollTop;
+    };
 
     const resolveItemValue = (candidate) => (
       candidate && typeof candidate === 'object' && 'value' in candidate
@@ -139,17 +150,12 @@ export default {
 
     const selectItem = (candidate) => {
       const value = resolveItemValue(candidate);
-      if (value == null || value === '') {
-        return;
-      }
+      if (value == null || value === '') return;
 
       const matched = listState.normalizedItems.value.find((item) =>
         areValuesEqual(item.value, value)
       );
-
-      if (!matched) {
-        return;
-      }
+      if (!matched) return;
 
       listState.selectedValue.value = matched.value;
       emit('update:selected', matched.value);
@@ -176,7 +182,9 @@ export default {
     return {
       ...listState,
       forwardedSlotNames,
-      forwardedAttrs,
+      listBodyRef,
+      scrollbarThumbStyles,
+      onBodyScroll,
       selectItem,
       isItemSelected,
       onItemClick,

@@ -49,9 +49,12 @@ export function useAvatar(props) {
   const showCount = computed(() => isMultiple.value && normalizedCount.value > 0);
   const showLabel = computed(() => !isImg.value && displayLabel.value.length > 0);
 
+  // Per-instance token — each avatar instance owns its own counter so concurrent
+  // image probes on different instances cannot interfere with each other.
+  let imageCheckToken = 0;
+
   // Tracks if current prop URL has failed loading. Reset and revalidate on src changes.
   const hasImageError = ref(false);
-  let imageCheckToken = 0;
   watch(() => [isImg.value, props.image], ([imageVariant, source]) => {
     imageCheckToken += 1;
     const token = imageCheckToken;

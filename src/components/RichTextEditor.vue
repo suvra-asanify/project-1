@@ -10,17 +10,17 @@
         >
           <template #activator="{ props: activatorProps }">
             <v-btn
-            v-bind="activatorProps"
-            class="toolbar-select heading-trigger"
-            :disabled="isDisabled"
-            :ripple="false"
-            variant="text"
-            rounded="0"
-            aria-haspopup="listbox"
-            :aria-expanded="headingMenuOpen ? 'true' : 'false'"
-          >
-            <span>{{ selectedHeadingLabel }}</span>
-            <v-icon size="24">mdi-menu-down</v-icon>
+              v-bind="activatorProps"
+              class="toolbar-select heading-trigger"
+              :disabled="isDisabled"
+              :ripple="false"
+              variant="text"
+              rounded="0"
+              aria-haspopup="listbox"
+              :aria-expanded="headingMenuOpen ? 'true' : 'false'"
+            >
+              <span>{{ selectedHeadingLabel }}</span>
+              <v-icon size="24">mdi-menu-down</v-icon>
             </v-btn>
           </template>
           <div class="heading-menu" role="listbox">
@@ -50,26 +50,12 @@
           :key="button.key"
           type="button"
           class="toolbar-btn toolbar-btn--text"
-          :class="[button.className, { active: formatState[button.activeKey] }]"
+          :class="[`toolbar-btn--${button.key}`, { active: formatState[button.command] }]"
           :disabled="isDisabled"
           :aria-label="button.ariaLabel"
           @click="runCommand(button.command)"
         >
           {{ button.label }}
-        </button>
-      </div>
-
-      <div v-if="hasFormat('list')" class="toolbar-group">
-        <button
-          v-for="button in listButtons"
-          :key="button.key"
-          type="button"
-          class="toolbar-btn"
-          :disabled="isDisabled"
-          :aria-label="button.ariaLabel"
-          @click="runCommand(button.command)"
-        >
-          <v-icon :size="toolbarIconSize">{{ button.icon }}</v-icon>
         </button>
       </div>
 
@@ -88,17 +74,17 @@
         >
           <template #activator="{ props: activatorProps }">
             <v-btn
-            v-bind="activatorProps"
-            class="toolbar-select font-trigger"
-            :disabled="isDisabled"
-            :ripple="false"
-            variant="text"
-            rounded="0"
-            aria-haspopup="listbox"
-            :aria-expanded="fontMenuOpen ? 'true' : 'false'"
-          >
-            <span>{{ selectedFontLabel }}</span>
-            <v-icon size="24">mdi-menu-down</v-icon>
+              v-bind="activatorProps"
+              class="toolbar-select font-trigger"
+              :disabled="isDisabled"
+              :ripple="false"
+              variant="text"
+              rounded="0"
+              aria-haspopup="listbox"
+              :aria-expanded="fontMenuOpen ? 'true' : 'false'"
+            >
+              <span>{{ selectedFontLabel }}</span>
+              <v-icon size="24">mdi-menu-down</v-icon>
             </v-btn>
           </template>
           <div class="font-menu" role="listbox">
@@ -113,13 +99,13 @@
         </v-menu>
       </div>
 
-      <div v-if="hasFormat('align')" class="toolbar-group">
+      <div v-for="group in visibleIconButtonGroups" :key="group.key" class="toolbar-group">
         <button
-          v-for="button in alignButtons"
+          v-for="button in group.buttons"
           :key="button.key"
           type="button"
           class="toolbar-btn"
-          :class="{ active: formatState[button.activeKey] }"
+          :class="{ active: formatState[button.command] }"
           :disabled="isDisabled"
           :aria-label="button.ariaLabel"
           @click="runCommand(button.command)"
@@ -209,7 +195,6 @@
 </template>
 
 <script>
-import { computed } from 'vue';
 import {
   RICH_TEXT_EDITOR_DEFAULT_FORMATS,
   RICH_TEXT_EDITOR_DEFAULT_HINT,
@@ -221,20 +206,39 @@ import List from './List.vue';
 
 const TOOLBAR_ICON_SIZE = 24;
 const TEXT_FORMAT_BUTTONS = Object.freeze([
-  { key: 'bold', activeKey: 'bold', command: 'bold', label: 'B', className: 'toolbar-btn--bold', ariaLabel: 'Bold' },
-  { key: 'italic', activeKey: 'italic', command: 'italic', label: 'I', className: 'toolbar-btn--italic', ariaLabel: 'Italic' },
-  { key: 'underline', activeKey: 'underline', command: 'underline', label: 'U', className: 'toolbar-btn--underline', ariaLabel: 'Underline' },
-  { key: 'strike', activeKey: 'strikeThrough', command: 'strikeThrough', label: 'S', className: 'toolbar-btn--strike', ariaLabel: 'Strike' },
+  { key: 'bold', command: 'bold', label: 'B', ariaLabel: 'Bold' },
+  { key: 'italic', command: 'italic', label: 'I', ariaLabel: 'Italic' },
+  { key: 'underline', command: 'underline', label: 'U', ariaLabel: 'Underline' },
+  { key: 'strike', command: 'strikeThrough', label: 'S', ariaLabel: 'Strike' },
 ]);
 const LIST_BUTTONS = Object.freeze([
   { key: 'ordered', command: 'insertOrderedList', icon: 'mdi-format-list-numbered', ariaLabel: 'Ordered list' },
   { key: 'bullet', command: 'insertUnorderedList', icon: 'mdi-format-list-bulleted', ariaLabel: 'Bullet list' },
 ]);
 const ALIGN_BUTTONS = Object.freeze([
-  { key: 'left', activeKey: 'justifyLeft', command: 'justifyLeft', icon: 'mdi-format-align-left', ariaLabel: 'Align left' },
-  { key: 'center', activeKey: 'justifyCenter', command: 'justifyCenter', icon: 'mdi-format-align-center', ariaLabel: 'Align center' },
-  { key: 'right', activeKey: 'justifyRight', command: 'justifyRight', icon: 'mdi-format-align-right', ariaLabel: 'Align right' },
-  { key: 'justify', activeKey: 'justifyFull', command: 'justifyFull', icon: 'mdi-format-align-justify', ariaLabel: 'Justify' },
+  { key: 'left', command: 'justifyLeft', icon: 'mdi-format-align-left', ariaLabel: 'Align left' },
+  { key: 'center', command: 'justifyCenter', icon: 'mdi-format-align-center', ariaLabel: 'Align center' },
+  { key: 'right', command: 'justifyRight', icon: 'mdi-format-align-right', ariaLabel: 'Align right' },
+  { key: 'justify', command: 'justifyFull', icon: 'mdi-format-align-justify', ariaLabel: 'Justify' },
+]);
+const ICON_BUTTON_GROUPS = Object.freeze([
+  { key: 'list', format: 'list', buttons: LIST_BUTTONS },
+  { key: 'align', format: 'align', buttons: ALIGN_BUTTONS },
+]);
+const HEADING_LIST_ITEMS = Object.freeze([
+  { value: '1', label: 'Heading 1' },
+  { value: '2', label: 'Heading 2' },
+  { value: '3', label: 'Heading 3' },
+  { value: '4', label: 'Heading 4' },
+  { value: '5', label: 'Heading 5' },
+  { value: '6', label: 'Heading 6' },
+  { value: 'paragraph', label: 'Normal' },
+]);
+const FONT_LIST_ITEMS = Object.freeze([
+  { value: 'sans-serif', label: 'Sans Serif' },
+  { value: 'Quicksand', label: 'Quicksand' },
+  { value: 'serif', label: 'Serif' },
+  { value: 'monospace', label: 'Monospace' },
 ]);
 
 export default {
@@ -295,59 +299,32 @@ export default {
     },
   },
   setup(props, { emit }) {
-    const editorState = useRichTextEditor(props, emit);
-    const headingLabelMap = {
-      paragraph: 'Normal',
-      '1': 'Heading 1',
-      '2': 'Heading 2',
-      '3': 'Heading 3',
-      '4': 'Heading 4',
-      '5': 'Heading 5',
-      '6': 'Heading 6',
-    };
-
-    const selectedHeadingLabel = computed(() => (
-      headingLabelMap[editorState.selectedHeading.value] || 'Normal'
-    ));
-    const headingListItems = [
-      { value: '1', label: 'Heading 1' },
-      { value: '2', label: 'Heading 2' },
-      { value: '3', label: 'Heading 3' },
-      { value: '4', label: 'Heading 4' },
-      { value: '5', label: 'Heading 5' },
-      { value: '6', label: 'Heading 6' },
-      { value: 'paragraph', label: 'Normal' },
-    ];
-    const fontLabelMap = {
-      'sans-serif': 'Sans Serif',
-      Quicksand: 'Quicksand',
-      serif: 'Serif',
-      monospace: 'Monospace',
-    };
-    const fontListItems = [
-      { value: 'sans-serif', label: 'Sans Serif' },
-      { value: 'Quicksand', label: 'Quicksand' },
-      { value: 'serif', label: 'Serif' },
-      { value: 'monospace', label: 'Monospace' },
-    ];
-    const selectedFontLabel = computed(() => (
-      fontLabelMap[editorState.selectedFont.value] || 'Sans Serif'
-    ));
-    const visibleTextFormatButtons = computed(() =>
-      TEXT_FORMAT_BUTTONS.filter((button) => editorState.hasFormat(button.key))
-    );
-
     return {
-      ...editorState,
+      ...useRichTextEditor(props, emit),
       toolbarIconSize: TOOLBAR_ICON_SIZE,
-      listButtons: LIST_BUTTONS,
-      alignButtons: ALIGN_BUTTONS,
-      visibleTextFormatButtons,
-      headingListItems,
-      fontListItems,
-      selectedHeadingLabel,
-      selectedFontLabel,
+      headingListItems: HEADING_LIST_ITEMS,
+      fontListItems: FONT_LIST_ITEMS,
+      iconButtonGroups: ICON_BUTTON_GROUPS,
     };
+  },
+  computed: {
+    selectedHeadingLabel() {
+      return this.findLabel(HEADING_LIST_ITEMS, this.selectedHeading, 'Normal');
+    },
+    selectedFontLabel() {
+      return this.findLabel(FONT_LIST_ITEMS, this.selectedFont, 'Sans Serif');
+    },
+    visibleTextFormatButtons() {
+      return TEXT_FORMAT_BUTTONS.filter((button) => this.hasFormat(button.key));
+    },
+    visibleIconButtonGroups() {
+      return this.iconButtonGroups.filter((group) => this.hasFormat(group.format));
+    },
+  },
+  methods: {
+    findLabel(items, value, fallback) {
+      return items.find((item) => item.value === value)?.label ?? fallback;
+    },
   },
 };
 </script>
@@ -357,7 +334,7 @@ export default {
   background: var(--black-04, rgba(0, 0, 0, 0.04));
   border: var(--border-sm) solid rgba(0, 0, 0, 0.2);
   border-radius: var(--rounded-md) var(--rounded-md) 0 0;
-  box-shadow: inset 0 -1px 0 #767676;
+  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.38);
   display: inline-flex;
   flex-direction: column;
   position: relative;
@@ -433,26 +410,24 @@ export default {
   display: none;
 }
 
-.heading-trigger {
-  align-items: center;
-  display: inline-flex;
-  justify-content: space-between;
-  min-width: 112px;
-}
-
-.heading-menu {
-  padding-top: 2px;
-}
-
+.heading-trigger,
 .font-trigger {
   align-items: center;
   display: inline-flex;
   justify-content: space-between;
-  min-width: 120px;
 }
 
+.heading-trigger {
+  min-width: 112px;
+}
+
+.heading-menu,
 .font-menu {
   padding-top: 2px;
+}
+
+.font-trigger {
+  min-width: 120px;
 }
 
 .rte-dropdown-list {
@@ -462,12 +437,14 @@ export default {
 }
 
 .heading-list {
-  --list-width: 300px;
+  --list-width: 332px;
+  max-width: calc(100vw - 32px);
 }
 
 .heading-option-label {
   display: block;
   font-weight: var(--font-weight-medium);
+  white-space: nowrap;
 }
 
 .heading-option-1 {
@@ -527,29 +504,20 @@ export default {
   text-decoration: line-through;
 }
 
-.toolbar-btn:hover {
-  background: transparent;
-  color: var(--brand-87, rgba(0, 90, 156, 0.87));
-}
-
+.toolbar-btn:hover,
 .toolbar-select:hover {
   background: transparent;
-  color: var(--brand-87, rgba(0, 90, 156, 0.87));
+  color: var(--primary, #005a9c);
 }
 
 .toolbar-btn.active {
-  color: var(--brand-87, rgba(0, 90, 156, 0.87));
+  color: var(--primary, #005a9c);
   background: transparent;
 }
 
-.toolbar-btn:focus-visible {
-  color: var(--brand-87, rgba(0, 90, 156, 0.87));
-  outline: var(--border-sm) solid rgba(0, 90, 156, 0.24);
-  outline-offset: 1px;
-}
-
+.toolbar-btn:focus-visible,
 .toolbar-select:focus-visible {
-  color: var(--brand-87, rgba(0, 90, 156, 0.87));
+  color: var(--primary, #005a9c);
   outline: var(--border-sm) solid rgba(0, 90, 156, 0.24);
   outline-offset: 1px;
 }
@@ -562,7 +530,10 @@ export default {
 
 .toolbar-color-btn {
   align-items: center;
+  color: rgba(0, 0, 0, 0.72);
   display: inline-flex;
+  min-height: var(--base-34);
+  min-width: var(--base-34);
   position: relative;
 }
 
@@ -581,15 +552,9 @@ export default {
   display: none;
 }
 
-.toolbar-color-btn {
-  color: rgba(0, 0, 0, 0.72);
-  min-height: var(--base-34);
-  min-width: var(--base-34);
-}
-
 .toolbar-color-btn:hover,
 .toolbar-color-btn:focus-visible {
-  color: var(--brand-87, rgba(0, 90, 156, 0.87));
+  color: var(--primary, #005a9c);
 }
 
 .toolbar-btn :deep(.v-icon),
@@ -646,7 +611,7 @@ export default {
 }
 
 .rich-text-editor-content :deep(blockquote) {
-  border-left: var(--base-4) solid var(--brand-87, rgba(0, 90, 156, 0.87));
+  border-left: var(--base-4) solid var(--primary, #005a9c);
   padding-left: var(--base-8);
 }
 
@@ -657,7 +622,7 @@ export default {
 }
 
 .rich-text-editor-content :deep(a) {
-  color: var(--brand-darken-1, rgb(0, 72, 125));
+  color: var(--primary, #005a9c);
   text-decoration: underline;
 }
 
@@ -687,24 +652,8 @@ export default {
   line-height: var(--body-xs-lh);
 }
 
-.sr-only {
-  clip: rect(0, 0, 0, 0);
-  border: 0;
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  white-space: nowrap;
-  width: 1px;
-}
-
-.rich-text-editor-shell:not(.disabled):not(.readonly):hover {
-  box-shadow: inset 0 -1px 0 #717171;
-}
-
 .rich-text-editor-shell.is-focused {
-  box-shadow: inset 0 -2px 0 var(--brand-87, rgba(0, 90, 156, 0.87));
+  box-shadow: inset 0 -2px 0 var(--primary, #005a9c);
 }
 
 @media (max-width: 1200px) {

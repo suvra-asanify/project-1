@@ -12,7 +12,12 @@
       "Bash(# Port 3845 is listening - this is the Figma MCP desktop server! # Try to discover its API/endpoints curl -s http://localhost:3845/)",
       "Bash(curl -sv http://localhost:3845/sse)",
       "Bash(curl -sv -X POST http://localhost:3845/ -H \"Content-Type: application/json\" -d '{\"\"jsonrpc\"\":\"\"2.0\"\",\"\"method\"\":\"\"tools/list\"\",\"\"id\"\":1}')",
-      "mcp__figma-remote-mcp__get_design_context"
+      "mcp__figma-remote-mcp__get_design_context",
+      "Bash(npm run storybook)",
+      "Bash(npm info storybook versions --json)",
+      "Bash(npm search \"storybook vue3\")",
+      "Bash(npm info @storybook/builder-webpack5 dist-tags)",
+      "Bash(pkill -f \"storybook dev\")"
     ]
   }
 }

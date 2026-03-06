@@ -7,7 +7,6 @@
     density="comfortable"
     nav
     role="listbox"
-    v-bind="$attrs"
   >
     <div ref="listBodyRef" class="list-body" @scroll="onBodyScroll">
       <slot
@@ -93,7 +92,6 @@ import { useForwardSlots } from '../shared/useForwardSlots';
 export default {
   name: 'list',
   components: { ListItem },
-  inheritAttrs: false,
   emits: ['update:selected', 'update:value', 'click:item'],
   props: {
     maxHeight: {

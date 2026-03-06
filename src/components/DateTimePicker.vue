@@ -2,8 +2,7 @@
   <div
     ref="rootEl"
     class="date-time-picker-shell"
-    :class="{ disabled }"
-    :style="{ minWidth: fieldWidth }"
+    :class="[{ disabled }, `type-${normalizedType}`]"
   >
     <v-text-field
       :model-value="displayValue"
@@ -81,17 +80,32 @@
         :value="dateTimeValue"
         :close="closeMenu"
       >
-        <div v-if="normalizedType === 'month'" class="picker-months">
-          <button
-            v-for="month in monthOptions"
-            :key="month.value"
-            type="button"
-            class="picker-month-chip"
-            :class="{ active: monthPickerValue.startsWith(month.value.slice(0, 7)) }"
-            @click="onMonthChange(month.value)"
-          >
-            {{ month.label }}
-          </button>
+        <div v-if="normalizedType === 'month'" class="picker-month-picker">
+          <div class="picker-calendar-header">
+            <div class="picker-nav-group">
+              <button type="button" class="picker-nav-btn" @click="pickerPrevYear">
+                <v-icon size="20">mdi-chevron-left</v-icon>
+              </button>
+            </div>
+            <div class="picker-month-year">{{ pickerYear }}</div>
+            <div class="picker-nav-group">
+              <button type="button" class="picker-nav-btn" @click="pickerNextYear">
+                <v-icon size="20">mdi-chevron-right</v-icon>
+              </button>
+            </div>
+          </div>
+          <div class="picker-months">
+            <button
+              v-for="month in monthOptions"
+              :key="month.value"
+              type="button"
+              class="picker-month-chip"
+              :class="{ active: monthPickerValue.startsWith(month.value.slice(0, 7)) }"
+              @click="onMonthChange(month.value)"
+            >
+              {{ month.label }}
+            </button>
+          </div>
         </div>
 
         <div v-else-if="normalizedType === 'time'" class="picker-time-list">
@@ -112,13 +126,21 @@
             <div class="picker-calendar">
               <div class="picker-calendar-header">
                 <div class="picker-nav-group">
-                  <v-icon size="20">mdi-chevron-double-left</v-icon>
-                  <v-icon size="20">mdi-chevron-left</v-icon>
+                  <button type="button" class="picker-nav-btn" @click="prevYear">
+                    <v-icon size="20">mdi-chevron-double-left</v-icon>
+                  </button>
+                  <button type="button" class="picker-nav-btn" @click="prevMonth">
+                    <v-icon size="20">mdi-chevron-left</v-icon>
+                  </button>
                 </div>
-                <div class="picker-month-year">Sep 2020</div>
+                <div class="picker-month-year">{{ calendarMonthYear }}</div>
                 <div class="picker-nav-group">
-                  <v-icon size="20">mdi-chevron-right</v-icon>
-                  <v-icon size="20">mdi-chevron-double-right</v-icon>
+                  <button type="button" class="picker-nav-btn" @click="nextMonth">
+                    <v-icon size="20">mdi-chevron-right</v-icon>
+                  </button>
+                  <button type="button" class="picker-nav-btn" @click="nextYear">
+                    <v-icon size="20">mdi-chevron-double-right</v-icon>
+                  </button>
                 </div>
               </div>
 
@@ -150,13 +172,21 @@
             <div class="picker-calendar picker-calendar-right">
               <div class="picker-calendar-header">
                 <div class="picker-nav-group">
-                  <v-icon size="20">mdi-chevron-double-left</v-icon>
-                  <v-icon size="20">mdi-chevron-left</v-icon>
+                  <button type="button" class="picker-nav-btn" @click="prevYear">
+                    <v-icon size="20">mdi-chevron-double-left</v-icon>
+                  </button>
+                  <button type="button" class="picker-nav-btn" @click="prevMonth">
+                    <v-icon size="20">mdi-chevron-left</v-icon>
+                  </button>
                 </div>
-                <div class="picker-month-year">Oct 2020</div>
+                <div class="picker-month-year">{{ rightCalendarMonthYear }}</div>
                 <div class="picker-nav-group">
-                  <v-icon size="20">mdi-chevron-right</v-icon>
-                  <v-icon size="20">mdi-chevron-double-right</v-icon>
+                  <button type="button" class="picker-nav-btn" @click="nextMonth">
+                    <v-icon size="20">mdi-chevron-right</v-icon>
+                  </button>
+                  <button type="button" class="picker-nav-btn" @click="nextYear">
+                    <v-icon size="20">mdi-chevron-double-right</v-icon>
+                  </button>
                 </div>
               </div>
 
@@ -191,13 +221,21 @@
           <div class="picker-calendar">
             <div class="picker-calendar-header">
               <div class="picker-nav-group">
-                <v-icon size="20">mdi-chevron-double-left</v-icon>
-                <v-icon size="20">mdi-chevron-left</v-icon>
+                <button type="button" class="picker-nav-btn" @click="prevYear">
+                  <v-icon size="20">mdi-chevron-double-left</v-icon>
+                </button>
+                <button type="button" class="picker-nav-btn" @click="prevMonth">
+                  <v-icon size="20">mdi-chevron-left</v-icon>
+                </button>
               </div>
-              <div class="picker-month-year">Sep 2020</div>
+              <div class="picker-month-year">{{ calendarMonthYear }}</div>
               <div class="picker-nav-group">
-                <v-icon size="20">mdi-chevron-right</v-icon>
-                <v-icon size="20">mdi-chevron-double-right</v-icon>
+                <button type="button" class="picker-nav-btn" @click="nextMonth">
+                  <v-icon size="20">mdi-chevron-right</v-icon>
+                </button>
+                <button type="button" class="picker-nav-btn" @click="nextYear">
+                  <v-icon size="20">mdi-chevron-double-right</v-icon>
+                </button>
               </div>
             </div>
 
@@ -249,127 +287,12 @@
 <script>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import {
-  DATE_TIME_PICKER_STATES,
   DATE_TIME_PICKER_TYPES,
   DATE_TIME_PICKER_VARIANTS,
   useDateTimePicker,
 } from '../composables/useDateTimePicker';
 import DsIcon from '../shared/DsIcon.vue';
 import { useForwardSlots } from '../shared/useForwardSlots';
-
-const SINGLE_CALENDAR_CELLS = Object.freeze([
-  { label: '29', iso: '2020-08-29', muted: true, hasDot: false },
-  { label: '30', iso: '2020-08-30', muted: true, hasDot: false },
-  { label: '1', iso: '2020-09-01', muted: false, hasDot: false },
-  { label: '2', iso: '2020-09-02', muted: false, hasDot: false },
-  { label: '3', iso: '2020-09-03', muted: false, hasDot: false },
-  { label: '4', iso: '2020-09-04', muted: false, hasDot: false },
-  { label: '5', iso: '2020-09-05', muted: false, hasDot: false },
-  { label: '6', iso: '2020-09-06', muted: false, hasDot: false },
-  { label: '7', iso: '2020-09-07', muted: false, hasDot: false },
-  { label: '8', iso: '2020-09-08', muted: false, hasDot: false },
-  { label: '9', iso: '2020-09-09', muted: false, hasDot: true },
-  { label: '10', iso: '2020-09-10', muted: false, hasDot: false },
-  { label: '11', iso: '2020-09-11', muted: false, hasDot: false },
-  { label: '12', iso: '2020-09-12', muted: false, hasDot: false },
-  { label: '13', iso: '2020-09-13', muted: false, hasDot: false },
-  { label: '14', iso: '2020-09-14', muted: false, hasDot: false },
-  { label: '15', iso: '2020-09-15', muted: false, hasDot: false },
-  { label: '16', iso: '2020-09-16', muted: false, hasDot: false },
-  { label: '17', iso: '2020-09-17', muted: false, hasDot: false },
-  { label: '18', iso: '2020-09-18', muted: false, hasDot: false },
-  { label: '19', iso: '2020-09-19', muted: false, hasDot: false },
-  { label: '20', iso: '2020-09-20', muted: false, hasDot: false },
-  { label: '21', iso: '2020-09-21', muted: false, hasDot: false },
-  { label: '22', iso: '2020-09-22', muted: false, hasDot: false },
-  { label: '23', iso: '2020-09-23', muted: false, hasDot: false },
-  { label: '24', iso: '2020-09-24', muted: false, hasDot: false },
-  { label: '25', iso: '2020-09-25', muted: false, hasDot: false },
-  { label: '26', iso: '2020-09-26', muted: false, hasDot: false },
-  { label: '27', iso: '2020-09-27', muted: false, hasDot: false },
-  { label: '28', iso: '2020-09-28', muted: false, hasDot: false },
-  { label: '29', iso: '2020-09-29', muted: false, hasDot: false },
-  { label: '30', iso: '2020-09-30', muted: false, hasDot: false },
-  { label: '1', iso: '2020-10-01', muted: true, hasDot: false },
-  { label: '2', iso: '2020-10-02', muted: true, hasDot: false },
-  { label: '3', iso: '2020-10-03', muted: true, hasDot: false },
-]);
-
-const LEFT_RANGE_CALENDAR_CELLS = Object.freeze([
-  { label: '29', iso: '2020-08-29', muted: true, hasDot: false },
-  { label: '30', iso: '2020-08-30', muted: true, hasDot: false },
-  { label: '1', iso: '2020-09-01', muted: false, hasDot: false },
-  { label: '2', iso: '2020-09-02', muted: false, hasDot: false },
-  { label: '3', iso: '2020-09-03', muted: false, hasDot: false },
-  { label: '4', iso: '2020-09-04', muted: false, hasDot: false },
-  { label: '5', iso: '2020-09-05', muted: false, hasDot: false },
-  { label: '6', iso: '2020-09-06', muted: false, hasDot: false },
-  { label: '7', iso: '2020-09-07', muted: false, hasDot: false },
-  { label: '8', iso: '2020-09-08', muted: false, hasDot: false },
-  { label: '9', iso: '2020-09-09', muted: false, hasDot: true },
-  { label: '10', iso: '2020-09-10', muted: false, hasDot: false },
-  { label: '11', iso: '2020-09-11', muted: false, hasDot: false },
-  { label: '12', iso: '2020-09-12', muted: false, hasDot: false },
-  { label: '13', iso: '2020-09-13', muted: false, hasDot: false },
-  { label: '14', iso: '2020-09-14', muted: false, hasDot: false },
-  { label: '15', iso: '2020-09-15', muted: false, hasDot: false },
-  { label: '16', iso: '2020-09-16', muted: false, hasDot: false },
-  { label: '17', iso: '2020-09-17', muted: false, hasDot: false },
-  { label: '18', iso: '2020-09-18', muted: false, hasDot: false },
-  { label: '19', iso: '2020-09-19', muted: false, hasDot: false },
-  { label: '20', iso: '2020-09-20', muted: false, hasDot: false },
-  { label: '21', iso: '2020-09-21', muted: false, hasDot: false },
-  { label: '22', iso: '2020-09-22', muted: false, hasDot: false },
-  { label: '23', iso: '2020-09-23', muted: false, hasDot: false },
-  { label: '24', iso: '2020-09-24', muted: false, hasDot: false },
-  { label: '25', iso: '2020-09-25', muted: false, hasDot: false },
-  { label: '26', iso: '2020-09-26', muted: false, hasDot: false },
-  { label: '27', iso: '2020-09-27', muted: false, hasDot: false },
-  { label: '28', iso: '2020-09-28', muted: false, hasDot: false },
-  { label: '29', iso: '2020-09-29', muted: false, hasDot: false },
-  { label: '30', iso: '2020-09-30', muted: false, hasDot: false },
-  { label: '1', iso: '2020-10-01', muted: true, hasDot: false },
-  { label: '2', iso: '2020-10-02', muted: true, hasDot: false },
-  { label: '3', iso: '2020-10-03', muted: true, hasDot: false },
-]);
-
-const RIGHT_RANGE_CALENDAR_CELLS = Object.freeze([
-  { label: '27', iso: '2020-09-27', muted: true, hasDot: false },
-  { label: '28', iso: '2020-09-28', muted: true, hasDot: false },
-  { label: '29', iso: '2020-09-29', muted: true, hasDot: false },
-  { label: '30', iso: '2020-09-30', muted: true, hasDot: false },
-  { label: '1', iso: '2020-10-01', muted: false, hasDot: false },
-  { label: '2', iso: '2020-10-02', muted: false, hasDot: false },
-  { label: '3', iso: '2020-10-03', muted: false, hasDot: false },
-  { label: '4', iso: '2020-10-04', muted: false, hasDot: false },
-  { label: '5', iso: '2020-10-05', muted: false, hasDot: false },
-  { label: '6', iso: '2020-10-06', muted: false, hasDot: false },
-  { label: '7', iso: '2020-10-07', muted: false, hasDot: false },
-  { label: '8', iso: '2020-10-08', muted: false, hasDot: false },
-  { label: '9', iso: '2020-10-09', muted: false, hasDot: false },
-  { label: '10', iso: '2020-10-10', muted: false, hasDot: false },
-  { label: '11', iso: '2020-10-11', muted: false, hasDot: false },
-  { label: '12', iso: '2020-10-12', muted: false, hasDot: false },
-  { label: '13', iso: '2020-10-13', muted: false, hasDot: false },
-  { label: '14', iso: '2020-10-14', muted: false, hasDot: false },
-  { label: '15', iso: '2020-10-15', muted: false, hasDot: false },
-  { label: '16', iso: '2020-10-16', muted: false, hasDot: false },
-  { label: '17', iso: '2020-10-17', muted: false, hasDot: false },
-  { label: '18', iso: '2020-10-18', muted: false, hasDot: false },
-  { label: '19', iso: '2020-10-19', muted: false, hasDot: false },
-  { label: '20', iso: '2020-10-20', muted: false, hasDot: false },
-  { label: '21', iso: '2020-10-21', muted: false, hasDot: false },
-  { label: '22', iso: '2020-10-22', muted: false, hasDot: false },
-  { label: '23', iso: '2020-10-23', muted: false, hasDot: false },
-  { label: '24', iso: '2020-10-24', muted: false, hasDot: false },
-  { label: '25', iso: '2020-10-25', muted: false, hasDot: false },
-  { label: '26', iso: '2020-10-26', muted: false, hasDot: false },
-  { label: '27', iso: '2020-10-27', muted: false, hasDot: false },
-  { label: '28', iso: '2020-10-28', muted: false, hasDot: false },
-  { label: '29', iso: '2020-10-29', muted: false, hasDot: false },
-  { label: '30', iso: '2020-10-30', muted: false, hasDot: false },
-  { label: '31', iso: '2020-10-31', muted: false, hasDot: false },
-]);
 
 export default {
   name: 'date-time-picker',
@@ -392,13 +315,6 @@ export default {
         return DATE_TIME_PICKER_TYPES.includes(value);
       },
     },
-    state: {
-      type: String,
-      default: 'default',
-      validator(value) {
-        return DATE_TIME_PICKER_STATES.includes(value);
-      },
-    },
     placeholder: {
       type: String,
       default: '',
@@ -410,10 +326,6 @@ export default {
     icon: {
       type: String,
       default: 'mdi-plus',
-    },
-    hasHint: {
-      type: Boolean,
-      default: false,
     },
     hint: {
       type: String,
@@ -454,24 +366,6 @@ export default {
     const rootEl = ref(null);
 
     const weekdays = Object.freeze(['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']);
-    const calendarCells = SINGLE_CALENDAR_CELLS;
-    const leftRangeCalendarCells = LEFT_RANGE_CALENDAR_CELLS;
-    const rightRangeCalendarCells = RIGHT_RANGE_CALENDAR_CELLS;
-
-    const monthOptions = Object.freeze([
-      { label: 'Jan', value: '2020-01-01' },
-      { label: 'Feb', value: '2020-02-01' },
-      { label: 'Mar', value: '2020-03-01' },
-      { label: 'Apr', value: '2020-04-01' },
-      { label: 'May', value: '2020-05-01' },
-      { label: 'Jun', value: '2020-06-01' },
-      { label: 'Jul', value: '2020-07-01' },
-      { label: 'Aug', value: '2020-08-01' },
-      { label: 'Sep', value: '2020-09-01' },
-      { label: 'Oct', value: '2020-10-01' },
-      { label: 'Nov', value: '2020-11-01' },
-      { label: 'Dec', value: '2020-12-01' },
-    ]);
 
     const timeOptions = computed(() => {
       const options = [];
@@ -486,9 +380,7 @@ export default {
     });
 
     function handleOutsideClick(event) {
-      if (!dateTimePickerState.menuValue.value || !rootEl.value) {
-        return;
-      }
+      if (!dateTimePickerState.menuValue.value || !rootEl.value) return;
       if (!rootEl.value.contains(event.target)) {
         dateTimePickerState.closeMenu();
       }
@@ -511,9 +403,7 @@ export default {
     });
 
     function isSelectedDay(cell) {
-      if (!cell || !cell.iso) {
-        return false;
-      }
+      if (!cell || !cell.iso) return false;
 
       if (dateTimePickerState.normalizedType.value === 'date') {
         return dateTimePickerState.dateValue.value === cell.iso;
@@ -534,49 +424,32 @@ export default {
     }
 
     function isInRange(cell) {
-      if (dateTimePickerState.normalizedType.value !== 'date-range') {
-        return false;
-      }
+      if (dateTimePickerState.normalizedType.value !== 'date-range') return false;
 
       const range = Array.isArray(dateTimePickerState.rangeValue.value)
         ? dateTimePickerState.rangeValue.value
         : [];
-      if (range.length < 2) {
-        return false;
-      }
+      if (range.length < 2) return false;
 
       const [start, end] = range;
       return cell.iso > start && cell.iso < end;
     }
 
     function isRangeEdge(cell, edge) {
-      if (dateTimePickerState.normalizedType.value !== 'date-range') {
-        return false;
-      }
+      if (dateTimePickerState.normalizedType.value !== 'date-range') return false;
 
       const range = Array.isArray(dateTimePickerState.rangeValue.value)
         ? dateTimePickerState.rangeValue.value
         : [];
+      if (range.length === 0) return false;
 
-      if (range.length === 0) {
-        return false;
-      }
-
-      if (edge === 'start') {
-        return range[0] === cell.iso;
-      }
-
-      if (edge === 'end') {
-        return range[1] === cell.iso;
-      }
-
+      if (edge === 'start') return range[0] === cell.iso;
+      if (edge === 'end') return range[1] === cell.iso;
       return false;
     }
 
     function onDaySelect(cell) {
-      if (!cell || !cell.iso) {
-        return;
-      }
+      if (!cell || !cell.iso) return;
 
       if (dateTimePickerState.normalizedType.value === 'date') {
         dateTimePickerState.onDateChange(cell.iso);
@@ -588,9 +461,7 @@ export default {
         return;
       }
 
-      if (dateTimePickerState.normalizedType.value !== 'date-range') {
-        return;
-      }
+      if (dateTimePickerState.normalizedType.value !== 'date-range') return;
 
       const range = Array.isArray(dateTimePickerState.rangeValue.value)
         ? dateTimePickerState.rangeValue.value
@@ -614,10 +485,6 @@ export default {
       forwardedSlotNames,
       rootEl,
       weekdays,
-      calendarCells,
-      leftRangeCalendarCells,
-      rightRangeCalendarCells,
-      monthOptions,
       timeOptions,
       isSelectedDay,
       isInRange,
@@ -632,12 +499,18 @@ export default {
 .date-time-picker-shell {
   display: inline-flex;
   flex-direction: column;
+  min-width: 240px;
   position: relative;
   width: 100%;
 }
 
+.date-time-picker-shell.type-date-range {
+  min-width: 320px;
+}
+
 .date-time-picker-shell.disabled {
   cursor: not-allowed;
+  opacity: 0.85;
 }
 
 .date-time-picker-disabled-overlay {
@@ -664,6 +537,7 @@ export default {
   border-radius: var(--rounded-md) var(--rounded-md) 0 0;
   color: var(--black-38, rgba(0, 0, 0, 0.38));
   min-height: var(--base-40);
+  transition: background-color 120ms ease, color 120ms ease;
 }
 
 .date-time-picker :deep(.v-field__overlay) {
@@ -686,11 +560,13 @@ export default {
   padding-top: 0;
 }
 
-.date-time-picker:not(.underlined):not(.disabled).state-hover :deep(.v-field) {
+/* Hover — real CSS pseudo-class, no prop needed */
+.date-time-picker:not(.underlined):not(.disabled) :deep(.v-field:hover) {
   background: rgba(0, 0, 0, 0.08);
 }
 
-.date-time-picker:not(.underlined):not(.disabled).state-pressed :deep(.v-field) {
+/* Active — menu is open */
+.date-time-picker:not(.underlined).is-active:not(.disabled) :deep(.v-field) {
   background: rgba(0, 0, 0, 0.16);
 }
 
@@ -710,11 +586,11 @@ export default {
   border-top-width: 0;
 }
 
-.date-time-picker.underlined.state-hover:not(.disabled) :deep(.v-field) {
+.date-time-picker.underlined:not(.disabled) :deep(.v-field:hover) {
   color: #717171;
 }
 
-.date-time-picker.underlined.state-pressed:not(.disabled) :deep(.v-field) {
+.date-time-picker.underlined.is-active:not(.disabled) :deep(.v-field) {
   color: var(--brand-87, rgba(0, 90, 156, 0.87));
 }
 
@@ -787,10 +663,6 @@ export default {
   line-height: var(--body-xs-lh);
 }
 
-.date-time-picker-shell.disabled {
-  opacity: 0.85;
-}
-
 .date-time-picker-dropdown {
   background: var(--white, #fff);
   border-radius: 0 0 var(--rounded-md) var(--rounded-md);
@@ -805,7 +677,7 @@ export default {
 }
 
 .picker-calendar-wrap {
-  background: #fff;
+  background: var(--white, #fff);
   min-width: 100%;
   padding: var(--base-8);
 }
@@ -818,7 +690,7 @@ export default {
 
 .picker-range-calendars {
   display: grid;
-  gap: var(--base-0);
+  gap: 0;
   grid-template-columns: 50% 50%;
   width: 100%;
 }
@@ -846,6 +718,17 @@ export default {
   color: var(--brand-87, rgba(0, 90, 156, 0.87));
   display: inline-flex;
   gap: var(--base-8);
+}
+
+.picker-nav-btn {
+  align-items: center;
+  background: none;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  justify-content: center;
+  padding: 0;
 }
 
 .picker-month-year {
@@ -898,9 +781,9 @@ export default {
 .picker-day-dot {
   background: var(--brand-87, rgba(0, 90, 156, 0.87));
   border-radius: 50%;
-  height: 3px;
-  margin-top: 2px;
-  width: 3px;
+  height: var(--base-4);
+  margin-top: var(--base-2);
+  width: var(--base-4);
 }
 
 .picker-day.in-range {
@@ -925,7 +808,7 @@ export default {
 .picker-time-list {
   align-content: start;
   display: grid;
-  gap: 2px;
+  gap: var(--base-2);
   max-height: 248px;
   overflow-y: auto;
   padding: var(--base-8);
@@ -965,6 +848,10 @@ export default {
 .picker-time-item.active {
   background: var(--brand-darken-1, rgb(0, 72, 125));
   color: #fff;
+}
+
+.picker-month-picker {
+  width: 100%;
 }
 
 .picker-months {

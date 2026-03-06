@@ -4,7 +4,9 @@
   "description": "Vue 3 project with Webpack",
   "scripts": {
     "dev": "vue-cli-service serve",
-    "build": "vue-cli-service build"
+    "build": "vue-cli-service build",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
   },
   "dependencies": {
     "@mdi/font": "^7.4.47",
@@ -13,6 +15,8 @@
     "vuetify": "3.7.5"
   },
   "devDependencies": {
+    "@storybook/addon-essentials": "7.0",
+    "@storybook/vue3-webpack5": "7.0",
     "@vue/cli-service": "^5.0.9",
     "sass": "^1.97.3",
     "sass-loader": "^16.0.7"

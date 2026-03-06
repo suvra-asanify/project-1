@@ -550,6 +550,60 @@
         </div>
       </div>
 
+      <div v-else-if="entry.name === 'color-picker' && colorPicker" class="tester-layout">
+        <div class="tester-controls">
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">state</span>
+            <select v-model="colorPicker.state" class="tester-input">
+              <option v-for="s in COLOR_PICKER_STATES" :key="s" :value="s">{{ s }}</option>
+            </select>
+          </label>
+
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">placeholder</span>
+            <input v-model="colorPicker.placeholder" class="tester-input" type="text" />
+          </label>
+
+          <label class="text-label-sm tester-field">
+            <span class="tester-field-label">value</span>
+            <input v-model="colorPicker.value" class="tester-input" type="text" />
+          </label>
+
+          <label class="text-label-sm tester-toggle">
+            <input v-model="colorPicker.hasIcon" type="checkbox" />
+            <span>has-icon</span>
+          </label>
+
+          <label v-if="colorPicker.hasIcon" class="text-label-sm tester-field">
+            <span class="tester-field-label">icon (mdi-* | flag:in | image url)</span>
+            <input v-model="colorPicker.icon" class="tester-input" type="text" />
+          </label>
+
+          <label class="text-label-sm tester-toggle">
+            <input v-model="colorPicker.hasHint" type="checkbox" />
+            <span>has-hint</span>
+          </label>
+
+          <label v-if="colorPicker.hasHint" class="text-label-sm tester-field">
+            <span class="tester-field-label">hint</span>
+            <input v-model="colorPicker.hint" class="tester-input" type="text" />
+          </label>
+
+          <label class="text-label-sm tester-toggle">
+            <input v-model="colorPicker.disabled" type="checkbox" />
+            <span>disabled</span>
+          </label>
+        </div>
+
+        <div class="tester-preview rounded-md pa-6">
+          <component
+            :is="entry.name"
+            v-bind="propsFor(entry.name)"
+            @update:value="onColorPickerValueUpdate"
+          />
+        </div>
+      </div>
+
       <div v-else-if="entry.name === 'text-field' && textField" class="tester-layout">
         <div class="tester-controls">
           <label class="text-label-sm tester-field">
@@ -755,6 +809,7 @@ import {
 } from '../composables/useAvatar';
 import { CHIP_COLORS, CHIP_SIZE_KEYS, CHIP_VARIANTS } from '../composables/useChip';
 import { COMBO_BOX_VARIANTS } from '../composables/useComboBox';
+import { COLOR_PICKER_STATES } from '../composables/useColorPicker';
 import {
   DATE_TIME_PICKER_STATES,
   DATE_TIME_PICKER_TYPES,
@@ -919,6 +974,16 @@ const defaultPropsByComponent = {
     disabled: false,
     value: null,
   },
+  'color-picker': {
+    state: 'default',
+    placeholder: 'Enter or Pick Color',
+    value: '#FFFFFF',
+    hasIcon: false,
+    icon: 'mdi-plus',
+    hasHint: false,
+    hint: '',
+    disabled: false,
+  },
   'rich-text-editor': {
     placeholder: 'Compose an epic...',
     value: '<p>Start writing with <strong>brand-styled</strong> controls.</p>',
@@ -945,6 +1010,7 @@ export default {
       CHIP_SIZE_KEYS,
       CHIP_VARIANTS,
       COMBO_BOX_VARIANTS,
+      COLOR_PICKER_STATES,
       DATE_TIME_PICKER_STATES,
       DATE_TIME_PICKER_TYPES,
       DATE_TIME_PICKER_VARIANTS,
@@ -999,6 +1065,9 @@ export default {
     },
     dateTimePicker() {
       return this.componentProps['date-time-picker'] || null;
+    },
+    colorPicker() {
+      return this.componentProps['color-picker'] || null;
     },
     richTextEditor() {
       return this.componentProps['rich-text-editor'] || null;
@@ -1091,6 +1160,18 @@ export default {
           hint: props.hint,
           disabled: props.disabled,
           value: props.value,
+        };
+      }
+      if (name === 'color-picker') {
+        return {
+          state: props.state,
+          placeholder: props.placeholder,
+          value: props.value,
+          hasIcon: props.hasIcon,
+          icon: props.icon,
+          hasHint: props.hasHint,
+          hint: props.hint,
+          disabled: props.disabled,
         };
       }
       if (name === 'rich-text-editor') {
@@ -1245,6 +1326,13 @@ export default {
       }
 
       this.dateTimePicker.value = nextValue;
+    },
+    onColorPickerValueUpdate(nextValue) {
+      if (!this.colorPicker) {
+        return;
+      }
+
+      this.colorPicker.value = String(nextValue ?? '');
     },
     onDateTimePickerRangeInput(event) {
       if (!this.dateTimePicker || this.dateTimePicker.type !== 'date-range') {

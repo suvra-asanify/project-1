@@ -1,5 +1,6 @@
 import Avatar from './components/Avatar.vue';
 import Chip from './components/Chip.vue';
+import ColorPicker from './components/ColorPicker.vue';
 import ComboBox from './components/ComboBox.vue';
 import DateTimePicker from './components/DateTimePicker.vue';
 import List from './components/List.vue';
@@ -13,6 +14,7 @@ import TextField from './components/TextField.vue';
 const components = {
   Avatar,
   Chip,
+  ColorPicker,
   ComboBox,
   DateTimePicker,
   List,
@@ -35,6 +37,7 @@ export const DesignSystem = {
 export {
   Avatar,
   Chip,
+  ColorPicker,
   ComboBox,
   DateTimePicker,
   List,

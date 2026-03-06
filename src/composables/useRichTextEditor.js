@@ -40,11 +40,8 @@ function normalizeModules(value) {
 }
 
 function toSafeHtml(value) {
-  const html = normalizeText(value, RICH_TEXT_EDITOR_DEFAULT_VALUE);
-  if (html === '<p><br></p>' || html === '<br>' || html.trim() === '') {
-    return '';
-  }
-  return html;
+  const html = normalizeText(value, '');
+  return (html === '<p><br></p>' || html === '<br>' || !html.trim()) ? '' : html;
 }
 
 export function useRichTextEditor(props, emit) {
@@ -86,9 +83,6 @@ export function useRichTextEditor(props, emit) {
 
   const showHint = computed(() => normalizedHint.value.length > 0);
   const showToolbar = computed(() => normalizedModules.value.toolbar && props.readonly !== true);
-  const showHistory = computed(() =>
-    normalizedModules.value.history && normalizedFormats.value.includes('history')
-  );
   const minHeight = computed(() => normalizePositiveInteger(props.minHeight, 160));
   const maxHeight = computed(() => normalizePositiveInteger(props.maxHeight, null));
 
@@ -101,12 +95,6 @@ export function useRichTextEditor(props, emit) {
 
   function hasFormat(format) {
     return normalizedFormats.value.includes(format);
-  }
-
-  function isEditorActive() {
-    const editor = editorRef.value;
-    if (!editor) return false;
-    return editor.contains(document.activeElement);
   }
 
   function setEditorHtml(nextHtml) {
@@ -124,7 +112,8 @@ export function useRichTextEditor(props, emit) {
   }
 
   function refreshFormatState() {
-    if (!isEditorActive()) return;
+    const editor = editorRef.value;
+    if (!editor?.contains(document.activeElement)) return;
 
     const justifyLeft = document.queryCommandState('justifyLeft');
     const justifyCenter = document.queryCommandState('justifyCenter');
@@ -161,59 +150,16 @@ export function useRichTextEditor(props, emit) {
     refreshFormatState();
   }
 
-  function applyHeader(level) {
+  function selectHeading(level) {
     selectedHeading.value = level === 'paragraph' ? 'paragraph' : String(level);
-    if (level === 'paragraph') {
-      runCommand('formatBlock', 'P');
-      return;
-    }
-    runCommand('formatBlock', `H${level}`);
-  }
-
-  function closeHeadingMenu() {
+    runCommand('formatBlock', level === 'paragraph' ? 'P' : `H${level}`);
     headingMenuOpen.value = false;
   }
 
-  function selectHeading(level) {
-    applyHeader(level);
-    closeHeadingMenu();
-  }
-
-  function applyFont(font) {
+  function selectFont(font) {
     selectedFont.value = String(font || 'sans-serif');
     runCommand('fontName', font);
-  }
-
-  function closeFontMenu() {
     fontMenuOpen.value = false;
-  }
-
-  function selectFont(font) {
-    applyFont(font);
-    closeFontMenu();
-  }
-
-  function applySize(size) {
-    const normalized = String(size || '').trim();
-    if (!normalized) return;
-    runCommand('fontSize', normalized);
-  }
-
-  function applyScript(type) {
-    if (type === 'sub') {
-      runCommand('subscript');
-    } else if (type === 'super') {
-      runCommand('superscript');
-    }
-  }
-
-  function applyDirection(dir) {
-    if (props.disabled || props.readonly) return;
-    const editor = editorRef.value;
-    if (!editor) return;
-    focusEditor();
-    editor.setAttribute('dir', dir === 'rtl' ? 'rtl' : 'ltr');
-    emitValue();
   }
 
   function applyColor(color, commandName) {
@@ -265,22 +211,6 @@ export function useRichTextEditor(props, emit) {
     reader.readAsDataURL(file);
   }
 
-  function insertVideo() {
-    if (props.disabled || props.readonly) return;
-    const url = prompt('Enter video URL');
-    if (!url) return;
-    const html = `<p><a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a></p>`;
-    runCommand('insertHTML', html);
-  }
-
-  function insertFormula() {
-    if (props.disabled || props.readonly) return;
-    const formula = prompt('Enter formula');
-    if (!formula) return;
-    const html = `<code>${formula}</code>`;
-    runCommand('insertHTML', html);
-  }
-
   function onInput() {
     emitValue();
     refreshFormatState();
@@ -293,21 +223,17 @@ export function useRichTextEditor(props, emit) {
 
   function onBlur() {
     isFocused.value = false;
-    closeHeadingMenu();
-    closeFontMenu();
-  }
-
-  function onSelectionChange() {
-    refreshFormatState();
+    headingMenuOpen.value = false;
+    fontMenuOpen.value = false;
   }
 
   onMounted(() => {
     setEditorHtml(toSafeHtml(props.value));
-    document.addEventListener('selectionchange', onSelectionChange);
+    document.addEventListener('selectionchange', refreshFormatState);
   });
 
   onBeforeUnmount(() => {
-    document.removeEventListener('selectionchange', onSelectionChange);
+    document.removeEventListener('selectionchange', refreshFormatState);
   });
 
   watch(() => props.value, (nextValue) => {
@@ -335,28 +261,18 @@ export function useRichTextEditor(props, emit) {
     normalizedHint,
     showHint,
     showToolbar,
-    showHistory,
     rootClasses,
     isDisabled,
     editorStyle,
     hasFormat,
     runCommand,
-    applyHeader,
-    closeHeadingMenu,
     selectHeading,
-    closeFontMenu,
     selectFont,
-    applyFont,
-    applySize,
-    applyScript,
-    applyDirection,
     applyColor,
     openColorPicker,
     insertLink,
     insertImage,
     onImageFileSelected,
-    insertVideo,
-    insertFormula,
     onInput,
     onFocus,
     onBlur,
